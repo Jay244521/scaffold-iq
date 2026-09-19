@@ -7,7 +7,9 @@
     </div>
 
     <div style="display:flex; flex-direction:column; align-items:center; gap:18pt;">
-      <div class="wb-icon" style="width:120pt; height:120pt;">{{{svg "badge-star"}}}</div>
+      <div class="wb-hero-portrait" style="--wb-portrait-ring:{{characterColor character}};">
+        <img src="{{characterPhoto character 'hero'}}" alt="{{characterName character}}">
+      </div>
       <h1 style="font-family:var(--wb-font-display); font-weight:700; font-size:var(--wb-size-cover-title); line-height:1.05; color:var(--wb-color-ink); margin:0; max-width:5.8in;">
         {{title}}
       </h1>

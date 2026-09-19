@@ -14,7 +14,7 @@
 </header>
 {{#if helperText}}
 <div class="wb-helper-banner">
-  <div class="wb-helper-banner__avatar" style="background:{{characterColor character}};">{{initials character}}</div>
+  <img class="wb-helper-banner__avatar" style="border-color:{{characterColor character}};" src="{{characterPhoto character}}" alt="{{characterName character}}">
   <div class="wb-helper-banner__text"><strong>{{characterName character}} says:</strong> {{helperText}}</div>
 </div>
 {{/if}}

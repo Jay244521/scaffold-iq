@@ -89,9 +89,16 @@
     "badge": "0 2px 6px rgba(43, 37, 64, 0.18)"
   },
   "characters": {
-    "benny": { "role": "The Brave Explorer", "color": "#FF7A6E", "motif": "compass" },
-    "luna": { "role": "The Kind Dreamer", "color": "#7C4DFF", "motif": "moon-stars" },
-    "zippy": { "role": "The Curious Speedster", "color": "#FFC93C", "motif": "lightning" },
-    "professorOllo": { "role": "The Wise Guide", "color": "#3DB4F2", "motif": "owl" }
+    "benny": { "role": "The Brave Bear", "species": "bear", "color": "#FF7A6E", "motif": "compass" },
+    "luna": { "role": "The Smart Cat", "species": "cat", "color": "#7C4DFF", "motif": "moon-stars" },
+    "zippy": { "role": "The Mini Robot", "species": "robot", "color": "#FFC93C", "motif": "lightning" },
+    "professorOllo": { "role": "The Wise Guide", "species": "owl", "color": "#3DB4F2", "motif": "owl" }
+  },
+  "characterPortraits": {
+    "note": "Source illustrations live in assets/characters/ as <slug>-face.png (circular avatar crop) and <slug>-hero.png (full-body cover art). Loaded at build time via the characterPhoto Handlebars helper.",
+    "benny": "benny",
+    "luna": "luna",
+    "zippy": "zippy",
+    "professorOllo": "ollo"
   }
 }

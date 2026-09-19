@@ -7,6 +7,7 @@ const Handlebars = require('handlebars');
 const ROOT = path.resolve(__dirname, '..', '..');
 const TEMPLATES_DIR = path.join(ROOT, 'templates');
 const VECTORS_DIR = path.join(ROOT, 'assets', 'vectors');
+const CHARACTERS_DIR = path.join(ROOT, 'assets', 'characters');
 const brandTokens = require(path.join(ROOT, 'assets', 'brand', 'brand-tokens.json'));
 
 const CHARACTER_NAMES = {
@@ -16,7 +17,16 @@ const CHARACTER_NAMES = {
   professorOllo: 'Professor Ollo',
 };
 
+// Character key -> portrait asset filename slug (assets/characters/<slug>-face.png / -hero.png)
+const CHARACTER_SLUGS = {
+  benny: 'benny',
+  luna: 'luna',
+  zippy: 'zippy',
+  professorOllo: 'ollo',
+};
+
 const svgCache = new Map();
+const photoCache = new Map();
 const partialsLoaded = new Set();
 const compiledPageCache = new Map();
 
@@ -26,6 +36,18 @@ function loadSvgRaw(name) {
   const raw = fs.readFileSync(file, 'utf8');
   svgCache.set(name, raw);
   return raw;
+}
+
+function loadCharacterPhotoDataUri(key, variant) {
+  const slug = CHARACTER_SLUGS[key];
+  if (!slug) return '';
+  const cacheKey = `${slug}-${variant}`;
+  if (photoCache.has(cacheKey)) return photoCache.get(cacheKey);
+  const file = path.join(CHARACTERS_DIR, `${slug}-${variant}.png`);
+  const base64 = fs.readFileSync(file).toString('base64');
+  const dataUri = `data:image/png;base64,${base64}`;
+  photoCache.set(cacheKey, dataUri);
+  return dataUri;
 }
 
 function registerPartial(name) {
@@ -42,6 +64,12 @@ Handlebars.registerHelper('svg', function svgHelper(name) {
   return new Handlebars.SafeString(loadSvgRaw(name));
 });
 
+// {{characterPhoto character}} -> face crop (default) | {{characterPhoto character "hero"}} -> full portrait
+Handlebars.registerHelper('characterPhoto', function characterPhotoHelper(key, ...rest) {
+  const variant = typeof rest[0] === 'string' ? rest[0] : 'face';
+  return loadCharacterPhotoDataUri(key, variant);
+});
+
 Handlebars.registerHelper('characterColor', function characterColorHelper(key) {
   const entry = brandTokens.characters[key];
   return entry ? entry.color : brandTokens.color.neutral.charcoal;
@@ -49,15 +77,6 @@ Handlebars.registerHelper('characterColor', function characterColorHelper(key) {
 
 Handlebars.registerHelper('characterName', function characterNameHelper(key) {
   return CHARACTER_NAMES[key] || key;
-});
-
-Handlebars.registerHelper('initials', function initialsHelper(key) {
-  const name = CHARACTER_NAMES[key] || key || '?';
-  return name
-    .split(/\s+/)
-    .map((word) => word.charAt(0))
-    .join('')
-    .toUpperCase();
 });
 
 Handlebars.registerHelper('year', function yearHelper() {

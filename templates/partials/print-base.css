@@ -108,12 +108,9 @@ html, body {
   height: 40pt;
   border-radius: var(--wb-radius-pill);
   flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--wb-color-paper);
-  font-family: var(--wb-font-display);
-  font-weight: 700;
+  object-fit: cover;
+  background: var(--wb-color-cloud);
+  border: 2.5pt solid var(--wb-color-outline);
 }
 
 .wb-helper-banner__text {
@@ -149,6 +146,30 @@ html, body {
 
 .wb-divider { width: 100%; margin: 10pt 0; }
 .wb-divider svg { width: 100%; height: auto; display: block; }
+
+/* Circular character portrait frame used on covers/certificates. Cover art can
+   arrive as either a full scenic illustration or a transparent cutout, so the
+   image is letterboxed (object-fit: contain) inside a tinted ring rather than
+   cropped, which looks intentional either way. */
+.wb-hero-portrait {
+  width: 168pt;
+  height: 210pt;
+  border-radius: var(--wb-radius-lg);
+  background: var(--wb-color-cloud);
+  border: 6pt solid var(--wb-portrait-ring, var(--wb-color-purple));
+  box-shadow: var(--wb-shadow-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  overflow: hidden;
+}
+.wb-hero-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
 
 /* Sizes any inline SVG icon to exactly fill its wrapper (icons otherwise render
    at their native intrinsic width/height and overflow the layout). */

@@ -5,6 +5,13 @@
 
       <div class="wb-icon" style="width:90pt; height:90pt;">{{{svg "badge-medal"}}}</div>
 
+      <div style="display:flex; gap:8pt;">
+        <img src="{{characterPhoto character}}" alt="{{characterName character}}" style="width:40pt; height:40pt; border-radius:50%; object-fit:cover; border:2.5pt solid {{characterColor character}};">
+        {{#if coCharacter}}
+        <img src="{{characterPhoto coCharacter}}" alt="{{characterName coCharacter}}" style="width:40pt; height:40pt; border-radius:50%; object-fit:cover; border:2.5pt solid {{characterColor coCharacter}};">
+        {{/if}}
+      </div>
+
       <p style="font-family:var(--wb-font-display); font-size:12pt; letter-spacing:0.1em; text-transform:uppercase; color:var(--wb-color-charcoal); margin:0;">Certificate of Completion</p>
 
       <h1 style="font-family:var(--wb-font-display); font-weight:700; font-size:30pt; color:var(--wb-color-ink); margin:0;">{{title}}</h1>

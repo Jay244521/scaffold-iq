@@ -7,6 +7,7 @@
     </div>
 
     <div style="display:flex; flex-direction:column; align-items:center; gap:14pt;">
+      <img src="{{characterPhoto character}}" alt="{{characterName character}}" style="width:56pt; height:56pt; border-radius:50%; object-fit:cover; border:3pt solid {{characterColor character}}; box-shadow:var(--wb-shadow-badge);">
       <p style="font-family:var(--wb-font-body); font-size:13pt; line-height:1.6; color:var(--wb-color-charcoal); max-width:5.6in;">{{blurb}}</p>
       {{#if highlights}}
       <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6pt; text-align:left;">
