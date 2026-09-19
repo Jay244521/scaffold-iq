@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 200" width="160" height="200" role="img" aria-label="Medal badge for certificates and volume tags">
+  <title>Medal Badge</title>
+  <defs>
+    <style>
+      .wb-medal-ribbon { fill: #FF7A6E; }
+      .wb-medal-disc { fill: #7C4DFF; }
+      .wb-medal-inner { fill: #FFFFFF; }
+      .wb-medal-star { fill: #FFC93C; }
+    </style>
+  </defs>
+  <polygon class="wb-medal-ribbon" points="56,10 80,70 104,10 96,10 80,50 64,10"/>
+  <polygon class="wb-medal-ribbon" points="60,10 80,60 48,110 40,10"/>
+  <polygon class="wb-medal-ribbon" points="100,10 80,60 112,110 120,10"/>
+  <circle cx="80" cy="120" r="60" class="wb-medal-disc"/>
+  <circle cx="80" cy="120" r="48" class="wb-medal-inner"/>
+  <path class="wb-medal-star" d="M80,84 L88,108 L114,108 L93,123 L101,147 L80,132 L59,147 L67,123 L46,108 L72,108 Z"/>
+</svg>

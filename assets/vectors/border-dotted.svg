@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 40" width="600" height="40" role="img" aria-label="Dotted border strip, tileable horizontally">
+  <title>Dotted Border Strip</title>
+  <g fill="#7C4DFF">
+    <circle cx="10" cy="20" r="4"/>
+    <circle cx="34" cy="20" r="4"/>
+    <circle cx="58" cy="20" r="4"/>
+    <circle cx="82" cy="20" r="4"/>
+    <circle cx="106" cy="20" r="4"/>
+    <circle cx="130" cy="20" r="4"/>
+    <circle cx="154" cy="20" r="4"/>
+    <circle cx="178" cy="20" r="4"/>
+    <circle cx="202" cy="20" r="4"/>
+    <circle cx="226" cy="20" r="4"/>
+    <circle cx="250" cy="20" r="4"/>
+    <circle cx="274" cy="20" r="4"/>
+    <circle cx="298" cy="20" r="4"/>
+    <circle cx="322" cy="20" r="4"/>
+    <circle cx="346" cy="20" r="4"/>
+    <circle cx="370" cy="20" r="4"/>
+    <circle cx="394" cy="20" r="4"/>
+    <circle cx="418" cy="20" r="4"/>
+    <circle cx="442" cy="20" r="4"/>
+    <circle cx="466" cy="20" r="4"/>
+    <circle cx="490" cy="20" r="4"/>
+    <circle cx="514" cy="20" r="4"/>
+    <circle cx="538" cy="20" r="4"/>
+    <circle cx="562" cy="20" r="4"/>
+    <circle cx="586" cy="20" r="4"/>
+  </g>
+</svg>

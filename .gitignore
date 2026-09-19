@@ -1,0 +1,8 @@
+node_modules/
+
+# Generated build artifacts — regenerate with `npm run build:pdfs`
+output/*.pdf
+output/build-summary.json
+!output/.gitkeep
+
+.DS_Store

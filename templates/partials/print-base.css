@@ -1,0 +1,156 @@
+/*
+  Wonderbloom Academy — shared print stylesheet
+  Loaded by every compiled product. Pairs with assets/brand/tokens.css.
+  All page geometry respects a 0.25in trim margin and 0.375in content-safe area.
+*/
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--wb-color-cloud);
+  font-family: var(--wb-font-body);
+  color: var(--wb-color-ink);
+  -webkit-font-smoothing: antialiased;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+/* Default sheet size; the build script overrides this per-format at compile time. */
+@page {
+  size: letter;
+  margin: 0;
+}
+
+.wb-page {
+  position: relative;
+  width: var(--wb-page-width-letter);
+  height: var(--wb-page-height-letter);
+  overflow: hidden;
+  background: var(--wb-color-paper);
+  break-after: page;
+  page-break-after: always;
+}
+
+.wb-page:last-child {
+  break-after: auto;
+  page-break-after: auto;
+}
+
+.wb-page--a4 {
+  width: var(--wb-page-width-a4);
+  height: var(--wb-page-height-a4);
+}
+
+/* Full-bleed decorative frame, absolutely positioned behind content */
+.wb-page__frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+.wb-page__frame svg { width: 100%; height: 100%; display: block; }
+
+/* Content sits within the 0.375in safe area, above the frame */
+.wb-page__content {
+  position: absolute;
+  inset: var(--wb-page-safe-area);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.wb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10pt;
+  border-bottom: 3px solid var(--wb-color-outline);
+  break-inside: avoid;
+}
+
+.wb-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 8pt;
+  font-family: var(--wb-font-display);
+  font-weight: 600;
+  font-size: 12pt;
+  color: var(--wb-color-purple);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.wb-header__title {
+  font-family: var(--wb-font-display);
+  font-weight: 600;
+  font-size: var(--wb-size-page-title);
+  color: var(--wb-color-ink);
+  margin: 4pt 0 0;
+}
+
+.wb-helper-banner {
+  display: flex;
+  align-items: center;
+  gap: 10pt;
+  margin-top: 10pt;
+  padding: 8pt 12pt;
+  background: var(--wb-color-cloud);
+  border-radius: var(--wb-radius-md);
+  break-inside: avoid;
+}
+
+.wb-helper-banner__avatar {
+  width: 40pt;
+  height: 40pt;
+  border-radius: var(--wb-radius-pill);
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wb-color-paper);
+  font-family: var(--wb-font-display);
+  font-weight: 700;
+}
+
+.wb-helper-banner__text {
+  font-size: var(--wb-size-body);
+  color: var(--wb-color-charcoal);
+  line-height: 1.4;
+}
+
+.wb-main {
+  flex: 1;
+  margin-top: 14pt;
+  display: flex;
+  flex-direction: column;
+  gap: 12pt;
+  min-height: 0;
+}
+
+.wb-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8pt;
+  border-top: 1.5px solid var(--wb-color-outline);
+  font-size: var(--wb-size-footer);
+  color: var(--wb-color-charcoal);
+  break-inside: avoid;
+}
+
+.wb-footer__site { font-weight: 600; color: var(--wb-color-purple); }
+
+/* Utility: prevent any block from splitting across a page break */
+.wb-no-split { break-inside: avoid; page-break-inside: avoid; }
+
+.wb-divider { width: 100%; margin: 10pt 0; }
+.wb-divider svg { width: 100%; height: auto; display: block; }
+
+/* Sizes any inline SVG icon to exactly fill its wrapper (icons otherwise render
+   at their native intrinsic width/height and overflow the layout). */
+.wb-icon { display: inline-flex; flex: none; }
+.wb-icon svg { width: 100%; height: 100%; display: block; }

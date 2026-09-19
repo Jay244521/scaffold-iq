@@ -1,0 +1,97 @@
+{
+  "brand": {
+    "name": "Wonderbloom Academy",
+    "tagline": "Grow curious minds, one page at a time.",
+    "website": "www.wonderbloomacademy.com",
+    "ageRange": "Ages 3-7"
+  },
+  "color": {
+    "primary": {
+      "vibrantPurple": "#7C4DFF",
+      "friendlyBlue": "#3DB4F2",
+      "playfulYellow": "#FFC93C",
+      "mintGreen": "#4FD9A0",
+      "warmCoral": "#FF7A6E"
+    },
+    "neutral": {
+      "ink": "#2B2540",
+      "charcoal": "#4A4458",
+      "cloud": "#F7F5FC",
+      "paper": "#FFFFFF",
+      "outline": "#E3DEF3"
+    },
+    "print": {
+      "note": "CMYK approximations for offset/print vendors. Screen builds use the RGB hex values above.",
+      "vibrantPurple": "cmyk(58, 68, 0, 0)",
+      "friendlyBlue": "cmyk(70, 22, 0, 5)",
+      "playfulYellow": "cmyk(0, 15, 82, 0)",
+      "mintGreen": "cmyk(63, 0, 46, 0)",
+      "warmCoral": "cmyk(0, 58, 52, 0)",
+      "ink": "cmyk(70, 68, 30, 65)"
+    },
+    "characters": {
+      "benny": "#FF7A6E",
+      "luna": "#7C4DFF",
+      "zippy": "#FFC93C",
+      "professorOllo": "#3DB4F2"
+    }
+  },
+  "typography": {
+    "display": {
+      "family": "Fredoka",
+      "fallback": "'Baloo 2', sans-serif",
+      "weights": [500, 600, 700],
+      "usage": "Titles, cover headlines, badges"
+    },
+    "body": {
+      "family": "Nunito",
+      "fallback": "'Quicksand', sans-serif",
+      "weights": [400, 600, 800],
+      "usage": "Instructions, story text, captions"
+    },
+    "accessible": {
+      "family": "OpenDyslexic",
+      "fallback": "'Lexend', sans-serif",
+      "weights": [400, 700],
+      "usage": "Optional dyslexia-friendly edition swap for body text"
+    },
+    "scale": {
+      "coverTitle": "48pt",
+      "pageTitle": "28pt",
+      "sectionHeading": "18pt",
+      "body": "13pt",
+      "caption": "10pt",
+      "footer": "9pt"
+    }
+  },
+  "spacing": {
+    "unit": "4px",
+    "pageMarginIn": 0.25,
+    "safeAreaIn": 0.375,
+    "gutterIn": 0.2
+  },
+  "page": {
+    "trimSizes": {
+      "usLetter": { "widthIn": 8.5, "heightIn": 11 },
+      "a4": { "widthMm": 210, "heightMm": 297 }
+    },
+    "bleedIn": 0.125,
+    "cornerRadiusPt": 18
+  },
+  "radii": {
+    "sm": "6px",
+    "md": "14px",
+    "lg": "24px",
+    "pill": "999px"
+  },
+  "shadow": {
+    "card": "0 6px 16px rgba(43, 37, 64, 0.12)",
+    "badge": "0 2px 6px rgba(43, 37, 64, 0.18)"
+  },
+  "characters": {
+    "benny": { "role": "The Brave Explorer", "color": "#FF7A6E", "motif": "compass" },
+    "luna": { "role": "The Kind Dreamer", "color": "#7C4DFF", "motif": "moon-stars" },
+    "zippy": { "role": "The Curious Speedster", "color": "#FFC93C", "motif": "lightning" },
+    "professorOllo": { "role": "The Wise Guide", "color": "#3DB4F2", "motif": "owl" }
+  }
+}

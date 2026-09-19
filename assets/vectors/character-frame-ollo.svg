@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 612 792" width="612" height="792" role="img" aria-label="Professor Ollo page frame — owl motif, friendly blue">
+  <title>Professor Ollo Page Frame</title>
+  <defs>
+    <style>
+      .wb-frame-stroke { fill: none; stroke: #3DB4F2; stroke-width: 6; stroke-linecap: round; }
+      .wb-owl-body { fill: #3DB4F2; opacity: 0.85; }
+      .wb-owl-eye { fill: #FFFFFF; }
+      .wb-owl-pupil { fill: #2B2540; }
+    </style>
+  </defs>
+  <rect x="18" y="18" width="576" height="756" rx="24" class="wb-frame-stroke"/>
+  <rect x="27" y="27" width="558" height="738" rx="18" fill="none" stroke="#3DB4F2" stroke-width="1.5" stroke-dasharray="4 6" stroke-linecap="round" opacity="0.55"/>
+
+  <!-- corner owl faces -->
+  <g transform="translate(54,54)">
+    <circle r="14" class="wb-owl-body"/>
+    <circle cx="-5" cy="-2" r="5" class="wb-owl-eye"/>
+    <circle cx="5" cy="-2" r="5" class="wb-owl-eye"/>
+    <circle cx="-5" cy="-2" r="2" class="wb-owl-pupil"/>
+    <circle cx="5" cy="-2" r="2" class="wb-owl-pupil"/>
+    <path d="M0,2 L-3,7 L3,7 Z" fill="#FFC93C"/>
+  </g>
+  <g transform="translate(558,54) scale(-1,1)">
+    <circle r="14" class="wb-owl-body"/>
+    <circle cx="-5" cy="-2" r="5" class="wb-owl-eye"/>
+    <circle cx="5" cy="-2" r="5" class="wb-owl-eye"/>
+    <circle cx="-5" cy="-2" r="2" class="wb-owl-pupil"/>
+    <circle cx="5" cy="-2" r="2" class="wb-owl-pupil"/>
+    <path d="M0,2 L-3,7 L3,7 Z" fill="#FFC93C"/>
+  </g>
+  <g transform="translate(54,738)">
+    <circle r="14" class="wb-owl-body"/>
+    <circle cx="-5" cy="-2" r="5" class="wb-owl-eye"/>
+    <circle cx="5" cy="-2" r="5" class="wb-owl-eye"/>
+    <circle cx="-5" cy="-2" r="2" class="wb-owl-pupil"/>
+    <circle cx="5" cy="-2" r="2" class="wb-owl-pupil"/>
+    <path d="M0,2 L-3,7 L3,7 Z" fill="#FFC93C"/>
+  </g>
+  <g transform="translate(558,738) scale(-1,1)">
+    <circle r="14" class="wb-owl-body"/>
+    <circle cx="-5" cy="-2" r="5" class="wb-owl-eye"/>
+    <circle cx="5" cy="-2" r="5" class="wb-owl-eye"/>
+    <circle cx="-5" cy="-2" r="2" class="wb-owl-pupil"/>
+    <circle cx="5" cy="-2" r="2" class="wb-owl-pupil"/>
+    <path d="M0,2 L-3,7 L3,7 Z" fill="#FFC93C"/>
+  </g>
+</svg>

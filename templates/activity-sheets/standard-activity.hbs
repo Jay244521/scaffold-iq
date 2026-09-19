@@ -1,0 +1,26 @@
+<section class="wb-page" data-template="activity-sheets/standard-activity">
+  <div class="wb-page__content" style="border: 3px solid var(--wb-color-outline); border-radius: var(--wb-radius-lg); padding: 0.3in;">
+    {{> page-header }}
+
+    <div class="wb-main">
+      {{#if instructions}}
+      <p class="wb-no-split" style="font-size: var(--wb-size-body); color: var(--wb-color-charcoal); margin:0;">{{instructions}}</p>
+      {{/if}}
+
+      <div class="wb-divider">{{{svg "page-divider-wave"}}}</div>
+
+      <div style="display:grid; grid-template-columns: repeat({{columns}}, 1fr); gap: 14pt; flex:1;">
+        {{#each items}}
+        <div class="wb-no-split" style="border: 2px solid var(--wb-color-outline); border-radius: var(--wb-radius-md); padding: 10pt; display:flex; flex-direction:column; gap:6pt; align-items:center; justify-content:center; text-align:center;">
+          {{#if this.emoji}}<div style="font-size:22pt;">{{this.emoji}}</div>{{/if}}
+          <div style="font-family: var(--wb-font-display); font-weight:600; font-size:12pt; color:var(--wb-color-ink);">{{this.label}}</div>
+          {{#if this.caption}}<div style="font-size:9.5pt; color:var(--wb-color-charcoal);">{{this.caption}}</div>{{/if}}
+          {{#if this.showBox}}<div style="width:36pt; height:36pt; border:2px dashed var(--wb-color-outline); border-radius:var(--wb-radius-sm);"></div>{{/if}}
+        </div>
+        {{/each}}
+      </div>
+    </div>
+
+    {{> page-footer }}
+  </div>
+</section>

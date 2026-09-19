@@ -1,0 +1,27 @@
+<section class="wb-page" data-template="activity-sheets/maze-layout">
+  <div class="wb-page__content" style="border: 3px solid var(--wb-color-outline); border-radius: var(--wb-radius-lg); padding: 0.3in;">
+    {{> page-header }}
+
+    <div class="wb-main" style="align-items:center;">
+      {{#if instructions}}
+      <p class="wb-no-split" style="font-size: var(--wb-size-body); color: var(--wb-color-charcoal); margin:0; align-self:flex-start;">{{instructions}}</p>
+      {{/if}}
+
+      <div class="wb-no-split" style="flex:1; width:100%; border: 3px solid var(--wb-color-ink); border-radius: var(--wb-radius-md); position:relative; background:
+        repeating-linear-gradient(0deg, transparent, transparent {{cellSizePt}}pt, var(--wb-color-outline) {{cellSizePt}}pt, var(--wb-color-outline) calc({{cellSizePt}}pt + 1px)),
+        repeating-linear-gradient(90deg, transparent, transparent {{cellSizePt}}pt, var(--wb-color-outline) {{cellSizePt}}pt, var(--wb-color-outline) calc({{cellSizePt}}pt + 1px));">
+        <div style="position:absolute; top:8pt; left:8pt; padding:4pt 10pt; border-radius:var(--wb-radius-pill); background:var(--wb-color-mint); color:#fff; font-family:var(--wb-font-display); font-weight:700; font-size:10pt;">START</div>
+        <div style="position:absolute; bottom:8pt; right:8pt; padding:4pt 10pt; border-radius:var(--wb-radius-pill); background:var(--wb-color-coral); color:#fff; font-family:var(--wb-font-display); font-weight:700; font-size:10pt;">FINISH</div>
+        {{#each obstacles}}
+        <div style="position:absolute; top:{{this.top}}pt; left:{{this.left}}pt; width:{{this.size}}pt; height:{{this.size}}pt; background:var(--wb-color-ink); opacity:0.85; border-radius:2pt;"></div>
+        {{/each}}
+      </div>
+
+      {{#if helperCaption}}
+      <p style="font-size:10pt; color:var(--wb-color-charcoal); align-self:flex-start; margin:0;">{{helperCaption}}</p>
+      {{/if}}
+    </div>
+
+    {{> page-footer }}
+  </div>
+</section>

@@ -1,0 +1,561 @@
+{
+  "brand": {
+    "name": "Wonderbloom Academy",
+    "website": "www.wonderbloomacademy.com",
+    "defaultAgeRange": "3-7"
+  },
+  "buildDefaults": {
+    "formats": ["letter", "a4"],
+    "outputDir": "output"
+  },
+  "products": [
+    {
+      "sku": "WB-SKU01",
+      "title": "Wonderbloom Academy Episode 1 Storybook",
+      "subtitle": "A Wonderbloom Garden Adventure",
+      "type": "storybook",
+      "character": "luna",
+      "coCharacter": "benny",
+      "ageRange": "3-7",
+      "volumeTag": "Episode 1",
+      "price": { "currency": "USD", "list": 9.99, "sale": 6.99 },
+      "formats": ["letter", "a4"],
+      "outputFile": "sku-01-episode-1-storybook",
+      "pages": [
+        {
+          "template": "covers/front-cover",
+          "data": {
+            "title": "Luna and the Whispering Garden",
+            "subtitle": "A Wonderbloom Academy Episode 1 Storybook",
+            "character": "luna",
+            "frameAsset": "character-frame-luna",
+            "ageRange": "3-7",
+            "volumeTag": "Episode 1"
+          }
+        },
+        {
+          "template": "storybooks/storybook-page",
+          "data": {
+            "character": "luna",
+            "frameAsset": "character-frame-luna",
+            "sceneEmoji": "🌙",
+            "illustrationPlaceholder": "Luna standing at the edge of a glowing garden at dusk",
+            "paragraphs": [
+              "Every evening, Luna liked to sit by her window and watch the stars wake up one by one.",
+              "Tonight, one star blinked extra bright — right above the old garden gate."
+            ]
+          }
+        },
+        {
+          "template": "storybooks/storybook-page",
+          "data": {
+            "character": "luna",
+            "frameAsset": "character-frame-luna",
+            "sceneEmoji": "🚪",
+            "illustrationPlaceholder": "Luna pushing open a vine-covered garden gate",
+            "paragraphs": [
+              "\"I wonder what's inside,\" Luna whispered, and she gently pushed open the creaky gate.",
+              "The garden hummed with soft, sleepy sounds, as if it were whispering hello."
+            ]
+          }
+        },
+        {
+          "template": "storybooks/storybook-page",
+          "data": {
+            "character": "benny",
+            "frameAsset": "character-frame-luna",
+            "sceneEmoji": "🧭",
+            "illustrationPlaceholder": "Benny popping out from behind a large sunflower with his compass",
+            "paragraphs": [
+              "\"Luna! Over here!\" called Benny, waving his compass in the air.",
+              "\"I heard a sound coming from the tall sunflowers. Want to explore with me?\""
+            ]
+          }
+        },
+        {
+          "template": "storybooks/storybook-page",
+          "data": {
+            "character": "benny",
+            "frameAsset": "character-frame-luna",
+            "sceneEmoji": "😟",
+            "illustrationPlaceholder": "A small shy creature peeking out from under a leaf",
+            "paragraphs": [
+              "Behind the sunflowers, they found a tiny creature curled up, trembling under a big leaf.",
+              "\"It's okay,\" Luna said softly. \"We won't hurt you. What's wrong?\""
+            ]
+          }
+        },
+        {
+          "template": "storybooks/storybook-page",
+          "data": {
+            "character": "professorOllo",
+            "frameAsset": "character-frame-luna",
+            "sceneEmoji": "🦉",
+            "illustrationPlaceholder": "Professor Ollo gliding down to join Luna and Benny",
+            "paragraphs": [
+              "Just then, Professor Ollo swooped down from the old oak tree.",
+              "\"This little one is lost,\" he said kindly. \"Perhaps we can help them find their way home.\""
+            ]
+          }
+        },
+        {
+          "template": "storybooks/storybook-page",
+          "data": {
+            "character": "luna",
+            "frameAsset": "character-frame-luna",
+            "sceneEmoji": "🤝",
+            "illustrationPlaceholder": "Luna, Benny, and the creature holding paws/hands in a circle",
+            "paragraphs": [
+              "Luna held out her hand. \"You don't have to be scared. We're your friends now.\"",
+              "The little creature smiled for the very first time and took her hand."
+            ]
+          }
+        },
+        {
+          "template": "storybooks/storybook-page",
+          "data": {
+            "character": "benny",
+            "frameAsset": "character-frame-luna",
+            "sceneEmoji": "🏡",
+            "illustrationPlaceholder": "The group walking together toward a cozy burrow glowing with warm light",
+            "paragraphs": [
+              "Together, they followed the moonlit path until they found a cozy little burrow.",
+              "\"Home sweet home!\" the creature cheered, hugging each of their new friends goodbye."
+            ]
+          }
+        },
+        {
+          "template": "storybooks/storybook-page",
+          "data": {
+            "character": "professorOllo",
+            "frameAsset": "character-frame-luna",
+            "sceneEmoji": "⭐",
+            "illustrationPlaceholder": "The whole group looking up at a sky full of stars",
+            "paragraphs": [
+              "\"Kindness turns strangers into friends,\" said Professor Ollo with a wise smile.",
+              "Luna looked up at the stars, feeling proud of the garden's newest friend. The End."
+            ]
+          }
+        },
+        {
+          "template": "covers/certificate",
+          "data": {
+            "title": "Wonderbloom Reading Star",
+            "character": "luna",
+            "coCharacter": "benny",
+            "frameAsset": "character-frame-luna",
+            "bookTitle": "Luna and the Whispering Garden"
+          }
+        },
+        {
+          "template": "covers/back-cover",
+          "data": {
+            "character": "luna",
+            "frameAsset": "character-frame-luna",
+            "sku": "WB-SKU01",
+            "blurb": "Join Luna, Benny, and Professor Ollo on a gentle nighttime adventure about kindness, courage, and making new friends in the Wonderbloom Garden.",
+            "highlights": [
+              "8-page illustrated storybook",
+              "Read-aloud friendly, short sentences",
+              "Includes a Certificate of Completion"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "sku": "WB-SKU02",
+      "title": "Benny & Luna's SEL & Feelings Tracing Pack",
+      "subtitle": "10 Feelings, Tracing & Reflection Activities",
+      "type": "activity-pack",
+      "character": "benny",
+      "coCharacter": "luna",
+      "ageRange": "3-6",
+      "volumeTag": "Activity Pack",
+      "price": { "currency": "USD", "list": 7.99, "sale": 4.99 },
+      "formats": ["letter", "a4"],
+      "outputFile": "sku-02-sel-feelings-tracing-pack",
+      "pages": [
+        {
+          "template": "covers/front-cover",
+          "data": {
+            "title": "Benny & Luna's SEL & Feelings Tracing Pack",
+            "subtitle": "10 Feelings, Tracing & Reflection Activities",
+            "character": "benny",
+            "frameAsset": "character-frame-benny",
+            "ageRange": "3-6",
+            "volumeTag": "Activity Pack"
+          }
+        },
+        {
+          "template": "activity-sheets/sel-prompt",
+          "data": {
+            "pageTitle": "How Do I Feel Today?",
+            "character": "benny",
+            "helperText": "Let's check in! Circle the face that matches how you feel right now.",
+            "prompt": "How am I feeling this morning?",
+            "feelings": [
+              {"emoji": "😄", "label": "Happy"},
+              {"emoji": "😢", "label": "Sad"},
+              {"emoji": "😠", "label": "Angry"},
+              {"emoji": "😨", "label": "Scared"},
+              {"emoji": "😌", "label": "Calm"}
+            ],
+            "reflectionQuestion": "I feel this way because...",
+            "reflectionLines": 3,
+            "pageNumber": 2,
+            "pageCount": 12
+          }
+        },
+        {
+          "template": "activity-sheets/tracing-sheet",
+          "data": {
+            "pageTitle": "Trace: Happy",
+            "character": "benny",
+            "helperText": "Trace each letter, then say the word out loud with a big smile!",
+            "instructions": "Trace the word HAPPY on every line.",
+            "repeatCount": 4,
+            "rows": [
+              {"glyph": "H"}, {"glyph": "A"}, {"glyph": "P"}, {"glyph": "P"}, {"glyph": "Y"}
+            ],
+            "pageNumber": 3,
+            "pageCount": 12
+          }
+        },
+        {
+          "template": "activity-sheets/sel-prompt",
+          "data": {
+            "pageTitle": "When I Feel Sad",
+            "character": "luna",
+            "helperText": "It's okay to feel sad sometimes. What helps you feel better?",
+            "prompt": "What makes me feel better when I'm sad?",
+            "feelings": [
+              {"emoji": "🤗", "label": "A Hug"},
+              {"emoji": "🧸", "label": "My Toy"},
+              {"emoji": "📖", "label": "A Story"},
+              {"emoji": "🎵", "label": "Music"},
+              {"emoji": "😴", "label": "Rest"}
+            ],
+            "reflectionQuestion": "Draw or write what helps you feel calm:",
+            "drawingBox": true,
+            "pageNumber": 4,
+            "pageCount": 12
+          }
+        },
+        {
+          "template": "activity-sheets/tracing-sheet",
+          "data": {
+            "pageTitle": "Trace: Calm",
+            "character": "luna",
+            "helperText": "Take a deep breath, then trace each letter slowly.",
+            "instructions": "Trace the word CALM on every line.",
+            "repeatCount": 4,
+            "rows": [
+              {"glyph": "C"}, {"glyph": "A"}, {"glyph": "L"}, {"glyph": "M"}
+            ],
+            "pageNumber": 5,
+            "pageCount": 12
+          }
+        },
+        {
+          "template": "activity-sheets/sel-prompt",
+          "data": {
+            "pageTitle": "Being Brave Like Benny",
+            "character": "benny",
+            "helperText": "Being brave doesn't mean you're never scared — it means you try anyway!",
+            "prompt": "When was a time I was brave?",
+            "feelings": [
+              {"emoji": "💪", "label": "Strong"},
+              {"emoji": "😬", "label": "Nervous"},
+              {"emoji": "🎉", "label": "Proud"},
+              {"emoji": "🙂", "label": "Okay"},
+              {"emoji": "😁", "label": "Excited"}
+            ],
+            "reflectionQuestion": "One brave thing I did was...",
+            "reflectionLines": 3,
+            "pageNumber": 6,
+            "pageCount": 12
+          }
+        },
+        {
+          "template": "activity-sheets/tracing-sheet",
+          "data": {
+            "pageTitle": "Trace: Brave",
+            "character": "benny",
+            "helperText": "You can do brave things! Trace each letter with confidence.",
+            "instructions": "Trace the word BRAVE on every line.",
+            "repeatCount": 4,
+            "rows": [
+              {"glyph": "B"}, {"glyph": "R"}, {"glyph": "A"}, {"glyph": "V"}, {"glyph": "E"}
+            ],
+            "pageNumber": 7,
+            "pageCount": 12
+          }
+        },
+        {
+          "template": "activity-sheets/sel-prompt",
+          "data": {
+            "pageTitle": "Kindness Counts",
+            "character": "luna",
+            "helperText": "Kindness is a superpower that everyone can use!",
+            "prompt": "How can I show kindness today?",
+            "feelings": [
+              {"emoji": "🤝", "label": "Share"},
+              {"emoji": "💛", "label": "Care"},
+              {"emoji": "🗣️", "label": "Kind Words"},
+              {"emoji": "🎁", "label": "Give"},
+              {"emoji": "👂", "label": "Listen"}
+            ],
+            "reflectionQuestion": "Today I will be kind by...",
+            "reflectionLines": 3,
+            "pageNumber": 8,
+            "pageCount": 12
+          }
+        },
+        {
+          "template": "activity-sheets/tracing-sheet",
+          "data": {
+            "pageTitle": "Trace: Kind",
+            "character": "luna",
+            "helperText": "Trace the word, then think of one kind thing to do today.",
+            "instructions": "Trace the word KIND on every line.",
+            "repeatCount": 4,
+            "rows": [
+              {"glyph": "K"}, {"glyph": "I"}, {"glyph": "N"}, {"glyph": "D"}
+            ],
+            "pageNumber": 9,
+            "pageCount": 12
+          }
+        },
+        {
+          "template": "activity-sheets/sel-prompt",
+          "data": {
+            "pageTitle": "I Feel Proud",
+            "character": "benny",
+            "helperText": "You worked hard on this whole pack — that's something to be proud of!",
+            "prompt": "What makes me feel proud?",
+            "feelings": [
+              {"emoji": "🏆", "label": "Winning"},
+              {"emoji": "🖍️", "label": "Creating"},
+              {"emoji": "🤸", "label": "Trying"},
+              {"emoji": "🌟", "label": "Helping"},
+              {"emoji": "📚", "label": "Learning"}
+            ],
+            "reflectionQuestion": "I felt proud when...",
+            "reflectionLines": 3,
+            "pageNumber": 10,
+            "pageCount": 12
+          }
+        },
+        {
+          "template": "activity-sheets/tracing-sheet",
+          "data": {
+            "pageTitle": "Trace: Proud",
+            "character": "benny",
+            "helperText": "Great work! Trace the last word in your feelings journey.",
+            "instructions": "Trace the word PROUD on every line.",
+            "repeatCount": 3,
+            "rows": [
+              {"glyph": "P"}, {"glyph": "R"}, {"glyph": "O"}, {"glyph": "U"}, {"glyph": "D"}
+            ],
+            "pageNumber": 11,
+            "pageCount": 12
+          }
+        },
+        {
+          "template": "covers/back-cover",
+          "data": {
+            "character": "benny",
+            "frameAsset": "character-frame-benny",
+            "sku": "WB-SKU02",
+            "blurb": "Ten playful pages that help little ones name their feelings, build tracing skills, and practice social-emotional reflection with Benny and Luna.",
+            "highlights": [
+              "5 SEL feelings-check prompts",
+              "5 word tracing practice sheets",
+              "Reflection & drawing space on every page"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "sku": "WB-SKU03",
+      "title": "Professor Ollo's Problem-Solving Activity Workbook",
+      "subtitle": "Tracing, Logic Matching & Count-and-Color Fun",
+      "type": "activity-workbook",
+      "character": "professorOllo",
+      "ageRange": "4-7",
+      "volumeTag": "Workbook Vol. 1",
+      "price": { "currency": "USD", "list": 8.99, "sale": 5.99 },
+      "formats": ["letter", "a4"],
+      "outputFile": "sku-03-problem-solving-workbook",
+      "pages": [
+        {
+          "template": "covers/front-cover",
+          "data": {
+            "title": "Professor Ollo's Problem-Solving Workbook",
+            "subtitle": "Tracing, Logic Matching & Count-and-Color Fun",
+            "character": "professorOllo",
+            "frameAsset": "character-frame-ollo",
+            "ageRange": "4-7",
+            "volumeTag": "Workbook Vol. 1"
+          }
+        },
+        {
+          "template": "activity-sheets/tracing-sheet",
+          "data": {
+            "pageTitle": "Number Tracing: 1-5",
+            "character": "professorOllo",
+            "helperText": "Let's warm up our pencils by tracing numbers one through five.",
+            "instructions": "Trace each number, then say it out loud.",
+            "repeatCount": 4,
+            "rows": [
+              {"glyph": "1"}, {"glyph": "2"}, {"glyph": "3"}, {"glyph": "4"}, {"glyph": "5"}
+            ],
+            "pageNumber": 2,
+            "pageCount": 11
+          }
+        },
+        {
+          "template": "activity-sheets/standard-activity",
+          "data": {
+            "pageTitle": "Count and Color",
+            "character": "professorOllo",
+            "helperText": "Count each group, then color one box for every item you count.",
+            "instructions": "Count the shapes in each box and write the number below it.",
+            "columns": 3,
+            "items": [
+              {"emoji": "🍎🍎🍎", "label": "Apples", "caption": "How many?", "showBox": true},
+              {"emoji": "⭐⭐", "label": "Stars", "caption": "How many?", "showBox": true},
+              {"emoji": "🎈🎈🎈🎈", "label": "Balloons", "caption": "How many?", "showBox": true},
+              {"emoji": "🐝", "label": "Bees", "caption": "How many?", "showBox": true},
+              {"emoji": "🌸🌸🌸", "label": "Flowers", "caption": "How many?", "showBox": true},
+              {"emoji": "🍪🍪", "label": "Cookies", "caption": "How many?", "showBox": true}
+            ],
+            "pageNumber": 3,
+            "pageCount": 11
+          }
+        },
+        {
+          "template": "activity-sheets/standard-activity",
+          "data": {
+            "pageTitle": "Shape Matching",
+            "character": "professorOllo",
+            "helperText": "Draw a line from each shape to its matching pair.",
+            "instructions": "Match each shape on the left to the same shape on the right.",
+            "columns": 4,
+            "items": [
+              {"emoji": "🔴", "label": "Circle"},
+              {"emoji": "🟦", "label": "Square"},
+              {"emoji": "🔺", "label": "Triangle"},
+              {"emoji": "⭐", "label": "Star"},
+              {"emoji": "🔴", "label": "Circle"},
+              {"emoji": "🟦", "label": "Square"},
+              {"emoji": "🔺", "label": "Triangle"},
+              {"emoji": "⭐", "label": "Star"}
+            ],
+            "pageNumber": 4,
+            "pageCount": 11
+          }
+        },
+        {
+          "template": "activity-sheets/maze-layout",
+          "data": {
+            "pageTitle": "Help Ollo Find the Library",
+            "character": "professorOllo",
+            "helperText": "Trace a path from START to FINISH without crossing any walls.",
+            "instructions": "Find the path through the maze to help Professor Ollo reach the library.",
+            "cellSizePt": 24,
+            "obstacles": [
+              {"top": 60, "left": 100, "size": 24},
+              {"top": 60, "left": 220, "size": 24},
+              {"top": 140, "left": 160, "size": 24},
+              {"top": 220, "left": 260, "size": 24},
+              {"top": 300, "left": 120, "size": 24}
+            ],
+            "helperCaption": "Tip: use your finger to trace the path first, then use a pencil.",
+            "pageNumber": 5,
+            "pageCount": 11
+          }
+        },
+        {
+          "template": "activity-sheets/tracing-sheet",
+          "data": {
+            "pageTitle": "Number Tracing: 6-10",
+            "character": "professorOllo",
+            "helperText": "Keep going! Trace numbers six through ten.",
+            "instructions": "Trace each number, then say it out loud.",
+            "repeatCount": 4,
+            "rows": [
+              {"glyph": "6"}, {"glyph": "7"}, {"glyph": "8"}, {"glyph": "9"}, {"glyph": "10"}
+            ],
+            "pageNumber": 6,
+            "pageCount": 11
+          }
+        },
+        {
+          "template": "activity-sheets/standard-activity",
+          "data": {
+            "pageTitle": "What Comes Next?",
+            "character": "professorOllo",
+            "helperText": "Look at the pattern in each box, then draw what comes next.",
+            "instructions": "Complete each pattern by drawing or writing the missing item.",
+            "columns": 3,
+            "items": [
+              {"emoji": "🔴🔵🔴🔵", "label": "Pattern A", "caption": "What's next?", "showBox": true},
+              {"emoji": "⭐⭐🌙", "label": "Pattern B", "caption": "What's next?", "showBox": true},
+              {"emoji": "1 2 3", "label": "Pattern C", "caption": "What's next?", "showBox": true}
+            ],
+            "pageNumber": 7,
+            "pageCount": 11
+          }
+        },
+        {
+          "template": "activity-sheets/maze-layout",
+          "data": {
+            "pageTitle": "Zippy's Speedway Maze",
+            "character": "professorOllo",
+            "helperText": "Zippy needs to reach the finish line fast — help find the way!",
+            "instructions": "Trace the fastest path through Zippy's speedway maze.",
+            "cellSizePt": 20,
+            "obstacles": [
+              {"top": 50, "left": 80, "size": 20},
+              {"top": 90, "left": 200, "size": 20},
+              {"top": 170, "left": 100, "size": 20},
+              {"top": 230, "left": 220, "size": 20},
+              {"top": 280, "left": 140, "size": 20},
+              {"top": 320, "left": 260, "size": 20}
+            ],
+            "helperCaption": "Extra challenge: time yourself with a grown-up's help!",
+            "pageNumber": 8,
+            "pageCount": 11
+          }
+        },
+        {
+          "template": "covers/certificate",
+          "data": {
+            "title": "Wonderbloom Problem Solver",
+            "character": "professorOllo",
+            "frameAsset": "character-frame-ollo",
+            "bookTitle": "Professor Ollo's Problem-Solving Workbook"
+          }
+        },
+        {
+          "template": "covers/back-cover",
+          "data": {
+            "character": "professorOllo",
+            "frameAsset": "character-frame-ollo",
+            "sku": "WB-SKU03",
+            "blurb": "Professor Ollo guides curious minds through tracing, counting, pattern logic, and maze-solving challenges that build early problem-solving confidence.",
+            "highlights": [
+              "Number tracing 1-10",
+              "Count-and-color & pattern logic pages",
+              "Two illustrated maze challenges",
+              "Includes a Certificate of Completion"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

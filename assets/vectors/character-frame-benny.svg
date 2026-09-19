@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 612 792" width="612" height="792" role="img" aria-label="Benny page frame — compass motif, warm coral">
+  <title>Benny Page Frame</title>
+  <defs>
+    <style>
+      .wb-frame-stroke { fill: none; stroke: #FF7A6E; stroke-width: 6; stroke-linecap: round; }
+      .wb-frame-dot { fill: #FF7A6E; }
+      .wb-frame-accent { fill: #FFC93C; }
+    </style>
+  </defs>
+  <!-- print-safe boundary: 0.25in (18pt) margin, 0.375in (27pt) safe area -->
+  <rect x="18" y="18" width="576" height="756" rx="24" class="wb-frame-stroke"/>
+  <rect x="27" y="27" width="558" height="738" rx="18" fill="none" stroke="#FF7A6E" stroke-width="1.5" stroke-dasharray="2 8" stroke-linecap="round" opacity="0.6"/>
+
+  <!-- corner compass motifs -->
+  <g transform="translate(54,54)">
+    <circle r="16" class="wb-frame-stroke"/>
+    <path d="M0,-16 L4,-4 L0,0 L-4,-4 Z" class="wb-frame-dot"/>
+    <circle r="3" class="wb-frame-accent"/>
+  </g>
+  <g transform="translate(558,54) scale(-1,1)">
+    <circle r="16" class="wb-frame-stroke"/>
+    <path d="M0,-16 L4,-4 L0,0 L-4,-4 Z" class="wb-frame-dot"/>
+    <circle r="3" class="wb-frame-accent"/>
+  </g>
+  <g transform="translate(54,738) scale(1,-1)">
+    <circle r="16" class="wb-frame-stroke"/>
+    <path d="M0,-16 L4,-4 L0,0 L-4,-4 Z" class="wb-frame-dot"/>
+    <circle r="3" class="wb-frame-accent"/>
+  </g>
+  <g transform="translate(558,738) scale(-1,-1)">
+    <circle r="16" class="wb-frame-stroke"/>
+    <path d="M0,-16 L4,-4 L0,0 L-4,-4 Z" class="wb-frame-dot"/>
+    <circle r="3" class="wb-frame-accent"/>
+  </g>
+
+  <!-- footprint trail along bottom, decorative only -->
+  <g fill="#FF7A6E" opacity="0.35">
+    <ellipse cx="120" cy="760" rx="6" ry="9"/>
+    <ellipse cx="145" cy="752" rx="6" ry="9"/>
+    <ellipse cx="470" cy="752" rx="6" ry="9"/>
+    <ellipse cx="495" cy="760" rx="6" ry="9"/>
+  </g>
+</svg>

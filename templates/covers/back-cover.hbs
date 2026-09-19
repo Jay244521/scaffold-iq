@@ -1,0 +1,27 @@
+<section class="wb-page" data-template="covers/back-cover">
+  <div class="wb-page__frame">{{{svg frameAsset}}}</div>
+  <div class="wb-page__content" style="align-items:center; justify-content:space-between; text-align:center; padding: 0.6in 0.7in;">
+
+    <div style="display:flex; align-items:center; gap:8pt; font-family:var(--wb-font-display); font-weight:600; font-size:13pt; color:{{characterColor character}}; text-transform:uppercase; letter-spacing:0.08em;">
+      Wonderbloom Academy
+    </div>
+
+    <div style="display:flex; flex-direction:column; align-items:center; gap:14pt;">
+      <p style="font-family:var(--wb-font-body); font-size:13pt; line-height:1.6; color:var(--wb-color-charcoal); max-width:5.6in;">{{blurb}}</p>
+      {{#if highlights}}
+      <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6pt; text-align:left;">
+        {{#each highlights}}
+        <li style="font-size:11pt; color:var(--wb-color-ink); display:flex; gap:8pt; align-items:flex-start;">
+          <span style="color:{{characterColor ../character}};">&#10003;</span>{{this}}
+        </li>
+        {{/each}}
+      </ul>
+      {{/if}}
+    </div>
+
+    <div style="display:flex; flex-direction:column; align-items:center; gap:4pt;">
+      <div class="wb-icon" style="width:64pt; height:64pt;">{{{svg "badge-medal"}}}</div>
+      <p style="font-size:10pt; color:var(--wb-color-charcoal); margin:0;">SKU {{sku}} &middot; {{website}}</p>
+    </div>
+  </div>
+</section>

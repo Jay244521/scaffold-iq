@@ -1,0 +1,20 @@
+<header class="wb-header wb-no-split">
+  <div>
+    <div class="wb-header__brand">
+      <span class="wb-icon" style="width:14pt; height:14pt;">{{{svg "badge-star"}}}</span>
+      Wonderbloom Academy
+    </div>
+    <h1 class="wb-header__title">{{pageTitle}}</h1>
+  </div>
+  {{#if volumeTag}}
+  <div style="font-family: var(--wb-font-display); font-size: 10pt; color: var(--wb-color-charcoal); text-align:right;">
+    {{volumeTag}}
+  </div>
+  {{/if}}
+</header>
+{{#if helperText}}
+<div class="wb-helper-banner">
+  <div class="wb-helper-banner__avatar" style="background:{{characterColor character}};">{{initials character}}</div>
+  <div class="wb-helper-banner__text"><strong>{{characterName character}} says:</strong> {{helperText}}</div>
+</div>
+{{/if}}

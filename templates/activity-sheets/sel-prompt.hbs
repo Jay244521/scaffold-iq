@@ -1,0 +1,38 @@
+<section class="wb-page" data-template="activity-sheets/sel-prompt">
+  <div class="wb-page__content" style="border: 3px solid var(--wb-color-outline); border-radius: var(--wb-radius-lg); padding: 0.3in;">
+    {{> page-header }}
+
+    <div class="wb-main">
+      <p class="wb-no-split" style="font-family:var(--wb-font-display); font-weight:600; font-size:15pt; color:var(--wb-color-ink); margin:0;">{{prompt}}</p>
+
+      <div style="display:flex; gap:10pt; justify-content:space-between;" class="wb-no-split">
+        {{#each feelings}}
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4pt; padding:8pt; border-radius:var(--wb-radius-md); background: var(--wb-color-cloud);">
+          <div style="font-size:26pt;">{{this.emoji}}</div>
+          <div style="font-size:9.5pt; font-weight:600; color:var(--wb-color-charcoal);">{{this.label}}</div>
+          <div style="width:16pt; height:16pt; border:2px solid var(--wb-color-outline); border-radius:var(--wb-radius-pill);"></div>
+        </div>
+        {{/each}}
+      </div>
+
+      <div class="wb-divider">{{{svg "page-divider-leaf"}}}</div>
+
+      {{#if reflectionLines}}
+      <div class="wb-no-split" style="display:flex; flex-direction:column; gap:16pt; flex:1;">
+        <p style="font-size:11pt; font-weight:600; color:var(--wb-color-ink); margin:0;">{{reflectionQuestion}}</p>
+        {{#times reflectionLines}}
+        <div style="border-bottom: 1.5px solid var(--wb-color-outline); height:1pt;"></div>
+        {{/times}}
+      </div>
+      {{/if}}
+
+      {{#if drawingBox}}
+      <div class="wb-no-split" style="flex:1; border:2px dashed var(--wb-color-outline); border-radius:var(--wb-radius-md); display:flex; align-items:center; justify-content:center; color:var(--wb-color-charcoal); font-size:10pt;">
+        Draw how you feel today
+      </div>
+      {{/if}}
+    </div>
+
+    {{> page-footer }}
+  </div>
+</section>

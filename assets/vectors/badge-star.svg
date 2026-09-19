@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160" role="img" aria-label="Star badge for age-range callouts and rewards">
+  <title>Star Badge</title>
+  <defs>
+    <style>
+      .wb-badge-ring { fill: #FFC93C; }
+      .wb-badge-core { fill: #FFFFFF; }
+      .wb-badge-star { fill: #FFC93C; }
+      .wb-badge-text { fill: #2B2540; font-family: "Fredoka", "Baloo 2", sans-serif; font-weight: 700; }
+    </style>
+  </defs>
+  <circle cx="80" cy="80" r="76" class="wb-badge-ring"/>
+  <circle cx="80" cy="80" r="64" class="wb-badge-core"/>
+  <path class="wb-badge-star" d="M80,28 L91,60 L125,60 L97,80 L108,112 L80,92 L52,112 L63,80 L35,60 L69,60 Z"/>
+</svg>

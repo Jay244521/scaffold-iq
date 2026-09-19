@@ -1,0 +1,32 @@
+<section class="wb-page" data-template="covers/front-cover">
+  <div class="wb-page__frame">{{{svg frameAsset}}}</div>
+  <div class="wb-page__content" style="align-items:center; justify-content:space-between; text-align:center; padding: 0.6in 0.5in;">
+
+    <div style="display:flex; align-items:center; gap:8pt; font-family:var(--wb-font-display); font-weight:600; font-size:13pt; color:{{characterColor character}}; text-transform:uppercase; letter-spacing:0.08em;">
+      Wonderbloom Academy
+    </div>
+
+    <div style="display:flex; flex-direction:column; align-items:center; gap:18pt;">
+      <div class="wb-icon" style="width:120pt; height:120pt;">{{{svg "badge-star"}}}</div>
+      <h1 style="font-family:var(--wb-font-display); font-weight:700; font-size:var(--wb-size-cover-title); line-height:1.05; color:var(--wb-color-ink); margin:0; max-width:5.8in;">
+        {{title}}
+      </h1>
+      {{#if subtitle}}
+      <p style="font-family:var(--wb-font-body); font-weight:600; font-size:16pt; color:var(--wb-color-charcoal); margin:0;">{{subtitle}}</p>
+      {{/if}}
+    </div>
+
+    <div style="display:flex; align-items:center; gap:16pt;">
+      <div style="padding:8pt 18pt; border-radius:var(--wb-radius-pill); background:{{characterColor character}}; color:#fff; font-family:var(--wb-font-display); font-weight:600; font-size:13pt;">
+        Ages {{ageRange}}
+      </div>
+      {{#if volumeTag}}
+      <div style="padding:8pt 18pt; border-radius:var(--wb-radius-pill); border:2px solid var(--wb-color-outline); color:var(--wb-color-charcoal); font-family:var(--wb-font-display); font-weight:600; font-size:13pt;">
+        {{volumeTag}}
+      </div>
+      {{/if}}
+    </div>
+
+    <p style="font-size:10pt; color:var(--wb-color-charcoal); margin:0;">featuring {{characterName character}} &amp; friends &middot; {{website}}</p>
+  </div>
+</section>

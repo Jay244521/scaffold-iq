@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 24" width="600" height="24" role="img" aria-label="Wavy page divider">
+  <title>Wave Page Divider</title>
+  <path fill="none" stroke="#3DB4F2" stroke-width="4" stroke-linecap="round"
+    d="M0,12 C25,0 50,24 75,12 C100,0 125,24 150,12 C175,0 200,24 225,12 C250,0 275,24 300,12 C325,0 350,24 375,12 C400,0 425,24 450,12 C475,0 500,24 525,12 C550,0 575,24 600,12"/>
+</svg>

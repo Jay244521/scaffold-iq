@@ -1,0 +1,81 @@
+/*
+  Wonderbloom Academy — Design Tokens (CSS Custom Properties)
+  Generated from assets/brand/brand-tokens.json — keep both files in sync.
+*/
+
+@font-face {
+  font-family: "Fredoka";
+  src: local("Fredoka");
+  font-weight: 500 700;
+}
+
+@font-face {
+  font-family: "Nunito";
+  src: local("Nunito");
+  font-weight: 400 800;
+}
+
+@font-face {
+  font-family: "OpenDyslexic";
+  src: local("OpenDyslexic");
+  font-weight: 400 700;
+}
+
+:root {
+  /* Color — primary palette */
+  --wb-color-purple: #7C4DFF;
+  --wb-color-blue: #3DB4F2;
+  --wb-color-yellow: #FFC93C;
+  --wb-color-mint: #4FD9A0;
+  --wb-color-coral: #FF7A6E;
+
+  /* Color — neutrals */
+  --wb-color-ink: #2B2540;
+  --wb-color-charcoal: #4A4458;
+  --wb-color-cloud: #F7F5FC;
+  --wb-color-paper: #FFFFFF;
+  --wb-color-outline: #E3DEF3;
+
+  /* Color — character accents */
+  --wb-color-benny: #FF7A6E;
+  --wb-color-luna: #7C4DFF;
+  --wb-color-zippy: #FFC93C;
+  --wb-color-ollo: #3DB4F2;
+
+  /* Typography */
+  --wb-font-display: "Fredoka", "Baloo 2", sans-serif;
+  --wb-font-body: "Nunito", "Quicksand", sans-serif;
+  --wb-font-accessible: "OpenDyslexic", "Lexend", sans-serif;
+
+  --wb-size-cover-title: 48pt;
+  --wb-size-page-title: 28pt;
+  --wb-size-section-heading: 18pt;
+  --wb-size-body: 13pt;
+  --wb-size-caption: 10pt;
+  --wb-size-footer: 9pt;
+
+  /* Spacing / page geometry (print-safe) */
+  --wb-page-margin: 0.25in;
+  --wb-page-safe-area: 0.375in;
+  --wb-gutter: 0.2in;
+  --wb-bleed: 0.125in;
+
+  /* Radii & shadow */
+  --wb-radius-sm: 6px;
+  --wb-radius-md: 14px;
+  --wb-radius-lg: 24px;
+  --wb-radius-pill: 999px;
+  --wb-shadow-card: 0 6px 16px rgba(43, 37, 64, 0.12);
+  --wb-shadow-badge: 0 2px 6px rgba(43, 37, 64, 0.18);
+
+  /* Page trim sizes */
+  --wb-page-width-letter: 8.5in;
+  --wb-page-height-letter: 11in;
+  --wb-page-width-a4: 210mm;
+  --wb-page-height-a4: 297mm;
+}
+
+/* Dyslexia-friendly edition toggle: add data-typeface="accessible" to <html> or <body> */
+[data-typeface="accessible"] {
+  --wb-font-body: "OpenDyslexic", "Lexend", sans-serif;
+}

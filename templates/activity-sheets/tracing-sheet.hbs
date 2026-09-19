@@ -1,0 +1,26 @@
+<section class="wb-page" data-template="activity-sheets/tracing-sheet">
+  <div class="wb-page__content" style="border: 3px solid var(--wb-color-outline); border-radius: var(--wb-radius-lg); padding: 0.3in;">
+    {{> page-header }}
+
+    <div class="wb-main">
+      {{#if instructions}}
+      <p class="wb-no-split" style="font-size: var(--wb-size-body); color: var(--wb-color-charcoal); margin:0;">{{instructions}}</p>
+      {{/if}}
+
+      <div style="display:flex; flex-direction:column; gap:14pt; flex:1;">
+        {{#each rows}}
+        <div class="wb-no-split" style="display:flex; align-items:center; gap:14pt;">
+          <div style="width:44pt; text-align:center; font-family:var(--wb-font-display); font-weight:700; font-size:22pt; color:{{characterColor ../character}};">{{this.glyph}}</div>
+          <div style="flex:1; display:flex; gap:10pt;">
+            {{#times ../repeatCount this}}
+            <div style="flex:1; font-family:var(--wb-font-display); font-size:26pt; color: var(--wb-color-outline); border-bottom:2px solid var(--wb-color-outline); text-align:center; letter-spacing:0.05em;">{{glyph}}</div>
+            {{/times}}
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+
+    {{> page-footer }}
+  </div>
+</section>

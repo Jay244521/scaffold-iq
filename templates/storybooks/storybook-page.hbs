@@ -1,0 +1,24 @@
+<section class="wb-page" data-template="storybooks/storybook-page">
+  <div class="wb-page__frame">{{{svg frameAsset}}}</div>
+  <div class="wb-page__content" style="justify-content:space-between;">
+
+    {{#if illustrationPlaceholder}}
+    <div class="wb-no-split" style="flex: 0 0 3.6in; border-radius: var(--wb-radius-lg); background: var(--wb-color-cloud); border: 2px dashed var(--wb-color-outline); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:6pt; color: var(--wb-color-charcoal); overflow:hidden;">
+      <div style="font-size:34pt;">{{sceneEmoji}}</div>
+      <div style="font-size:9.5pt; max-width:80%; text-align:center;">Illustration placeholder &mdash; {{illustrationPlaceholder}}</div>
+    </div>
+    {{/if}}
+
+    <div class="wb-no-split" style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:10pt; padding: 0 0.15in;">
+      {{#each paragraphs}}
+      <p style="font-family: var(--wb-font-body); font-size: 14pt; line-height:1.65; color: var(--wb-color-ink); margin:0;">{{this}}</p>
+      {{/each}}
+    </div>
+
+    <div class="wb-footer wb-no-split" style="border-top:none; padding-top:0; justify-content:center; gap: 6pt;">
+      <div style="width:8pt; height:8pt; border-radius:50%; background:{{characterColor character}};"></div>
+      <span>{{website}}</span>
+      <span>&middot; Page {{pageNumber}}</span>
+    </div>
+  </div>
+</section>

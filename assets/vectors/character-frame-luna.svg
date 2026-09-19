@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 612 792" width="612" height="792" role="img" aria-label="Luna page frame — moon and stars motif, vibrant purple">
+  <title>Luna Page Frame</title>
+  <defs>
+    <style>
+      .wb-frame-stroke { fill: none; stroke: #7C4DFF; stroke-width: 6; stroke-linecap: round; }
+      .wb-star { fill: #FFC93C; }
+      .wb-moon { fill: #7C4DFF; opacity: 0.85; }
+    </style>
+  </defs>
+  <rect x="18" y="18" width="576" height="756" rx="24" class="wb-frame-stroke"/>
+  <rect x="27" y="27" width="558" height="738" rx="18" fill="none" stroke="#7C4DFF" stroke-width="1.5" stroke-dasharray="1 7" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- corner moons -->
+  <g transform="translate(54,54)">
+    <path d="M10,-10 A14,14 0 1 0 10,10 A11,11 0 1 1 10,-10 Z" class="wb-moon"/>
+  </g>
+  <g transform="translate(558,54) scale(-1,1)">
+    <path d="M10,-10 A14,14 0 1 0 10,10 A11,11 0 1 1 10,-10 Z" class="wb-moon"/>
+  </g>
+  <g transform="translate(54,738)">
+    <path d="M10,-10 A14,14 0 1 0 10,10 A11,11 0 1 1 10,-10 Z" class="wb-moon"/>
+  </g>
+  <g transform="translate(558,738) scale(-1,1)">
+    <path d="M10,-10 A14,14 0 1 0 10,10 A11,11 0 1 1 10,-10 Z" class="wb-moon"/>
+  </g>
+
+  <!-- scattered stars along top and bottom edges -->
+  <g class="wb-star">
+    <path d="M110,40 l2.4,6.6 7,0.4 -5.4,4.4 1.8,6.8 -5.8,-4 -5.8,4 1.8,-6.8 -5.4,-4.4 7,-0.4 Z"/>
+    <path d="M300,32 l2,5.6 6,0.3 -4.6,3.7 1.5,5.8 -4.9,-3.4 -4.9,3.4 1.5,-5.8 -4.6,-3.7 6,-0.3 Z"/>
+    <path d="M500,44 l2.2,6 6.4,0.3 -5,4 1.7,6.2 -5.3,-3.6 -5.3,3.6 1.7,-6.2 -5,-4 6.4,-0.3 Z"/>
+    <path d="M150,752 l2,5.6 6,0.3 -4.6,3.7 1.5,5.8 -4.9,-3.4 -4.9,3.4 1.5,-5.8 -4.6,-3.7 6,-0.3 Z"/>
+    <path d="M460,752 l2,5.6 6,0.3 -4.6,3.7 1.5,5.8 -4.9,-3.4 -4.9,3.4 1.5,-5.8 -4.6,-3.7 6,-0.3 Z"/>
+  </g>
+</svg>

@@ -1,0 +1,29 @@
+<section class="wb-page" data-template="covers/certificate">
+  <div class="wb-page__frame">{{{svg frameAsset}}}</div>
+  <div class="wb-page__content" style="align-items:center; justify-content:center; text-align:center; padding: 0.7in;">
+    <div style="border:4px double {{characterColor character}}; border-radius:var(--wb-radius-lg); padding:0.5in 0.6in; display:flex; flex-direction:column; align-items:center; gap:14pt; width:100%; height:100%; justify-content:center;">
+
+      <div class="wb-icon" style="width:90pt; height:90pt;">{{{svg "badge-medal"}}}</div>
+
+      <p style="font-family:var(--wb-font-display); font-size:12pt; letter-spacing:0.1em; text-transform:uppercase; color:var(--wb-color-charcoal); margin:0;">Certificate of Completion</p>
+
+      <h1 style="font-family:var(--wb-font-display); font-weight:700; font-size:30pt; color:var(--wb-color-ink); margin:0;">{{title}}</h1>
+
+      <p style="font-size:13pt; color:var(--wb-color-charcoal); margin:0;">is proudly awarded to</p>
+
+      <div style="width:70%; border-bottom:2px solid var(--wb-color-outline); padding-bottom:6pt; font-family:var(--wb-font-display); font-size:20pt; color:{{characterColor character}}; min-height:28pt;">
+        {{#if recipientName}}{{recipientName}}{{/if}}&nbsp;
+      </div>
+
+      <p style="font-size:12pt; color:var(--wb-color-charcoal); max-width:5in; margin:0;">
+        for completing every page of <strong>{{bookTitle}}</strong> with {{characterName character}}
+        {{#if coCharacter}} and {{characterName coCharacter}}{{/if}}. Great job exploring, learning, and growing!
+      </p>
+
+      <div style="display:flex; justify-content:space-between; width:80%; margin-top:10pt; font-size:10pt; color:var(--wb-color-charcoal);">
+        <div>Date: {{#if dateAwarded}}{{dateAwarded}}{{else}}______________{{/if}}</div>
+        <div>{{website}}</div>
+      </div>
+    </div>
+  </div>
+</section>
