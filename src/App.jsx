@@ -1,51 +1,89 @@
-# Scaffold-IQ — Deploy to Vercel
+import React, { useState } from 'react';
 
-## Project Structure
-```
-scaffold-iq/
-├── public/
-│   └── index.html
-├── src/
-│   ├── App.jsx       ← Full MVP (student + teacher)
-│   └── index.js      ← React entry point
-├── package.json
-├── vercel.json
-└── .gitignore
-```
+const styles = {
+  page: {
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '24px',
+    padding: '24px',
+    background: '#1C3D2E',
+    color: '#F4F7F5',
+    fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
+    textAlign: 'center',
+  },
+  title: {
+    fontSize: '2.5rem',
+    fontWeight: 700,
+    margin: 0,
+  },
+  tagline: {
+    fontSize: '1.1rem',
+    color: '#B9CFC2',
+    margin: 0,
+    maxWidth: '32rem',
+  },
+  roleRow: {
+    display: 'flex',
+    gap: '16px',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  button: {
+    padding: '12px 28px',
+    fontSize: '1rem',
+    fontWeight: 600,
+    borderRadius: '999px',
+    border: '2px solid #F4F7F5',
+    background: 'transparent',
+    color: '#F4F7F5',
+    cursor: 'pointer',
+  },
+  buttonActive: {
+    background: '#F4F7F5',
+    color: '#1C3D2E',
+  },
+  status: {
+    fontSize: '0.95rem',
+    color: '#B9CFC2',
+  },
+};
 
-## Deploy in 5 Steps
+function App() {
+  const [role, setRole] = useState(null);
 
-### Step 1 — Create GitHub Repo
-1. Go to github.com → New repository
-2. Name it `scaffold-iq`
-3. Set to Public
-4. Click "Create repository"
+  return (
+    <div style={styles.page}>
+      <h1 style={styles.title}>Scaffold-IQ</h1>
+      <p style={styles.tagline}>
+        The student and teacher workspace is under construction. Pick a role to preview
+        where each portal will live.
+      </p>
+      <div style={styles.roleRow}>
+        <button
+          type="button"
+          style={{ ...styles.button, ...(role === 'student' ? styles.buttonActive : {}) }}
+          onClick={() => setRole('student')}
+        >
+          I'm a Student
+        </button>
+        <button
+          type="button"
+          style={{ ...styles.button, ...(role === 'teacher' ? styles.buttonActive : {}) }}
+          onClick={() => setRole('teacher')}
+        >
+          I'm a Teacher
+        </button>
+      </div>
+      {role && (
+        <p style={styles.status}>
+          {role === 'student' ? 'Student portal' : 'Teacher dashboard'} coming soon.
+        </p>
+      )}
+    </div>
+  );
+}
 
-### Step 2 — Upload Files
-In your new repo, upload ALL files from this folder maintaining the same structure:
-- Drag and drop the entire folder OR use GitHub Desktop
-
-### Step 3 — Connect to Vercel
-1. Go to vercel.com → Sign up free with GitHub
-2. Click "Add New Project"
-3. Import your `scaffold-iq` GitHub repo
-4. Vercel auto-detects Create React App — click Deploy
-
-### Step 4 — Add API Key
-1. In Vercel dashboard → Your project → Settings → Environment Variables
-2. Add: `REACT_APP_ANTHROPIC_KEY` = your Anthropic API key
-3. Redeploy
-
-### Step 5 — Custom Domain (Optional)
-1. Vercel gives you: `scaffold-iq.vercel.app` for free
-2. If you own scaffold-iq.com → Settings → Domains → Add domain
-
-## Your Live Links
-- **Main app**: https://scaffold-iq.vercel.app
-- **Student portal**: same link → click "I'm a Student"
-- **Teacher dashboard**: same link → click "I'm a Teacher"
-
-## Notes
-- All session data saves to browser localStorage (no database needed yet)
-- AI calls use Anthropic Claude API (free credits on signup)
-- Zero monthly cost on Vercel free tier
+export default App;
