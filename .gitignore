@@ -1,0 +1,35 @@
+# Unreal Engine generated/derived files
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vs/
+.vsconfig
+
+Plugins/*/Binaries/
+Plugins/*/Intermediate/
+
+# Visual Studio / Rider / VS Code project files
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+.idea/
+.vscode/
+*.xcodeproj
+*.xcworkspace
+
+# Compiled source
+*.obj
+*.pdb
+
+# Packaged builds
+*.ipa
+*.apk
+
+# OS files
+.DS_Store
+Thumbs.db
