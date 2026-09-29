@@ -179,7 +179,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .section--sage .eyebrow { color: var(--cream); opacity: .8; }
 
 /* Suite */
-.suite { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+.suite { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
 .product { text-align: center; }
 .product__art {
   aspect-ratio: 4 / 5; border-radius: var(--radius);
@@ -193,7 +193,6 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .product__art--espresso { background: #E6DDD3; }
 .product__art--terracotta { background: #F0DDD0; }
 .product__art--sage { background: #DFE2D8; }
-.product__art--cream { background: var(--cream-deep); }
 .product__num { font-family: var(--font-display); font-size: 12px; letter-spacing: .2em; opacity: .5; margin-bottom: 6px; }
 .product h3 { font-size: 22px; margin-bottom: 6px; }
 .product__flavour { font-size: 14px; color: var(--terracotta); font-weight: 500; margin-bottom: 16px; }
@@ -201,18 +200,6 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .tags li { font-size: 12px; letter-spacing: .06em; opacity: .75; }
 
 
-/* Focus Elixir box */
-.box { width: 64%; display: flex; flex-direction: column; box-shadow: 0 30px 60px -24px rgba(54,45,40,.45); }
-.box__lid {
-  background: var(--espresso); color: var(--cream);
-  border-top: 10px solid var(--terracotta);
-  display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 26px 10px 20px;
-}
-.box__lid span { font-family: var(--font-display); font-weight: 700; letter-spacing: .42em; padding-left: .42em; font-size: clamp(14px, 1.5vw, 20px); }
-.box__lid small { font-size: 9px; letter-spacing: .28em; text-transform: uppercase; opacity: .8; }
-.box__sticks { display: flex; gap: 6px; justify-content: center; background: var(--espresso-soft); padding: 14px 10px 0; height: 70px; overflow: hidden; }
-.box__sticks i { display: block; width: 14%; height: 90px; border-radius: 2px 2px 0 0; background: var(--terracotta); }
-.box__sticks i:nth-child(even) { background: var(--cream); translate: 0 8px; }
 
 /* Philosophy */
 .pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(28px, 4vw, 56px); }
@@ -258,9 +245,6 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .footer p { font-size: 12px; opacity: .6; letter-spacing: .04em; }
 
 /* Responsive */
-@media (max-width: 1000px) {
-  .suite { grid-template-columns: repeat(2, 1fr); gap: 40px 24px; }
-}
 @media (max-width: 820px) {
   .nav__links { display: none; }
   .hero__stack { height: 340px; max-width: 460px; }
@@ -273,7 +257,6 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   .product { text-align: center; }
 .product__art { aspect-ratio: 5 / 4; }
   .product__art .pouch { width: 40%; }
-  .box { width: 48%; }
   .hero__stack { height: 300px; }
   .hero__stack .pouch { width: 150px; }
   .signup .btn { width: 100%; }

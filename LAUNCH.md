@@ -11,7 +11,7 @@ This follows the AURA blueprint step by step. Tick each box as you go.
 
 ### 1.1 Pre-order page
 - [x] Minimal, editorial landing page using the AURA brand system: Espresso `#362D28`, Terracotta `#C86D44`, Sage `#848C79` and Cream `#F4F1EA`, with Syne and Montserrat set centred and widely tracked
-- [x] All four launch products, each with its packaging colour and key features
+- [x] All three launch products, each with its packaging colour and key features
 - [x] Waitlist sign-up saving to Supabase (`aura_waitlist` table)
 - [ ] Deploy: in Vercel, set Framework Preset to **Other** and clear the build command, then merge the PR
 - [ ] Sign up once on the live site and confirm the row appears in Supabase
@@ -48,7 +48,7 @@ This follows the AURA blueprint step by step. Tick each box as you go.
 - [ ] Keep it short. Say who you are, that AURA is bootstrapped, that you'd like to send them the full suite for free, and that there's no obligation to post
 
 ### 2.3 PR boxes ($300 of the $400)
-- [ ] Each box holds all three sprouted blends and Focus Elixir stick packs
+- [ ] Each box holds all three sprouted blends
 - [ ] Price one box end to end (product, packaging, insert card, postage) before ordering supplies
 
 **Budget check:** $300 across 30–50 boxes is **$6–$10 per box, shipping included**. Domestic postage alone often uses most of that. If a box comes in above $10, send fewer, better boxes (for example 30 at $10), rather than cutting the product suite.
@@ -83,7 +83,7 @@ This follows the AURA blueprint step by step. Tick each box as you go.
 | 6  | Sampling Flavour 01: Cacao & Sea Salt almonds |
 | 7  | Sampling Flavour 02: Turmeric & Honey cashews |
 | 8  | Sampling Flavour 03: Matcha & Maca pumpkin seeds |
-| 9  | Focus Elixir: who it's for, and a desk-setup morning routine |
+| 9  | Blind taste test: sprouted vs. regular roasted nuts |
 | 10 | The $400 budget, line by line |
 | 11 | Packing the first PR box |
 | 12 | How creators get picked (without naming them before they agree) |
