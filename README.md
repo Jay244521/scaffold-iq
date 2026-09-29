@@ -10,6 +10,8 @@ assets/styles.css    brand tokens, layout, CSS pouch mockups
 assets/script.js     waitlist form handler (posts to Supabase)
 assets/favicon.svg
 vercel.json
+LAUNCH.md            step-by-step blueprint checklist (Phases 1–3, budget)
+launch/              creator seeding tracker (CSV)
 ```
 
 ## Brand system
@@ -22,6 +24,10 @@ vercel.json
 | Cream        | `#F4F1EA` | Background, reversed text    |
 
 Headings use Syne and body text uses Montserrat, both from Google Fonts.
+
+## Pre-orders (Shopify)
+
+Leave `SHOPIFY_PREORDER_URL` in `assets/script.js` empty while the drop is "coming soon". Once your Shopify Starter product exists, paste its checkout link there. "Pre-order" buttons then appear on the page, and the status line changes to "Pre-orders open".
 
 ## Waitlist
 
@@ -36,6 +42,9 @@ Both sign-up forms save to the `aura_waitlist` table in Supabase (project `bkstq
 Visitors can add their email but cannot read, edit or delete the list. The table permissions enforce this, so the publishable key in `assets/script.js` is safe to have in public code.
 
 ## Before you share the link
+
+The full step-by-step plan is in [LAUNCH.md](LAUNCH.md). The items below are the website-specific ones.
+
 
 1. **Confirm your handles.** The page shows `@aurasnacks` as plain text with no link. Once you've secured the accounts, you can turn the handles in the `#journal` section of `index.html` into links.
 2. **Check the product claims.** Terms like "Non-GMO verified" and "adaptogenic" come straight from the blueprint. Make sure your supplier documents support them before launch.

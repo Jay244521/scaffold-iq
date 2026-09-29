@@ -37,15 +37,18 @@
     <section class="hero" id="top">
       <div class="wrap hero__inner">
         <div class="hero__copy">
-          <p class="eyebrow">Drop 01 &nbsp;·&nbsp; Pre-order opening soon</p>
+          <p class="eyebrow">Drop 01 &nbsp;·&nbsp; <span data-drop-status>Pre-order opening soon</span></p>
           <h1 class="hero__title">Fuel,<br>refined.</h1>
           <p class="hero__lede">Sprouted nuts, seeds and daily focus support. No seed oils, whole-food ingredients, and packaging you'll want to leave out on the desk.</p>
-          <form class="signup" data-waitlist novalidate>
-            <label class="visually-hidden" for="email-hero">Email address</label>
-            <input id="email-hero" name="email" type="email" autocomplete="email" placeholder="you@email.com" required>
-            <button type="submit" class="btn">Reserve my spot</button>
-            <p class="signup__msg" role="status" aria-live="polite"></p>
-          </form>
+          <div class="hero__ctas">
+            <a class="btn btn--terracotta" href="#drop" data-preorder hidden>Pre-order Drop 01</a>
+            <form class="signup" data-waitlist novalidate>
+              <label class="visually-hidden" for="email-hero">Email address</label>
+              <input id="email-hero" name="email" type="email" autocomplete="email" placeholder="you@email.com" required>
+              <button type="submit" class="btn">Reserve my spot</button>
+              <p class="signup__msg" role="status" aria-live="polite"></p>
+            </form>
+          </div>
           <p class="fine">Limited first run. Waitlist members get first access to Drop 01.</p>
         </div>
         <div class="hero__stack" aria-hidden="true">
@@ -169,6 +172,7 @@
             <li><strong>Pre-order.</strong> Claim your box when the drop opens.</li>
             <li><strong>We make it.</strong> Small batch, sprouted and packed to order.</li>
           </ol>
+          <a class="btn btn--terracotta" href="#drop" data-preorder hidden>Pre-order the full suite</a>
         </div>
       </div>
     </section>

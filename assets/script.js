@@ -8,6 +8,13 @@ const SUPABASE_URL = "https://bkstqsewmsmotpqwwhmj.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_UMgFjI_Upj1ACaSPcvlGGQ_S2lDgUUm";
 const WAITLIST_ENDPOINT = SUPABASE_URL ? `${SUPABASE_URL}/rest/v1/aura_waitlist` : "";
 
+// Shopify pre-order (blueprint Phase 1). Leave empty while the drop is "coming
+// soon": the page then only collects waitlist emails. When the Shopify Starter
+// store is live, paste the Drop 01 product's checkout link here (Shopify admin →
+// Products → Drop 01 → "Copy checkout link"). Pre-order buttons then appear
+// and the status line switches to "Pre-orders open".
+const SHOPIFY_PREORDER_URL = "";
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function setMessage(form, text, state) {
@@ -63,6 +70,16 @@ async function handleSubmit(event) {
 document.querySelectorAll("form[data-waitlist]").forEach((form) => {
   form.addEventListener("submit", handleSubmit);
 });
+
+if (SHOPIFY_PREORDER_URL) {
+  document.querySelectorAll("[data-preorder]").forEach((link) => {
+    link.href = SHOPIFY_PREORDER_URL;
+    link.hidden = false;
+  });
+  document.querySelectorAll("[data-drop-status]").forEach((el) => {
+    el.textContent = "Pre-orders open";
+  });
+}
 
 document.querySelectorAll("[data-year]").forEach((el) => {
   el.textContent = new Date().getFullYear();
