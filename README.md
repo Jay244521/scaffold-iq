@@ -7,7 +7,7 @@ It is plain HTML, CSS and JS, with no build step and no dependencies.
 ```
 index.html           page markup and copy
 assets/styles.css    brand tokens, layout, CSS pouch mockups
-assets/script.js     waitlist form handler (set WAITLIST_ENDPOINT here)
+assets/script.js     waitlist form handler (posts to Supabase)
 assets/favicon.svg
 vercel.json
 ```
@@ -23,11 +23,22 @@ vercel.json
 
 Headings use Syne and body text uses Montserrat, both from Google Fonts.
 
+## Waitlist
+
+Both sign-up forms save to the `aura_waitlist` table in Supabase (project `bkstqsewmsmotpqwwhmj`). To see sign-ups, open **Table Editor → aura_waitlist** in the Supabase dashboard, where you can also export them to CSV.
+
+| Column       | Notes                                                             |
+|--------------|-------------------------------------------------------------------|
+| `email`      | Unique and case-insensitive, so repeat sign-ups are ignored       |
+| `source`     | Which form was used: `top` (hero) or `join` (bottom of the page)  |
+| `created_at` | Time of sign-up (UTC)                                             |
+
+Visitors can add their email but cannot read, edit or delete the list. The table permissions enforce this, so the publishable key in `assets/script.js` is safe to have in public code.
+
 ## Before you share the link
 
-1. **Connect the waitlist.** Create a free form at [formspree.io](https://formspree.io) and paste its URL into `WAITLIST_ENDPOINT` at the top of `assets/script.js`. Until you do, the form checks the email but **does not save it**. Visitors see a "waitlist opens shortly" message instead.
-2. **Confirm your handles.** The page shows `@aurasnacks` as plain text with no link. Once you've secured the accounts, you can turn the handles in the `#journal` section of `index.html` into links.
-3. **Check the product claims.** Terms like "Non-GMO verified" and "adaptogenic" come straight from the blueprint. Make sure your supplier documents support them before launch.
+1. **Confirm your handles.** The page shows `@aurasnacks` as plain text with no link. Once you've secured the accounts, you can turn the handles in the `#journal` section of `index.html` into links.
+2. **Check the product claims.** Terms like "Non-GMO verified" and "adaptogenic" come straight from the blueprint. Make sure your supplier documents support them before launch.
 
 ## Run locally
 

@@ -1,10 +1,12 @@
 // AURA waitlist
 //
-// Paste a form endpoint here to start collecting emails. A free Formspree form
-// (https://formspree.io) works as-is: create a form and use its URL, e.g.
-// "https://formspree.io/f/abcdwxyz". Any endpoint that accepts a JSON POST of
-// { email, source } and returns a 2xx status will also work.
-const WAITLIST_ENDPOINT = "";
+// Sign-ups are stored in the Supabase table public.aura_waitlist. The key below
+// is Supabase's *publishable* key, which is safe to ship in a public page: the
+// table's permissions let visitors add their email but never read, edit or
+// delete the list. View sign-ups in the Supabase dashboard (Table Editor).
+const SUPABASE_URL = "https://bkstqsewmsmotpqwwhmj.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_UMgFjI_Upj1ACaSPcvlGGQ_S2lDgUUm";
+const WAITLIST_ENDPOINT = SUPABASE_URL ? `${SUPABASE_URL}/rest/v1/aura_waitlist` : "";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -28,7 +30,7 @@ async function handleSubmit(event) {
   }
 
   if (!WAITLIST_ENDPOINT) {
-    console.warn("AURA: WAITLIST_ENDPOINT is not set in assets/script.js, so this sign-up was not saved.");
+    console.warn("AURA: SUPABASE_URL is not set in assets/script.js, so this sign-up was not saved.");
     setMessage(form, "The waitlist opens shortly. Follow @aurasnacks for the drop.", "error");
     return;
   }
@@ -39,10 +41,15 @@ async function handleSubmit(event) {
   try {
     const res = await fetch(WAITLIST_ENDPOINT, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_PUBLISHABLE_KEY,
+        Prefer: "return=minimal",
+      },
       body: JSON.stringify({ email, source: form.closest("section")?.id || "site" }),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    // 409 = this email is already on the list, which is a success for the visitor.
+    if (!res.ok && res.status !== 409) throw new Error(`HTTP ${res.status}`);
     form.reset();
     setMessage(form, "You're on the list. We'll email you when Drop 01 opens.", "ok");
   } catch (err) {
