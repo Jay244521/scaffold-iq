@@ -1,0 +1,12 @@
+{
+  "name": "vanta-site",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "wrangler pages dev . --port 8788",
+    "deploy": "wrangler pages deploy . --project-name vanta"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
