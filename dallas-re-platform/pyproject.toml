@@ -1,0 +1,9 @@
+[project]
+name = "dallas-re-platform"
+version = "0.1.0"
+description = "AI-native real estate development platform for Dallas, TX"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
