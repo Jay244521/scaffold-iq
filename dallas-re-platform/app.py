@@ -14,9 +14,12 @@ import pydeck as pdk
 import streamlit as st
 from fastapi import HTTPException
 from pydantic import ValidationError
+from sqlalchemy.exc import SQLAlchemyError
 
 from api.routes import parcels as parcels_route
 from api.routes.proforma import UnderwriteRequest, underwrite
+from database.db import session_scope
+from database.queries import query_parcels
 from scrapers import dcad_ingest
 
 API_URL = os.getenv("API_URL", "http://127.0.0.1:8000")
@@ -70,6 +73,7 @@ def run_underwriting(payload: dict, use_api: bool, base_url: str) -> dict:
 def run_sift(params: dict, use_api: bool, base_url: str) -> dict:
     """Return the /sift-parcels response. Raises RuntimeError with the backend's message."""
     if use_api:
+        params = {k: v for k, v in params.items() if v is not None}  # httpx sends None as ""
         resp = httpx.post(f"{base_url}/sift-parcels", params=params, timeout=600)
         if resp.status_code >= 400:
             raise RuntimeError(resp.json().get("detail", resp.text))
@@ -78,6 +82,23 @@ def run_sift(params: dict, use_api: bool, base_url: str) -> dict:
         return parcels_route.sift_parcels(**params)
     except HTTPException as e:
         raise RuntimeError(e.detail) from e
+
+
+def load_db_parcels(filters: dict, use_api: bool, base_url: str) -> list[dict]:
+    """Persisted candidates from PostGIS. Raises RuntimeError if the database is unavailable."""
+    if use_api:
+        params = {"max_ratio": filters["max_ratio"], "min_lot_sqft": filters["min_lot_sqft"],
+                  "zip_code": filters["zip_codes"], "limit": filters["limit"]}
+        params = {k: v for k, v in params.items() if v is not None}  # httpx sends None as ""
+        resp = httpx.get(f"{base_url}/parcels", params=params, timeout=30)
+        if resp.status_code >= 400:
+            raise RuntimeError(resp.json().get("detail", resp.text))
+        return resp.json()["parcels"]
+    try:
+        with session_scope() as session:
+            return query_parcels(session, **filters)
+    except SQLAlchemyError as e:
+        raise RuntimeError(f"Parcel database unavailable ({e.__class__.__name__})") from e
 
 
 # --------------------------------------------------------------------------- #
@@ -268,7 +289,10 @@ def parcel_map(candidates: pd.DataFrame) -> None:
 
 st.divider()
 st.header("Sifted parcel candidates")
-st.caption("Under-improved Dallas County parcels from the DCAD pipeline, lowest improvement/land ratio first.")
+st.caption(
+    "Under-improved Dallas County parcels, lowest improvement/land ratio first. Filters query the "
+    "PostGIS `parcels` table; **Re-run DCAD sift** rebuilds it from the files in `data/external/`."
+)
 
 with st.form("sift_form"):
     f1, f2, f3, f4 = st.columns(4)
@@ -276,32 +300,60 @@ with st.form("sift_form"):
     min_lot = f2.number_input("Min lot (sq ft)", 0, value=int(dcad_ingest.DEFAULT_MIN_LOT_SQFT), step=1_000)
     zips = f3.text_input("ZIP codes (comma-separated)", placeholder="75215, 75210")
     limit = f4.number_input("Max rows", 1, 1000, 50)
-    submitted = st.form_submit_button("Sift parcels")
+    b1, b2, b3 = st.columns([1, 1, 3])
+    apply = b1.form_submit_button("Apply filters")
+    resift = b2.form_submit_button("Re-run DCAD sift")
+    persist = b3.checkbox("Save sift results to PostGIS", value=True)
 
-if submitted:
-    params = {"max_ratio": max_ratio, "min_lot_sqft": float(min_lot), "limit": int(limit),
-              "zip_code": [z.strip() for z in zips.split(",") if z.strip()] or None}
+filters = {"max_ratio": float(max_ratio), "min_lot_sqft": float(min_lot), "limit": int(limit),
+           "zip_codes": [z.strip() for z in zips.split(",") if z.strip()] or None}
+
+if resift:
+    params = {"max_ratio": filters["max_ratio"], "min_lot_sqft": filters["min_lot_sqft"],
+              "limit": filters["limit"], "zip_code": filters["zip_codes"], "persist": persist}
     with st.spinner("Running DCAD pipeline (can take a while on full county files)..."):
         try:
-            st.session_state["sift"] = run_sift(params, use_api, base_url)
+            result = run_sift(params, use_api, base_url)
             st.session_state.pop("sift_error", None)
+            # Persisted runs are read back from PostGIS below; otherwise show the run itself.
+            if persist:
+                st.session_state.pop("sift", None)
+                st.toast(f"Saved {result['total_candidates']:,} candidates to PostGIS")
+            else:
+                st.session_state["sift"] = result
         except (RuntimeError, httpx.HTTPError) as e:
             st.session_state["sift_error"] = str(e)
             st.session_state.pop("sift", None)
+elif apply:
+    st.session_state.pop("sift", None)  # back to the database view
 
 if "sift_error" in st.session_state:
     st.warning(st.session_state["sift_error"])
 
+candidates, db_error = None, None
 sift = st.session_state.get("sift")
 if sift is not None:
     candidates = pd.DataFrame(sift["candidates"])
-    st.write(f"Showing **{sift['returned']:,}** of **{sift['total_candidates']:,}** candidates.")
-elif parcels_route.OUTPUT_CSV.exists():
-    candidates = pd.read_csv(parcels_route.OUTPUT_CSV, dtype={"zip_code": str, "account_num": str})
-    st.write(f"Showing the last saved run ({len(candidates):,} candidates). Click **Sift parcels** to refresh.")
+    st.write(f"Showing **{sift['returned']:,}** of **{sift['total_candidates']:,}** candidates "
+             "from this run (not saved to the database).")
 else:
-    candidates = None
-    st.info("No parcel candidates yet. Download the DCAD export into `data/external/`, then click **Sift parcels**.")
+    try:
+        rows = load_db_parcels(filters, use_api, base_url)
+        if rows:
+            candidates = pd.DataFrame(rows)
+            st.write(f"Showing **{len(candidates):,}** parcels from PostGIS.")
+    except (RuntimeError, httpx.HTTPError) as e:
+        db_error = str(e)
+
+if db_error and parcels_route.OUTPUT_CSV.exists():
+    candidates = pd.read_csv(parcels_route.OUTPUT_CSV, dtype={"zip_code": str, "account_num": str})
+    st.write(f"Showing the last CSV snapshot ({len(candidates):,} candidates; filters not applied).")
+    st.caption(f"⚠️ {db_error}")
+elif db_error:
+    st.info(f"{db_error}. Start PostGIS, then click **Re-run DCAD sift**.")
+elif candidates is None and sift is None:
+    st.info("No parcels in the database match. Adjust the filters, or download the DCAD export "
+            "into `data/external/` and click **Re-run DCAD sift**.")
 
 if candidates is not None and not candidates.empty:
     parcel_map(candidates)
@@ -320,4 +372,4 @@ if candidates is not None and not candidates.empty:
         },
     )
 elif candidates is not None:
-    st.info("No parcels matched these filters.")
+    st.info("No parcels matched this run's filters.")

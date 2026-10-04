@@ -1,5 +1,5 @@
 """PostgreSQL / PostGIS persistence layer."""
 
-from database.session import Base, SessionLocal, engine, get_session
+from database.db import Base, SessionLocal, engine, get_session, init_db, session_scope
 
-__all__ = ["Base", "SessionLocal", "engine", "get_session"]
+__all__ = ["Base", "SessionLocal", "engine", "get_session", "init_db", "session_scope"]

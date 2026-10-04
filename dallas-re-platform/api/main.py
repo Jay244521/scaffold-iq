@@ -2,7 +2,8 @@
 
     GET  /health               liveness check
     POST /underwrite           full development pro forma for a deal
-    POST /sift-parcels         DCAD pipeline -> top under-improved parcels
+    POST /sift-parcels         DCAD pipeline -> top under-improved parcels (?persist=true saves them)
+    GET  /parcels              persisted candidates from PostGIS (filters, bbox, radius)
     POST /underwriting/quick   quick stabilized-deal metrics
 """
 

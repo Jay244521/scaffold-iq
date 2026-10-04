@@ -10,15 +10,17 @@ Pipeline:
     1. Clean the values and merge them with address, land and geometry data.
     2. Compute improvement-to-land value ratio = IMPR_VAL / LAND_VAL.
     3. Keep parcels with ratio < --max-ratio and lot size >= --min-lot-sqft.
-    4. Write a CSV to data/processed/ (and optionally upsert into PostgreSQL).
+    4. Upsert the candidates into the PostGIS `parcels` table (polygon + centroid,
+       GiST-indexed) and write a CSV snapshot to data/processed/.
 
 DCAD column names vary between releases, so each field is matched against a
 list of known aliases (case-insensitive). Add an alias below if a column is
 not found.
 
 Usage:
-    python -m scrapers.dcad_ingest
-    python -m scrapers.dcad_ingest --max-ratio 0.25 --min-lot-sqft 20000 --to-db
+    python -m scrapers.dcad_ingest                        # CSV + upsert into PostGIS
+    python -m scrapers.dcad_ingest --max-ratio 0.25 --min-lot-sqft 20000
+    python -m scrapers.dcad_ingest --no-db                # CSV only, no database needed
 """
 
 from __future__ import annotations
@@ -29,6 +31,8 @@ from pathlib import Path
 
 import geopandas as gpd
 import pandas as pd
+from shapely.geometry import MultiPolygon, Point, Polygon
+from shapely.geometry.base import BaseGeometry
 
 from config import EXTERNAL_DIR, PROCESSED_DIR
 
@@ -228,8 +232,22 @@ def load_land(path: Path) -> pd.DataFrame:
     return lot
 
 
+def to_multipolygon(geom: BaseGeometry | None) -> MultiPolygon | None:
+    """Coerce a dissolved parcel shape to a MultiPolygon (dropping stray lines/points)."""
+    if geom is None or geom.is_empty:
+        return None
+    if isinstance(geom, Polygon):
+        return MultiPolygon([geom])
+    if isinstance(geom, MultiPolygon):
+        return geom
+    polys = [g for g in getattr(geom, "geoms", []) if isinstance(g, Polygon)]
+    polys += [p for g in getattr(geom, "geoms", []) if isinstance(g, MultiPolygon) for p in g.geoms]
+    return MultiPolygon(polys) if polys else None
+
+
 def load_geometry(path: Path) -> pd.DataFrame:
-    """Parcel polygons -> one row per key with polygon area (sq ft) and centroid lat/lon."""
+    """Parcel polygons -> one row per key with polygon area (sq ft), centroid lat/lon and
+    the WGS84 polygon itself (`geom`, a shapely MultiPolygon) for PostGIS."""
     gdf = gpd.read_file(path)
     if gdf.crs is None:
         raise ValueError(f"{path.name} has no CRS; cannot compute areas")
@@ -255,6 +273,7 @@ def load_geometry(path: Path) -> pd.DataFrame:
             "geom_sqft": gdf.geometry.area,
             "latitude": centroids.y.round(6),
             "longitude": centroids.x.round(6),
+            "geom": gdf.geometry.to_crs(LATLON_CRS).map(to_multipolygon),
         }
     )
 
@@ -339,27 +358,47 @@ def filter_candidates(
 # --------------------------------------------------------------------------- #
 # Output
 # --------------------------------------------------------------------------- #
-def write_to_db(df: pd.DataFrame) -> int:
-    """Upsert candidates into the `parcels` table, keyed on account_num."""
+DB_BATCH_SIZE = 1_000
+
+
+def write_to_db(df: pd.DataFrame, geoms: pd.Series | None = None) -> int:
+    """Upsert candidates into the PostGIS `parcels` table, keyed on account_num.
+
+    `geoms` maps account_num -> shapely MultiPolygon (EPSG:4326). The centroid point is
+    built from latitude/longitude. Re-running refreshes values and `sifted_at`; a parcel
+    with no polygon this run keeps the one it already has.
+    """
+    from geoalchemy2.shape import from_shape
+    from sqlalchemy import func
     from sqlalchemy.dialects.postgresql import insert
 
-    from database.models import Parcel
-    from database.session import Base, engine
+    from database.db import engine, init_db
+    from database.models import SRID, Parcel
 
-    Base.metadata.create_all(bind=engine, tables=[Parcel.__table__])
-    table_cols = {c.name for c in Parcel.__table__.columns} - {"id", "updated_at"}
-    subset = df[[c for c in df.columns if c in table_cols]]
+    init_db(engine)
+    table = Parcel.__table__
+    attr_cols = [c for c in OUTPUT_COLUMNS if c in df.columns and c in table.columns]
+    subset = df[attr_cols]
     records = subset.astype(object).where(subset.notna(), None).to_dict("records")
     if not records:
         return 0
+
+    geom_by_account = geoms.to_dict() if geoms is not None else {}
+    for rec in records:
+        geom = geom_by_account.get(rec["account_num"])
+        rec["geom"] = from_shape(geom, srid=SRID) if geom is not None else None
+        lat, lon = rec.get("latitude"), rec.get("longitude")
+        rec["centroid"] = from_shape(Point(lon, lat), srid=SRID) if lat is not None and lon is not None else None
+
     with engine.begin() as conn:
-        for start in range(0, len(records), 5_000):
-            stmt = insert(Parcel.__table__).values(records[start : start + 5_000])
-            stmt = stmt.on_conflict_do_update(
-                index_elements=["account_num"],
-                set_={c: stmt.excluded[c] for c in records[0] if c != "account_num"},
-            )
-            conn.execute(stmt)
+        for start in range(0, len(records), DB_BATCH_SIZE):
+            stmt = insert(table).values(records[start : start + DB_BATCH_SIZE])
+            update = {c: stmt.excluded[c] for c in records[0] if c not in ("account_num", "geom", "centroid")}
+            update["geom"] = func.coalesce(stmt.excluded.geom, table.c.geom)
+            update["centroid"] = func.coalesce(stmt.excluded.centroid, table.c.centroid)
+            update["sifted_at"] = func.now()
+            update["updated_at"] = func.now()
+            conn.execute(stmt.on_conflict_do_update(index_elements=["account_num"], set_=update))
     return len(records)
 
 
@@ -404,7 +443,17 @@ def run(
     log.info("Wrote %s", out_path)
 
     if to_db:
-        log.info("Upserted %s rows into parcels", f"{write_to_db(candidates):,}")
+        # Polygons ride alongside the candidates rather than in the CSV / API output.
+        geoms = (
+            merged.drop_duplicates("account_num").set_index("account_num")["geom"]
+            .reindex(candidates["account_num"]).dropna()
+            if "geom" in merged else None
+        )
+        written = write_to_db(candidates, geoms)
+        log.info(
+            "Upserted %s parcels (%s with polygons) into PostGIS",
+            f"{written:,}", f"{0 if geoms is None else len(geoms):,}",
+        )
     return candidates
 
 
@@ -415,18 +464,25 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--out", type=Path, default=PROCESSED_DIR / "dcad_dev_candidates.csv")
     parser.add_argument("--max-ratio", type=float, default=DEFAULT_MAX_RATIO)
     parser.add_argument("--min-lot-sqft", type=float, default=DEFAULT_MIN_LOT_SQFT)
-    parser.add_argument("--to-db", action="store_true", help="Also upsert results into PostgreSQL")
+    parser.add_argument("--no-db", action="store_true", help="Only write the CSV; skip the PostGIS upsert")
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    run(
-        external_dir=args.external_dir,
-        out_path=args.out,
-        max_ratio=args.max_ratio,
-        min_lot_sqft=args.min_lot_sqft,
-        geometry_path=args.geometry,
-        to_db=args.to_db,
-    )
+    from sqlalchemy.exc import SQLAlchemyError
+
+    try:
+        run(
+            external_dir=args.external_dir,
+            out_path=args.out,
+            max_ratio=args.max_ratio,
+            min_lot_sqft=args.min_lot_sqft,
+            geometry_path=args.geometry,
+            to_db=not args.no_db,
+        )
+    except SQLAlchemyError as e:
+        log.error("PostGIS upsert failed (%s); the CSV was still written to %s", e.__class__.__name__, args.out)
+        log.error("Check DATABASE_URL and that PostGIS is running, or pass --no-db.")
+        raise SystemExit(1) from None
 
 
 if __name__ == "__main__":

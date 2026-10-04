@@ -10,12 +10,13 @@ dallas-re-platform/
 │   ├── main.py          # App entry point (/health)
 │   └── routes/
 │       ├── proforma.py       # POST /underwrite
-│       ├── parcels.py        # POST /sift-parcels
+│       ├── parcels.py        # POST /sift-parcels, GET /parcels
 │       └── underwriting.py   # POST /underwriting/quick
-├── database/            # SQLAlchemy + PostgreSQL
-│   ├── session.py       # Engine, session factory, declarative Base
-│   ├── models.py        # ORM models (Parcel, ...)
-│   └── init_db.py       # Create tables
+├── database/            # SQLAlchemy + PostgreSQL/PostGIS (GeoAlchemy2)
+│   ├── db.py            # Engine, sessions (get_session, session_scope), init_db
+│   ├── models.py        # Parcel (polygon + centroid), UnderwrittenDeal
+│   ├── queries.py       # query_parcels: filters, bbox and radius search
+│   └── init_db.py       # Enable PostGIS, create tables and spatial indexes
 ├── scrapers/            # Data collection (DCAD parcels, permits, zoning, comps)
 │   ├── base.py          # BaseScraper: fetch() -> DataFrame, saved to data/raw/
 │   └── dcad_ingest.py   # DCAD exports -> under-improved development candidates
@@ -41,7 +42,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env            # set DATABASE_URL
 
-python -m database.init_db      # create tables (needs a running PostgreSQL)
+python -m database.init_db      # enable PostGIS + create tables (needs PostgreSQL with PostGIS)
 uvicorn api.main:app --reload   # http://127.0.0.1:8000/docs
 ```
 
@@ -65,7 +66,8 @@ API is down.
 |---|---|
 | `GET /health` | Liveness check |
 | `POST /underwrite` | Runs `DevelopmentProForma` and returns sources & uses, per-unit costs, operations, exit, returns and annual cash flows |
-| `POST /sift-parcels` | Re-runs the DCAD pipeline on `data/external/` and returns the top candidates |
+| `POST /sift-parcels` | Re-runs the DCAD pipeline on `data/external/` and returns the top candidates (`persist=true` also upserts them into PostGIS) |
+| `GET /parcels` | Queries persisted candidates in PostGIS: `max_ratio`, `min_lot_sqft`, `zip_code`, `bbox`, `lat`+`lon`+`radius_m`, `include_geometry` |
 | `POST /underwriting/quick` | Quick metrics for a stabilized deal |
 
 Interactive docs with request examples: http://127.0.0.1:8000/docs
@@ -80,6 +82,10 @@ curl -X POST http://127.0.0.1:8000/underwrite -H 'Content-Type: application/json
 
 # Query params: max_ratio, min_lot_sqft, zip_code (repeatable), limit (default 50, max 1000)
 curl -X POST 'http://127.0.0.1:8000/sift-parcels?max_ratio=0.25&min_lot_sqft=20000&zip_code=75215&limit=25'
+
+# From PostGIS: within 1.5 km of downtown, nearest first, with GeoJSON polygons
+curl 'http://127.0.0.1:8000/parcels?lat=32.7767&lon=-96.797&radius_m=1500&include_geometry=true'
+curl 'http://127.0.0.1:8000/parcels?bbox=-96.83,32.73,-96.76,32.80&max_ratio=0.1'
 ```
 
 `/underwrite` also accepts `contingency_pct`, `vacancy_rate`, `construction_years`,
@@ -106,11 +112,15 @@ area (computed in EPSG:2276). Geometry is joined on the account number, or on
 ```bash
 python -m scrapers.dcad_ingest                                   # ratio < 0.30, lot >= 10,000 sf
 python -m scrapers.dcad_ingest --max-ratio 0.25 --min-lot-sqft 20000
-python -m scrapers.dcad_ingest --to-db                           # also upsert into the parcels table
+python -m scrapers.dcad_ingest --no-db                           # CSV only, no database needed
 ```
 
-Output: `data/processed/dcad_dev_candidates.csv`, sorted by lowest
-improvement-to-land ratio, with columns matching the `parcels` table:
+By default the candidates are upserted into the PostGIS `parcels` table (keyed on
+`account_num`; re-runs refresh values and `sifted_at`). Each row stores the parcel
+polygon (`geom`, MultiPolygon) and centroid (`centroid`, Point), both EPSG:4326 with GiST
+indexes, plus a geography index on the centroid for metre-based radius searches. A CSV
+snapshot is also written to `data/processed/dcad_dev_candidates.csv`, sorted by lowest
+improvement-to-land ratio, with these columns:
 `account_num, appraisal_year, address, city, zip_code, zoning, division, owner_name,
 land_value, improvement_value, total_value, impr_land_ratio, lot_sqft, lot_acres,
 lot_size_source, land_value_per_sqft, latitude, longitude`.
@@ -137,9 +147,36 @@ stabilized NOI and a sale at forward NOI / exit cap. `ltv` applies to total
 capitalization by default (loan-to-cost); set `ltv_basis="value"` to size the
 loan on stabilized value instead. Contingency applies to hard costs.
 
+## Database
+
+`database/models.py` defines two tables:
+
+- `parcels`: one row per sifted DCAD account, with the attributes above plus `geom`, `centroid`, `sifted_at` and `updated_at`.
+- `underwritten_deals`: pro forma runs. Key assumptions and outputs (total capitalization,
+  loan, equity, NOI, yield on cost, DSCR, exit value, levered/unlevered IRR, equity multiple,
+  profit) are typed columns; the full request, cash flows and response are JSONB. An optional
+  `parcel_id` links a deal to its site.
+
+```python
+from database.db import session_scope
+from database.models import UnderwrittenDeal
+from database.queries import query_parcels
+
+with session_scope() as s:                      # commits, or rolls back on error
+    sites = query_parcels(s, near=(32.7767, -96.797), radius_m=2_000, max_ratio=0.1)
+    s.add(UnderwrittenDeal.from_response(underwrite_response, parcel_id=..., name="Elm St 60u"))
+```
+
+There are no migrations yet: `init_db` only creates missing tables. If you created
+`parcels` with an earlier version of this repo, drop it (or add the new columns) first.
+
 ## Tests
 
 ```bash
-pip install pytest
+pip install pytest httpx
 pytest
 ```
+
+`tests/test_database.py` runs against `TEST_DATABASE_URL` (default
+`postgresql+psycopg2://postgres:postgres@localhost:5432/dallas_re_test`, created if missing)
+and is skipped when no PostGIS server is reachable.

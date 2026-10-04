@@ -6,3 +6,4 @@ fastapi
 uvicorn
 streamlit>=1.50
 pydeck
+geoalchemy2>=0.15
