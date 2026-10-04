@@ -16,7 +16,7 @@ dallas-re-platform/
 │   └── init_db.py       # Create tables
 ├── scrapers/            # Data collection (DCAD parcels, permits, zoning, comps)
 │   ├── base.py          # BaseScraper: fetch() -> DataFrame, saved to data/raw/
-│   └── dallas_parcels.py
+│   └── dcad_ingest.py   # DCAD exports -> under-improved development candidates
 ├── underwriting/        # Deal math: NOI, cap rate, yield on cost, DSCR
 │   └── metrics.py
 ├── data/
@@ -50,6 +50,34 @@ curl -X POST http://127.0.0.1:8000/underwriting/quick \
        "total_cost":8000000,"market_cap_rate":0.055,"loan_amount":5000000,
        "interest_rate":0.065,"amort_years":30}'
 ```
+
+## Finding development sites (DCAD ingest)
+
+Download the current-year data files from
+[DCAD Data Products](https://www.dallascad.org/DataProducts.aspx) into `data/external/`:
+
+| File | Required | Used for |
+|---|---|---|
+| `ACCOUNT_APPRL_YEAR.CSV` | yes | land, improvement and total values |
+| `ACCOUNT_INFO.CSV` | no | address, zip, owner, division (BPP accounts are excluded) |
+| `LAND.CSV` | no | land area (summed across sections) and zoning |
+| parcel geometry (`.gpkg`, `.shp`, `.geojson` or `*parcel*.zip`) | no | lot area fallback, centroid lat/lon |
+
+Lot size comes from `LAND.CSV` when available, otherwise from the parcel polygon
+area (computed in EPSG:2276). Geometry is joined on the account number, or on
+`GIS_PARCEL_ID` through `ACCOUNT_INFO.CSV`.
+
+```bash
+python -m scrapers.dcad_ingest                                   # ratio < 0.30, lot >= 10,000 sf
+python -m scrapers.dcad_ingest --max-ratio 0.25 --min-lot-sqft 20000
+python -m scrapers.dcad_ingest --to-db                           # also upsert into the parcels table
+```
+
+Output: `data/processed/dcad_dev_candidates.csv`, sorted by lowest
+improvement-to-land ratio, with columns matching the `parcels` table:
+`account_num, appraisal_year, address, city, zip_code, zoning, division, owner_name,
+land_value, improvement_value, total_value, impr_land_ratio, lot_sqft, lot_acres,
+lot_size_source, land_value_per_sqft, latitude, longitude`.
 
 ## Tests
 
