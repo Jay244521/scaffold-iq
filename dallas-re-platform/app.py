@@ -10,6 +10,7 @@ import os
 
 import httpx
 import pandas as pd
+import pydeck as pdk
 import streamlit as st
 from fastapi import HTTPException
 from pydantic import ValidationError
@@ -19,6 +20,7 @@ from api.routes.proforma import UnderwriteRequest, underwrite
 from scrapers import dcad_ingest
 
 API_URL = os.getenv("API_URL", "http://127.0.0.1:8000")
+DALLAS_CENTER = (32.7767, -96.7970)  # downtown Dallas (lat, lon)
 SAMPLE = UnderwriteRequest.model_config["json_schema_extra"]["example"]
 
 st.set_page_config(page_title="Dallas RE Underwriting", page_icon="🏗️", layout="wide")
@@ -201,6 +203,69 @@ with tab_su:
 # --------------------------------------------------------------------------- #
 # Parcel candidates
 # --------------------------------------------------------------------------- #
+def ratio_color(ratio: float, max_ratio: float) -> list[int]:
+    """Green (vacant / barely improved) through amber to red (near the ratio cutoff)."""
+    t = 0.0 if max_ratio <= 0 or pd.isna(ratio) else min(max(ratio / max_ratio, 0.0), 1.0)
+    if t < 0.5:  # green -> amber
+        r, g, b = 26 + (245 - 26) * t * 2, 152 + (166 - 152) * t * 2, 80 - 45 * t * 2
+    else:  # amber -> red
+        r, g, b = 245 - (245 - 215) * (t - 0.5) * 2, 166 - (166 - 48) * (t - 0.5) * 2, 35 + (39 - 35) * (t - 0.5) * 2
+    return [int(r), int(g), int(b), 200]
+
+
+def parcel_map(candidates: pd.DataFrame) -> None:
+    """Plot candidates on a pydeck map of Dallas, colored by improvement/land ratio."""
+    if not {"latitude", "longitude"} <= set(candidates.columns):
+        st.caption("No coordinates in this run. Add the DCAD parcel geometry file to `data/external/` to map parcels.")
+        return
+    points = candidates.dropna(subset=["latitude", "longitude"]).copy()
+    unmapped = len(candidates) - len(points)
+    if points.empty:
+        st.caption("None of these parcels have coordinates. Add the DCAD parcel geometry file to `data/external/`.")
+        return
+
+    ratio = points.get("impr_land_ratio", pd.Series(float("nan"), index=points.index))
+    acres = points.get("lot_acres", pd.Series(float("nan"), index=points.index))
+    scale = ratio.max() if ratio.notna().any() else 0.0
+    points["color"] = [ratio_color(r, scale) for r in ratio]
+    # Dot area grows with lot size (in screen pixels, so it stays readable at any zoom).
+    points["radius"] = 4 + 2.5 * acres.fillna(0).clip(upper=25) ** 0.5
+    points["tip_address"] = points.get("address", pd.Series("", index=points.index)).fillna("Unknown address")
+    points["tip_land"] = points.get("land_value", pd.Series(float("nan"), index=points.index)).map(
+        lambda v: "n/a" if pd.isna(v) else f"${v:,.0f}")
+    points["tip_ratio"] = ratio.map(lambda v: "n/a" if pd.isna(v) else f"{v:.3f}")
+    points["tip_acres"] = acres.map(lambda v: "n/a" if pd.isna(v) else f"{v:.2f} ac")
+    points["tip_zoning"] = points.get("zoning", pd.Series("", index=points.index)).fillna("n/a")
+    cols = ["longitude", "latitude", "color", "radius",
+            "tip_address", "tip_land", "tip_ratio", "tip_acres", "tip_zoning"]
+
+    layer = pdk.Layer(
+        "ScatterplotLayer",
+        data=points[cols],
+        get_position=["longitude", "latitude"],
+        get_fill_color="color",
+        get_radius="radius",
+        radius_units='"pixels"',  # quoted: pydeck treats bare strings as JS expressions
+        stroked=True,
+        get_line_color=[255, 255, 255, 180],
+        line_width_min_pixels=1,
+        pickable=True,
+        auto_highlight=True,
+    )
+    tooltip = {
+        "html": "<b>{tip_address}</b><br/>Land value: {tip_land}<br/>"
+                "Improvement / land: {tip_ratio}<br/>Lot: {tip_acres} · Zoning: {tip_zoning}",
+        "style": {"fontSize": "12px"},
+    }
+    view = pdk.ViewState(latitude=DALLAS_CENTER[0], longitude=DALLAS_CENTER[1], zoom=10)
+    st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view, tooltip=tooltip), height=480)
+
+    note = f"🟢 low → 🔴 high improvement/land ratio (0–{scale:.2f}); dot size = lot size."
+    if unmapped:
+        note += f" {unmapped:,} parcel(s) without coordinates are listed below but not mapped."
+    st.caption(note)
+
+
 st.divider()
 st.header("Sifted parcel candidates")
 st.caption("Under-improved Dallas County parcels from the DCAD pipeline, lowest improvement/land ratio first.")
@@ -239,6 +304,7 @@ else:
     st.info("No parcel candidates yet. Download the DCAD export into `data/external/`, then click **Sift parcels**.")
 
 if candidates is not None and not candidates.empty:
+    parcel_map(candidates)
     st.dataframe(
         candidates,
         hide_index=True,
@@ -253,9 +319,5 @@ if candidates is not None and not candidates.empty:
             "lot_acres": st.column_config.NumberColumn(format="%.2f"),
         },
     )
-    if {"latitude", "longitude"} <= set(candidates.columns):
-        points = candidates.dropna(subset=["latitude", "longitude"])
-        if not points.empty:
-            st.map(points, latitude="latitude", longitude="longitude", size=40)
 elif candidates is not None:
     st.info("No parcels matched these filters.")

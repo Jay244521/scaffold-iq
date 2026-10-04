@@ -54,7 +54,8 @@ streamlit run app.py            # http://localhost:8501
 
 `app.py` is a Streamlit front end: underwriting assumptions in the sidebar, key returns
 (total capitalization, levered IRR, equity multiple, yield on cost) as metric cards, annual
-cash flows, and a table and map of sifted DCAD parcel candidates. It calls the API at
+cash flows, and sifted DCAD parcel candidates in a table plus an interactive pydeck map of
+Dallas (colored by improvement/land ratio, sized by lot, with land-value tooltips). It calls the API at
 `API_URL` (default `http://127.0.0.1:8000`) and runs the same route code in-process when the
 API is down.
 
