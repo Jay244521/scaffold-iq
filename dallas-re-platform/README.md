@@ -9,6 +9,8 @@ dallas-re-platform/
 ├── api/                 # FastAPI service
 │   ├── main.py          # App entry point (/health)
 │   └── routes/
+│       ├── proforma.py       # POST /underwrite
+│       ├── parcels.py        # POST /sift-parcels
 │       └── underwriting.py   # POST /underwriting/quick
 ├── database/            # SQLAlchemy + PostgreSQL
 │   ├── session.py       # Engine, session factory, declarative Base
@@ -42,15 +44,33 @@ python -m database.init_db      # create tables (needs a running PostgreSQL)
 uvicorn api.main:app --reload   # http://127.0.0.1:8000/docs
 ```
 
-Example underwriting request:
+## API
+
+| Endpoint | What it does |
+|---|---|
+| `GET /health` | Liveness check |
+| `POST /underwrite` | Runs `DevelopmentProForma` and returns sources & uses, per-unit costs, operations, exit, returns and annual cash flows |
+| `POST /sift-parcels` | Re-runs the DCAD pipeline on `data/external/` and returns the top candidates |
+| `POST /underwriting/quick` | Quick metrics for a stabilized deal |
+
+Interactive docs with request examples: http://127.0.0.1:8000/docs
 
 ```bash
-curl -X POST http://127.0.0.1:8000/underwriting/quick \
-  -H 'Content-Type: application/json' \
-  -d '{"gross_income":1000000,"vacancy_rate":0.05,"operating_expenses":400000,
-       "total_cost":8000000,"market_cap_rate":0.055,"loan_amount":5000000,
-       "interest_rate":0.065,"amort_years":30}'
+curl -X POST http://127.0.0.1:8000/underwrite -H 'Content-Type: application/json' -d '{
+  "land_cost": 1500000, "units": 60, "hard_costs": 11000000, "soft_costs": 2200000,
+  "loan": {"ltv": 0.65, "interest_rate": 0.07, "amort_years": null, "ltv_basis": "cost"},
+  "exit_cap_rate": 0.055,
+  "rent_per_unit_month": 2100, "other_income_per_unit_month": 75, "opex_per_unit_year": 7500
+}'
+
+# Query params: max_ratio, min_lot_sqft, zip_code (repeatable), limit (default 50, max 1000)
+curl -X POST 'http://127.0.0.1:8000/sift-parcels?max_ratio=0.25&min_lot_sqft=20000&zip_code=75215&limit=25'
 ```
+
+`/underwrite` also accepts `contingency_pct`, `vacancy_rate`, `construction_years`,
+`hold_years`, `rent_growth`, `expense_growth` and `selling_costs_pct` (defaults as in the
+pro forma). `/sift-parcels` returns 503 until the DCAD export is in `data/external/`; each
+call re-reads the full export, so expect it to take a while on the real county files.
 
 ## Finding development sites (DCAD ingest)
 
