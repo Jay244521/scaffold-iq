@@ -17,8 +17,9 @@ dallas-re-platform/
 ├── scrapers/            # Data collection (DCAD parcels, permits, zoning, comps)
 │   ├── base.py          # BaseScraper: fetch() -> DataFrame, saved to data/raw/
 │   └── dcad_ingest.py   # DCAD exports -> under-improved development candidates
-├── underwriting/        # Deal math: NOI, cap rate, yield on cost, DSCR
-│   └── metrics.py
+├── underwriting/        # Deal math
+│   ├── metrics.py       # NOI, cap rate, yield on cost, DSCR, IRR, loan balance
+│   └── proforma.py      # DevelopmentProForma: sources & uses, NOI, levered IRR, equity multiple
 ├── data/
 │   ├── raw/             # Scraper output (git-ignored)
 │   ├── processed/       # Cleaned / joined datasets (git-ignored)
@@ -78,6 +79,28 @@ improvement-to-land ratio, with columns matching the `parcels` table:
 `account_num, appraisal_year, address, city, zip_code, zoning, division, owner_name,
 land_value, improvement_value, total_value, impr_land_ratio, lot_sqft, lot_acres,
 lot_size_source, land_value_per_sqft, latitude, longitude`.
+
+## Development pro forma
+
+```python
+from underwriting.proforma import DevelopmentProForma
+
+deal = DevelopmentProForma(
+    land_cost=1_500_000, hard_costs=11_000_000, soft_costs=2_200_000,
+    contingency_pct=0.05, ltv=0.65, interest_rate=0.07, exit_cap_rate=0.055,
+    gross_potential_rent=1_512_000, operating_expenses=450_000,
+)
+result = deal.run()          # total_capitalization, required_equity, loan_amount, noi,
+print(result.summary())      # levered_irr, equity_multiple, cash flows, ...
+```
+
+`python -m underwriting.proforma` runs a sample 60-unit Dallas multifamily deal.
+
+The model is annual: equity in at close, `construction_years` with no income
+(construction interest is capitalized into total cost), then `hold_years` of
+stabilized NOI and a sale at forward NOI / exit cap. `ltv` applies to total
+capitalization by default (loan-to-cost); set `ltv_basis="value"` to size the
+loan on stabilized value instead. Contingency applies to hard costs.
 
 ## Tests
 
