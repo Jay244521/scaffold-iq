@@ -27,6 +27,7 @@ dallas-re-platform/
 │   ├── processed/       # Cleaned / joined datasets (git-ignored)
 │   └── external/        # Third-party downloads, shapefiles (git-ignored)
 ├── tests/
+├── app.py               # Streamlit dashboard
 ├── config.py            # Settings from environment variables
 ├── requirements.txt
 └── .env.example
@@ -43,6 +44,19 @@ cp .env.example .env            # set DATABASE_URL
 python -m database.init_db      # create tables (needs a running PostgreSQL)
 uvicorn api.main:app --reload   # http://127.0.0.1:8000/docs
 ```
+
+## Dashboard
+
+```bash
+uvicorn api.main:app --reload   # optional: the dashboard falls back to the local engine
+streamlit run app.py            # http://localhost:8501
+```
+
+`app.py` is a Streamlit front end: underwriting assumptions in the sidebar, key returns
+(total capitalization, levered IRR, equity multiple, yield on cost) as metric cards, annual
+cash flows, and a table and map of sifted DCAD parcel candidates. It calls the API at
+`API_URL` (default `http://127.0.0.1:8000`) and runs the same route code in-process when the
+API is down.
 
 ## API
 
