@@ -1,19 +1,30 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle,
   ArrowUpDown,
+  BrickWall,
   Building2,
   Check,
+  ChevronDown,
+  ChevronUp,
+  CircleAlert,
+  CircleCheck,
+  CircleMinus,
   Copy,
   DollarSign,
   Download,
+  Droplets,
   FileText,
   HardHat,
+  LoaderCircle,
   MapPin,
   RefreshCw,
   Search,
-  User,
+  Sparkles,
+  Wind,
+  Zap,
 } from 'lucide-react';
+import { analyzeNeeds } from './analyzeNeeds';
 
 const PERMITS_URL =
   "https://services.arcgis.com/Wl7Y1m92PbjtJs5n/arcgis/rest/services/CFW_Development_Permits_Table/FeatureServer/0/query?where=PermitType%3D'Commercial+Building'&outFields=PermitNum,OriginalAddress,Description,DeclaredValue,ApplicantName,ContractorName&f=pjson&resultRecordCount=20";
@@ -100,18 +111,112 @@ function StatCard({ icon: Icon, label, value, hint }) {
   );
 }
 
-function DetailRow({ icon: Icon, label, value }) {
+const TRADE_ICONS = {
+  electrical: Zap,
+  plumbing: Droplets,
+  hvac: Wind,
+  concrete: BrickWall,
+};
+
+const TRADE_STATUS = {
+  missing: { label: 'Likely missing', className: 'bg-orange-100 text-orange-800 ring-orange-200', icon: CircleAlert },
+  covered: { label: 'In scope', className: 'bg-emerald-50 text-emerald-700 ring-emerald-200', icon: CircleCheck },
+  unlikely: { label: 'Not needed', className: 'bg-slate-100 text-slate-500 ring-slate-200', icon: CircleMinus },
+};
+
+const ANALYSIS_DELAY_MS = 900;
+
+function TradeRow({ trade }) {
+  const Icon = TRADE_ICONS[trade.key];
+  const status = TRADE_STATUS[trade.status];
+  const StatusIcon = status.icon;
   return (
-    <div className="flex items-start gap-2 text-sm">
-      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
-      <span className="text-slate-500">{label}:</span>
-      <span className="min-w-0 break-words font-medium text-slate-800">{value || '—'}</span>
+    <li className="flex items-start gap-3 py-2.5">
+      <div
+        className={`rounded-lg p-1.5 ${trade.status === 'missing' ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-500'}`}
+      >
+        <Icon className="h-4 w-4" aria-hidden="true" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="text-sm font-semibold text-slate-800">{trade.name}</span>
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${status.className}`}
+          >
+            <StatusIcon className="h-3 w-3" aria-hidden="true" />
+            {status.label}
+          </span>
+          <span className="ml-auto text-xs text-slate-400">{trade.likelihood} need</span>
+        </div>
+        <p className="mt-0.5 text-xs text-slate-500">{trade.reason}</p>
+      </div>
+    </li>
+  );
+}
+
+function AnalysisPanel({ analysis, description }) {
+  return (
+    <div className="mt-4 rounded-lg border border-violet-100 bg-violet-50/40 p-4">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 text-sm font-semibold text-violet-900">
+          <Sparkles className="h-4 w-4 text-violet-500" aria-hidden="true" />
+          Trade needs analysis
+        </div>
+        <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-violet-700 ring-1 ring-inset ring-violet-200">
+          Simulated
+        </span>
+      </div>
+
+      <div className="mt-3 text-xs text-slate-500">Project type</div>
+      <div className="text-sm font-medium text-slate-800">{analysis.projectType}</div>
+
+      <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+        <span>Confidence</span>
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-violet-100">
+          <div className="h-full rounded-full bg-violet-500" style={{ width: `${analysis.confidence}%` }} />
+        </div>
+        <span className="tabular-nums font-medium text-slate-700">{analysis.confidence}%</span>
+      </div>
+
+      <p className="mt-3 text-sm text-slate-700">{analysis.summary}</p>
+
+      <ul className="mt-2 divide-y divide-violet-100">
+        {analysis.trades.map((trade) => (
+          <TradeRow key={trade.key} trade={trade} />
+        ))}
+      </ul>
+
+      <p className="mt-3 border-t border-violet-100 pt-3 text-xs italic text-slate-500">
+        Based on: “{description || 'No description filed'}”
+      </p>
     </div>
   );
 }
 
 function PermitCard({ permit }) {
   const [copied, setCopied] = useState(false);
+  const [analysisState, setAnalysisState] = useState('idle');
+  const [isOpen, setIsOpen] = useState(false);
+  const timerRef = useRef(null);
+
+  useEffect(() => () => clearTimeout(timerRef.current), []);
+
+  const analysis = useMemo(
+    () => (analysisState === 'done' ? analyzeNeeds(permit.description, permit.value) : null),
+    [analysisState, permit.description, permit.value]
+  );
+
+  const handleAnalyze = () => {
+    if (isOpen) {
+      setIsOpen(false);
+      return;
+    }
+    setIsOpen(true);
+    if (analysisState === 'idle') {
+      setAnalysisState('loading');
+      timerRef.current = setTimeout(() => setAnalysisState('done'), ANALYSIS_DELAY_MS);
+    }
+  };
 
   const handleCopy = async () => {
     try {
@@ -128,48 +233,80 @@ function PermitCard({ permit }) {
     : null;
 
   return (
-    <article className="flex flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
+    <article className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="text-xs font-semibold uppercase tracking-wide text-orange-600">
-            {permit.permitNum || 'Unnumbered permit'}
+        <div>
+          <div className="text-xs font-medium uppercase tracking-wide text-slate-400">Declared value</div>
+          <div className="mt-0.5 text-2xl font-bold tabular-nums text-slate-900">{currency.format(permit.value)}</div>
+        </div>
+        {permit.permitNum && (
+          <span className="shrink-0 rounded-md bg-slate-100 px-2 py-1 font-mono text-[11px] text-slate-500">
+            {permit.permitNum}
+          </span>
+        )}
+      </div>
+
+      <div className="mt-4 space-y-3">
+        <div className="flex items-start gap-2.5">
+          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" aria-hidden="true" />
+          <div className="min-w-0">
+            <div className="text-xs text-slate-400">Address</div>
+            {mapsUrl ? (
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="break-words text-sm font-semibold text-slate-800 hover:text-orange-600 hover:underline"
+              >
+                {permit.address}
+              </a>
+            ) : (
+              <div className="text-sm font-semibold text-slate-400">No address listed</div>
+            )}
           </div>
-          {mapsUrl ? (
-            <a
-              href={mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-1 flex items-start gap-1.5 text-base font-semibold text-slate-900 hover:text-orange-600"
-            >
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              <span className="break-words">{permit.address}</span>
-            </a>
-          ) : (
-            <div className="mt-1 text-base font-semibold text-slate-400">No address listed</div>
-          )}
         </div>
-        <div className="shrink-0 rounded-lg bg-emerald-50 px-2.5 py-1 text-sm font-semibold tabular-nums text-emerald-700">
-          {currency.format(permit.value)}
+        <div className="flex items-start gap-2.5">
+          <HardHat className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" aria-hidden="true" />
+          <div className="min-w-0">
+            <div className="text-xs text-slate-400">Contractor</div>
+            <div className={`break-words text-sm font-semibold ${permit.contractor ? 'text-slate-800' : 'text-slate-400'}`}>
+              {permit.contractor || 'Not listed'}
+            </div>
+          </div>
         </div>
       </div>
 
-      <p className="mt-3 line-clamp-3 text-sm text-slate-600" title={permit.description}>
-        {permit.description || 'No description provided.'}
-      </p>
-
-      <div className="mt-4 space-y-2 border-t border-slate-100 pt-4">
-        <DetailRow icon={User} label="Applicant" value={permit.applicant} />
-        <DetailRow icon={HardHat} label="Contractor" value={permit.contractor} />
+      <div className="mt-5 flex gap-2">
+        <button
+          type="button"
+          onClick={handleAnalyze}
+          aria-expanded={isOpen}
+          className={`inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition ${
+            isOpen ? 'bg-violet-100 text-violet-800 hover:bg-violet-200' : 'bg-violet-600 text-white hover:bg-violet-700'
+          }`}
+        >
+          <Sparkles className="h-4 w-4" aria-hidden="true" />
+          {isOpen ? 'Hide analysis' : 'Analyze Needs'}
+          {isOpen ? <ChevronUp className="h-4 w-4" aria-hidden="true" /> : <ChevronDown className="h-4 w-4" aria-hidden="true" />}
+        </button>
+        <button
+          type="button"
+          onClick={handleCopy}
+          title="Copy lead details"
+          aria-label="Copy lead details"
+          className="inline-flex items-center justify-center rounded-lg border border-slate-200 px-3 text-slate-500 transition hover:border-orange-300 hover:bg-orange-50 hover:text-orange-700"
+        >
+          {copied ? <Check className="h-4 w-4" aria-hidden="true" /> : <Copy className="h-4 w-4" aria-hidden="true" />}
+        </button>
       </div>
 
-      <button
-        type="button"
-        onClick={handleCopy}
-        className="mt-4 inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-orange-300 hover:bg-orange-50 hover:text-orange-700"
-      >
-        {copied ? <Check className="h-4 w-4" aria-hidden="true" /> : <Copy className="h-4 w-4" aria-hidden="true" />}
-        {copied ? 'Copied' : 'Copy lead'}
-      </button>
+      {isOpen && analysisState === 'loading' && (
+        <div className="mt-4 flex items-center gap-2 rounded-lg border border-violet-100 bg-violet-50/40 p-4 text-sm text-violet-800">
+          <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />
+          Analyzing permit scope…
+        </div>
+      )}
+      {isOpen && analysis && <AnalysisPanel analysis={analysis} description={permit.description} />}
     </article>
   );
 }
@@ -379,7 +516,7 @@ export default function LeadMachine() {
           )}
 
           {status === 'ready' && visiblePermits.length > 0 && (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 items-start gap-5 md:grid-cols-2 xl:grid-cols-3">
               {visiblePermits.map((permit) => (
                 <PermitCard key={permit.id} permit={permit} />
               ))}
