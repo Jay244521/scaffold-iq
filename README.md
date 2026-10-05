@@ -49,3 +49,7 @@ In your new repo, upload ALL files from this folder maintaining the same structu
 - All session data saves to browser localStorage (no database needed yet)
 - AI calls use Anthropic Claude API (free credits on signup)
 - Zero monthly cost on Vercel free tier
+
+## Fort Worth Lead Machine
+A Tailwind + lucide-react dashboard of the 20 latest commercial building permits from the
+City of Fort Worth's ArcGIS permit feed. Open `/lead-machine` (e.g. `http://localhost:3000/lead-machine`).
