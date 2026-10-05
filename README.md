@@ -1,55 +1,28 @@
-# Scaffold-IQ — Deploy to Vercel
+# Fort Worth Lead Machine
 
-## Project Structure
+A React dashboard (Tailwind CSS + lucide-react) of the 20 latest commercial building permits from
+the City of Fort Worth's ArcGIS development permits feed. Each permit card shows the address,
+declared value and contractor, and an **Analyze Needs** button gives a simulated read of which major
+trades (Electrical, Plumbing, HVAC, Concrete) the project likely needs but the scope doesn't mention.
+
+## Run locally
+```bash
+npm install
+npm start
 ```
-scaffold-iq/
-├── public/
-│   └── index.html
-├── src/
-│   ├── App.jsx       ← Full MVP (student + teacher)
-│   └── index.js      ← React entry point
-├── package.json
-├── vercel.json
-└── .gitignore
+Then open http://localhost:3000.
+
+## Project structure
+```
+public/index.html
+src/
+├── index.js          React entry point
+├── index.css         Tailwind directives
+├── LeadMachine.jsx   Dashboard (fetching, stats, grid, cards)
+└── analyzeNeeds.js   Keyword rules behind the simulated trade analysis
+tailwind.config.js
+vercel.json           Create React App build settings for Vercel
 ```
 
-## Deploy in 5 Steps
-
-### Step 1 — Create GitHub Repo
-1. Go to github.com → New repository
-2. Name it `scaffold-iq`
-3. Set to Public
-4. Click "Create repository"
-
-### Step 2 — Upload Files
-In your new repo, upload ALL files from this folder maintaining the same structure:
-- Drag and drop the entire folder OR use GitHub Desktop
-
-### Step 3 — Connect to Vercel
-1. Go to vercel.com → Sign up free with GitHub
-2. Click "Add New Project"
-3. Import your `scaffold-iq` GitHub repo
-4. Vercel auto-detects Create React App — click Deploy
-
-### Step 4 — Add API Key
-1. In Vercel dashboard → Your project → Settings → Environment Variables
-2. Add: `REACT_APP_ANTHROPIC_KEY` = your Anthropic API key
-3. Redeploy
-
-### Step 5 — Custom Domain (Optional)
-1. Vercel gives you: `scaffold-iq.vercel.app` for free
-2. If you own scaffold-iq.com → Settings → Domains → Add domain
-
-## Your Live Links
-- **Main app**: https://scaffold-iq.vercel.app
-- **Student portal**: same link → click "I'm a Student"
-- **Teacher dashboard**: same link → click "I'm a Teacher"
-
-## Notes
-- All session data saves to browser localStorage (no database needed yet)
-- AI calls use Anthropic Claude API (free credits on signup)
-- Zero monthly cost on Vercel free tier
-
-## Fort Worth Lead Machine
-A Tailwind + lucide-react dashboard of the 20 latest commercial building permits from the
-City of Fort Worth's ArcGIS permit feed. Open `/lead-machine` (e.g. `http://localhost:3000/lead-machine`).
+## Deploying
+The repo is connected to Vercel, which redeploys on every push to `main`.
