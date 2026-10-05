@@ -16,6 +16,8 @@ const FIELD_PATTERNS = {
   value: [/^(declared|job|project|construction)_?val(ue|uation)?$/i, /valuation/i, /value/i],
   contractor: [/^contractor(_?(full_)?name)?$/i, /contractor/i],
   applicant: [/^applicant(_?(full_)?name)?$/i, /applicant/i, /owner_?full_?name/i, /owner/i],
+  status: [/^current_?status$/i, /^(permit_?|record_?)?status$/i, /status/i],
+  zoning: [/^zon(e|ing)(_?(code|district|class))?$/i, /zon(e|ing)/i],
 };
 
 const DATE_PATTERNS = [/^file_?date$/i, /issue\w*_?date/i, /appl\w*_?date/i, /open\w*_?date/i, /status_?date/i];
@@ -55,6 +57,8 @@ export function resolveFields(fields) {
     value: matchField(fields, FIELD_PATTERNS.value, numberFields),
     contractor: matchField(fields, FIELD_PATTERNS.contractor, textFields),
     applicant: matchField(fields, FIELD_PATTERNS.applicant, textFields),
+    status: matchField(fields, FIELD_PATTERNS.status, textFields),
+    zoning: matchField(fields, FIELD_PATTERNS.zoning, textFields),
     date:
       matchField(fields, DATE_PATTERNS, ['esriFieldTypeDate', 'esriFieldTypeDateOnly']) ||
       (fields.find((f) => f.type === 'esriFieldTypeDate') || {}).name ||
