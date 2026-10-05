@@ -25,9 +25,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { analyzeNeeds } from './analyzeNeeds';
-
-const PERMITS_URL =
-  "https://services.arcgis.com/Wl7Y1m92PbjtJs5n/arcgis/rest/services/CFW_Development_Permits_Table/FeatureServer/0/query?where=PermitType%3D'Commercial+Building'&outFields=PermitNum,OriginalAddress,Description,DeclaredValue,ApplicantName,ContractorName&f=pjson&resultRecordCount=20";
+import { fetchCommercialPermits } from './permitsApi';
 
 const currency = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -55,15 +53,25 @@ function clean(value) {
   return typeof value === 'string' ? value.trim() : value ?? '';
 }
 
-function normalizePermit(attributes, index) {
+function formatDate(value) {
+  if (value === null || value === undefined || value === '') return '';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? ''
+    : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function normalizePermit(attributes, fields, index) {
+  const get = (key) => (fields[key] ? attributes[fields[key]] : undefined);
   return {
-    id: `${clean(attributes.PermitNum) || 'permit'}-${index}`,
-    permitNum: clean(attributes.PermitNum),
-    address: clean(attributes.OriginalAddress),
-    description: clean(attributes.Description),
-    value: toNumber(attributes.DeclaredValue),
-    applicant: clean(attributes.ApplicantName),
-    contractor: clean(attributes.ContractorName),
+    id: `${clean(get('permitNum')) || 'permit'}-${index}`,
+    permitNum: clean(get('permitNum')),
+    address: clean(get('address')),
+    description: clean(get('description')),
+    value: toNumber(get('value')),
+    applicant: clean(get('applicant')),
+    contractor: clean(get('contractor')),
+    filedDate: formatDate(get('date')),
   };
 }
 
@@ -239,11 +247,14 @@ function PermitCard({ permit }) {
           <div className="text-xs font-medium uppercase tracking-wide text-slate-400">Declared value</div>
           <div className="mt-0.5 text-2xl font-bold tabular-nums text-slate-900">{currency.format(permit.value)}</div>
         </div>
-        {permit.permitNum && (
-          <span className="shrink-0 rounded-md bg-slate-100 px-2 py-1 font-mono text-[11px] text-slate-500">
-            {permit.permitNum}
-          </span>
-        )}
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          {permit.permitNum && (
+            <span className="rounded-md bg-slate-100 px-2 py-1 font-mono text-[11px] text-slate-500">
+              {permit.permitNum}
+            </span>
+          )}
+          {permit.filedDate && <span className="text-[11px] text-slate-400">Filed {permit.filedDate}</span>}
+        </div>
       </div>
 
       <div className="mt-4 space-y-3">
@@ -342,17 +353,8 @@ export default function LeadMachine() {
     setStatus('loading');
     setError('');
     try {
-      const response = await fetch(PERMITS_URL, { signal });
-      if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
-      }
-      const data = await response.json();
-      // ArcGIS reports query errors with HTTP 200 and an `error` object.
-      if (data.error) {
-        throw new Error(data.error.message || 'The permit service returned an error.');
-      }
-      const features = Array.isArray(data.features) ? data.features : [];
-      setPermits(features.map((f, i) => normalizePermit(f.attributes || {}, i)));
+      const { features, fields } = await fetchCommercialPermits(signal);
+      setPermits(features.map((attributes, i) => normalizePermit(attributes, fields, i)));
       setLastUpdated(new Date());
       setStatus('ready');
     } catch (err) {
