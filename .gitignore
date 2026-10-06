@@ -1,3 +1,8 @@
 node_modules/
 build/
 .env*.local
+
+# Python / radar
+__pycache__/
+.pytest_cache/
+radar_output/
