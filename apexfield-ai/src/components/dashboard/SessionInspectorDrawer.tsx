@@ -12,6 +12,7 @@ import {
   Pause,
   Send,
   ShieldAlert,
+  ShieldCheck,
   Truck,
   UserPlus,
   X,
@@ -129,12 +130,10 @@ export function SessionInspectorDrawer({ tech, onClose, onWhisper, onClear, onDi
             {/* 1. POV feed + transcript */}
             <section className={section} aria-labelledby={`${titleId}-feed`}>
               <h3 id={`${titleId}-feed`} className={sectionTitle}>
-                1 · POV CAMERA FEED &amp; VOICE TRANSCRIPT
+                {tech.live ? "1 · LIVE SESSION · SAFETY & EVENT LOG" : "1 · POV CAMERA FEED & VOICE TRANSCRIPT"}
               </h3>
-              <div className="mt-3">
-                <PovFrame tech={tech} />
-              </div>
-              <Transcript lines={tech.transcript} />
+              <div className="mt-3">{tech.live ? <LiveFrameNote tech={tech} /> : <PovFrame tech={tech} />}</div>
+              <Transcript lines={tech.transcript} label={tech.live ? "SESSION EVENT LOG" : "LIVE VOICE TRANSCRIPT"} />
             </section>
 
             {/* 2. Timeline */}
@@ -183,7 +182,7 @@ function AttentionBanner({ tech, onClear }: { tech: Technician; onClear: (id: st
           <p className="mt-1 text-sm text-slate-100">{tech.statusReason}</p>
         </div>
       </div>
-      {esc && (
+      {esc && !tech.live && (
         <button
           type="button"
           onClick={() => onClear(tech.id)}
@@ -203,7 +202,7 @@ const ROLE_STYLE: Record<TranscriptLine["role"], { label: string; cls: string; t
   system: { label: "SYSTEM", cls: "text-muted", text: "text-muted italic" },
 };
 
-function Transcript({ lines }: { lines: TranscriptLine[] }) {
+function Transcript({ lines, label }: { lines: TranscriptLine[]; label: string }) {
   const listRef = useRef<HTMLOListElement>(null);
   useEffect(() => {
     const el = listRef.current;
@@ -212,7 +211,7 @@ function Transcript({ lines }: { lines: TranscriptLine[] }) {
   return (
     <div className="mt-3">
       <p className="flex items-center gap-2 font-mono text-[10px] tracking-[0.1em] text-muted">
-        <Headphones className="h-3.5 w-3.5 text-amber" aria-hidden="true" /> LIVE VOICE TRANSCRIPT
+        <Headphones className="h-3.5 w-3.5 text-amber" aria-hidden="true" /> {label}
       </p>
       <ol ref={listRef} aria-live="polite" className="mt-2 flex max-h-72 flex-col gap-2 overflow-y-auto rounded-xl border border-line bg-[#080b13] p-3">
         {lines.map((l) => {
@@ -363,6 +362,11 @@ function Interventions({ tech, onWhisper, onClear, onDispatch }: Omit<Props, "on
         </div>
       </div>
 
+      {tech.live ? (
+        <p className="rounded-xl border border-line bg-slate-deep px-3 py-2.5 text-xs text-muted">
+          Your note is spoken to the technician by their AI coach. It can&apos;t override the safety gate: the disconnect is only cleared when the coach sees it pulled or the tech confirms 0V.
+        </p>
+      ) : (
       <div className="grid gap-2 sm:grid-cols-2">
         {tech.status === "safety_hold" && confirmHold ? (
           <div className="flex flex-col gap-2 rounded-xl border border-amber/60 bg-amber/10 p-3 sm:col-span-2">
@@ -407,6 +411,28 @@ function Interventions({ tech, onWhisper, onClear, onDispatch }: Omit<Props, "on
           {tech.backupDispatched ? "Senior Backup En Route" : "Dispatch Senior Tech Backup"}
         </button>
       </div>
+      )}
+    </div>
+  );
+}
+
+/** Live sessions don't store camera frames (privacy); show safety + equipment status instead. */
+function LiveFrameNote({ tech }: { tech: Technician }) {
+  const ok = tech.safetyVerified;
+  return (
+    <div className="flex flex-col gap-3 rounded-xl border border-line bg-[#05070d] p-4">
+      <span
+        className={`inline-flex items-center gap-1.5 self-start rounded-md px-2 py-1 font-mono text-[10px] font-bold tracking-wider ${
+          ok ? "bg-emerald/90 text-slate-deep" : "bg-danger/90 text-white"
+        }`}
+      >
+        {ok ? <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" /> : <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" />}
+        {ok ? "SAFETY DISCONNECT VERIFIED" : "DISCONNECT NOT VERIFIED · ELECTRICAL LOCKED"}
+      </span>
+      <p className="text-sm text-slate-300">
+        Camera frames stay between the technician&apos;s phone and the AI coach; they aren&apos;t stored. Steps, readings and your notes appear below as they happen.
+      </p>
+      {tech.live && <p className="font-mono text-[10px] text-muted">SESSION {tech.live.sessionId.slice(0, 8)} · STARTED {new Date(tech.live.startedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</p>}
     </div>
   );
 }

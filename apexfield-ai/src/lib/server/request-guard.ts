@@ -14,7 +14,10 @@ export function clientIp(req: Request): string {
   return (fwd?.split(",")[0] ?? req.headers.get("x-real-ip") ?? "unknown").trim();
 }
 
-export function guardRequest(req: Request, opts: { key: string; limit: number; windowMs: number }): NextResponse | null {
+export function guardRequest(
+  req: Request,
+  opts: { key: string; limit: number; windowMs: number; /** Rate-limit per user instead of per IP. */ subject?: string },
+): NextResponse | null {
   const origin = req.headers.get("origin");
   const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
   if (origin && host) {
@@ -29,7 +32,7 @@ export function guardRequest(req: Request, opts: { key: string; limit: number; w
     }
   }
 
-  const id = `${opts.key}:${clientIp(req)}`;
+  const id = `${opts.key}:${opts.subject ?? clientIp(req)}`;
   const now = Date.now();
   const hits = (buckets.get(id) ?? []).filter((t) => now - t < opts.windowMs);
   if (hits.length >= opts.limit) {

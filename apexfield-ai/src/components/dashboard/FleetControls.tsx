@@ -19,6 +19,7 @@ export function FleetControls({
   onQuery,
   autoTick,
   onAutoTick,
+  showAutoTick = true,
 }: {
   filter: FleetFilter;
   onFilter: (f: FleetFilter) => void;
@@ -27,6 +28,7 @@ export function FleetControls({
   onQuery: (q: string) => void;
   autoTick: boolean;
   onAutoTick: (on: boolean) => void;
+  showAutoTick?: boolean;
 }) {
   return (
     <section aria-label="Filter technicians" className="flex flex-col gap-3 rounded-2xl border border-line bg-steel p-3 sm:p-4">
@@ -53,6 +55,7 @@ export function FleetControls({
           )}
         </label>
 
+        {showAutoTick && (
         <label className="flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-xl border border-line-strong bg-slate-deep px-3 lg:justify-start">
           <span className="text-sm font-medium text-slate-200">Simulate Live Updates (Auto-Tick)</span>
           <input type="checkbox" role="switch" checked={autoTick} onChange={(e) => onAutoTick(e.target.checked)} className="peer sr-only" />
@@ -61,6 +64,7 @@ export function FleetControls({
             className="relative h-6 w-11 shrink-0 rounded-full bg-line-strong transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-ink after:transition-transform peer-checked:bg-emerald peer-checked:after:translate-x-5 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-amber"
           />
         </label>
+        )}
       </div>
 
       <div role="radiogroup" aria-label="Status filter" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">

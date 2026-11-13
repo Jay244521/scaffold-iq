@@ -6,6 +6,9 @@ import { useGeminiLiveSession, type LiveToolHandler } from "@/hooks/useGeminiLiv
 import { applyToolCall, initialLiveState, type LiveSessionState } from "@/lib/ai/live-session-state";
 import type { HvacToolCall } from "@/lib/ai/hvac-tools";
 import { runOemLookup, type LookupRecord } from "@/lib/ai/oem-lookup-client";
+import { useAuth } from "@/hooks/useAuth";
+import { useManagerWhispers } from "@/hooks/useManagerWhispers";
+import { AccountMenu } from "@/components/auth/AccountMenu";
 import { DemoTopBar } from "../DemoTopBar";
 import { LiveMediaPanel } from "./LiveMediaPanel";
 import { BlockedNotice, EquipmentCard, LiveReport, ManualLookups, PersistenceBadge, ReadingsFeed, SafetyCard, StepTracker, TranscriptCard } from "./LiveHud";
@@ -56,6 +59,19 @@ export function LiveSession({ modeSwitch, onUseSimulator }: { modeSwitch: ReactN
   );
 
   const live = useGeminiLiveSession({ onToolCall });
+  const auth = useAuth();
+
+  // Manager whispers for this session go straight into the coach once it's live.
+  useManagerWhispers(auth.supabase, live.sessionInfo?.sessionId ?? null, live.status === "active", live.sendManagerNote);
+
+  const startBlocked =
+    auth.status === "loading"
+      ? { message: "Checking your account…" }
+      : auth.status === "signed_out"
+        ? { message: "Sign in with your technician account to start a live session.", href: "/login?next=%2Fdemo%3Fmode%3Dlive", cta: "Sign in" }
+        : auth.status === "signed_in" && !auth.profile
+          ? { message: "Your account isn't linked to a company yet. Ask your service manager to add you." }
+          : null;
 
   useEffect(() => {
     sessionIdRef.current = live.sessionInfo?.sessionId ?? null;
@@ -87,7 +103,10 @@ export function LiveSession({ modeSwitch, onUseSimulator }: { modeSwitch: ReactN
         <div className="mb-5 flex flex-col gap-1 sm:mb-6">
           <p className="hidden font-mono text-[13px] tracking-[0.1em] text-amber sm:block">LIVE MULTIMODAL COACHING · GEMINI LIVE API</p>
           <h1 className="text-xl font-extrabold tracking-tight sm:text-3xl">Run a real call with a master tech in your ear.</h1>
-          <PersistenceBadge info={live.sessionInfo} />
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <PersistenceBadge info={live.sessionInfo} />
+            <AccountMenu auth={auth} next="/demo?mode=live" />
+          </div>
         </div>
 
         {live.status === "error" && live.error && (
@@ -136,6 +155,7 @@ export function LiveSession({ modeSwitch, onUseSimulator }: { modeSwitch: ReactN
               captions={live.captions}
               equipmentLabel={equipmentLabel}
               onStart={begin}
+              startBlocked={startBlocked}
               onStop={live.stop}
               onScan={live.scanDataPlate}
               onToggleMute={live.toggleMute}

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { DEFAULT_LIVE_MODEL, buildLiveConnectConfig } from "@/lib/ai/hvac-tools";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { allowAnonymousLive, getAuthContext } from "@/lib/supabase/server-auth";
 import { guardRequest } from "@/lib/server/request-guard";
 
 export const runtime = "nodejs";
@@ -18,11 +19,26 @@ const CONNECT_WINDOW_SECONDS = 60;
  * POST /api/live/token
  * Body: { sessionId?: string, reportedSymptom?: string }  (sessionId: resume a dropped connection)
  *
- * Mints a single-use ephemeral Gemini token locked to the HVAC coach model, system
+ * Requires a signed-in technician (unless LIVE_DEMO_ALLOW_ANONYMOUS=true for local
+ * development). Creates the service_sessions row under the tech's org and id, then
+ * mints a single-use ephemeral Gemini token locked to the HVAC coach model, system
  * instruction and tool schema. GEMINI_API_KEY never leaves the server.
  */
 export async function POST(req: Request) {
-  const blocked = guardRequest(req, { key: "live-token", limit: 8, windowMs: 60_000 });
+  // Auth first: never mint a token (or spend quota) for an unknown caller.
+  const auth = await getAuthContext();
+  if (!auth?.tech && !allowAnonymousLive()) {
+    const linked = auth && !auth.tech;
+    return NextResponse.json(
+      {
+        error: linked ? "Your account isn't linked to a company yet. Ask your service manager to add you." : "Sign in to start a live AI session.",
+        code: "auth_required",
+      },
+      { status: 401 },
+    );
+  }
+
+  const blocked = guardRequest(req, { key: "live-token", limit: 8, windowMs: 60_000, subject: auth?.user.id });
   if (blocked) return blocked;
 
   const apiKey = process.env.GEMINI_API_KEY;
@@ -44,6 +60,12 @@ export async function POST(req: Request) {
     typeof body.reportedSymptom === "string" && body.reportedSymptom.trim()
       ? body.reportedSymptom.trim().slice(0, 500)
       : "Not reported (live AI coaching session)";
+
+  // Resuming: the session must belong to this technician.
+  if (resumeId && auth?.tech) {
+    const { data: own } = await auth.supabase.from("service_sessions").select("id").eq("id", resumeId).eq("tech_id", auth.user.id).maybeSingle();
+    if (!own) return NextResponse.json({ error: "That session isn't yours to resume." }, { status: 403 });
+  }
 
   const model = process.env.GEMINI_LIVE_MODEL || DEFAULT_LIVE_MODEL;
   const now = Date.now();
@@ -73,21 +95,36 @@ export async function POST(req: Request) {
 
   // Persistence is optional: a missing or failing Supabase never blocks the session.
   let sessionId: string | null = resumeId;
-  const db = getSupabaseAdmin();
-  if (db && !resumeId) {
-    // service_sessions.reported_symptom is NOT NULL; live mode doesn't capture a symptom up front.
-    // org_id / tech_id stay null until the demo has sign-in (rows are then visible only to the service role).
-    const { data, error } = await db
-      .from("service_sessions")
-      .insert({ reported_symptom: reportedSymptom, status: "in_progress", current_step_index: 1 })
-      .select("id")
-      .single();
-    if (error) console.error("[live/token] service_sessions insert failed:", error.message);
-    else sessionId = data.id as string;
+  let persistence = false;
+  if (auth?.tech) {
+    // Signed in: insert as the user so RLS checks the org; the session is owned by this tech.
+    if (!resumeId) {
+      const { data, error } = await auth.supabase
+        .from("service_sessions")
+        .insert({ org_id: auth.tech.org_id, tech_id: auth.user.id, reported_symptom: reportedSymptom, status: "in_progress", current_step_index: 1 })
+        .select("id")
+        .single();
+      if (error) console.error("[live/token] service_sessions insert failed:", error.message);
+      else sessionId = data.id as string;
+    }
+    persistence = Boolean(sessionId);
+  } else {
+    // Anonymous local-dev mode: org-less rows written with the service role, if configured.
+    const db = getSupabaseAdmin();
+    if (db && !resumeId) {
+      const { data, error } = await db
+        .from("service_sessions")
+        .insert({ reported_symptom: reportedSymptom, status: "in_progress", current_step_index: 1 })
+        .select("id")
+        .single();
+      if (error) console.error("[live/token] service_sessions insert failed:", error.message);
+      else sessionId = data.id as string;
+    }
+    persistence = Boolean(db && sessionId);
   }
 
   return NextResponse.json(
-    { token, model, expiresAt: expireTime, sessionId, persistence: Boolean(db && sessionId) },
+    { token, model, expiresAt: expireTime, sessionId, persistence },
     { headers: { "Cache-Control": "no-store" } },
   );
 }

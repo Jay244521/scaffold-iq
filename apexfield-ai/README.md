@@ -60,7 +60,7 @@ How live tool calls map onto the schema (`src/lib/ai/persist-live-event.ts`):
 | `advance_diagnostic_step` | `diagnostic_steps` (`in_progress` → `pending`) and `service_sessions.current_step_index` |
 | `complete_service_session` | `service_sessions` status `completed`, `confirmed_root_cause`, `parts_replaced`, `ai_summary_report`, `completed_at` |
 
-The demo has no sign-in yet, so `org_id` and `tech_id` stay null. The org-scoped RLS policies then hide those rows from every signed-in user; only the service role sees them. Once technicians sign in, set both columns from the session. A reading's `target_spec_note` has no column in `diagnostic_readings`; it stays in the live transcript.
+Sessions are created with the signed-in technician's `org_id` and `tech_id`, so the org-scoped RLS policies apply. Only anonymous local-dev sessions (`LIVE_DEMO_ALLOW_ANONYMOUS=true`) have null org and tech. A reading's `target_spec_note` has no column in `diagnostic_readings`; it stays in the live transcript.
 
 ### How it works
 
@@ -97,6 +97,33 @@ WebSocket (BidiGenerateContentConstrained) ◀────▶ Gemini Live
 **Model.** Defaults to `gemini-2.5-flash-native-audio-preview-09-2025`; set `GEMINI_LIVE_MODEL` to change it. The SDK sends audio/video as `realtimeInput.audio` / `realtimeInput.video`, which replaced the deprecated `mediaChunks` field.
 
 **Abuse limits.** The token route allows 8 requests per minute per IP, in memory, so the limit is per server instance. Before a public launch, put the demo behind sign-in or an edge rate limiter so strangers can't spend your Gemini quota.
+
+## Accounts, live fleet and manager whispers
+
+**Sign-in (Supabase Auth, email + password)**
+- `/signup` creates a company (`organizations`), its first user and that user's `technicians` row with role `admin`, the service manager. Accounts are created confirmed through the service role (`/api/auth/signup`), so there's no email round-trip.
+- `/login` sends managers (`admin`, `lead_tech`) to `/dashboard` and technicians to `/demo?mode=live`.
+- Managers add technicians from **Dashboard → Team** (`/api/team`) with a temporary password, role (`apprentice` / `tech` / `lead_tech`), years of experience and truck.
+- `src/middleware.ts` keeps the auth cookie fresh. Server code reads the user with `getAuthContext()` (`src/lib/supabase/server-auth.ts`); the browser uses `useAuth()`.
+
+**Live AI is signed-in only**
+- `/api/live/token` refuses anonymous callers before it mints a Gemini token. Sessions are created with the tech's `org_id` and `tech_id`, through RLS.
+- `/api/live/events` only writes into a session the caller owns, as that user. `/api/live/lookup` requires sign-in too.
+- For local development without accounts, set `LIVE_DEMO_ALLOW_ANONYMOUS=true`.
+
+**Live fleet (`/dashboard`)**
+- Signed-in managers get **Live fleet**, with a switch to **Demo data**. Everyone else sees the demo board with a sign-in prompt.
+- `useLiveFleet` loads the org's technicians and today's sessions (with equipment, readings, steps and whispers), scoped by RLS. It refetches on Supabase Realtime changes and every 30 seconds as a fallback; the badge shows REALTIME or POLLING.
+- `src/lib/live-fleet.ts` maps rows onto the same cards and inspector as the demo. A session sitting at step 3 or later without disconnect verification shows as **Safety gate hold**. Camera frames and the voice transcript aren't stored, so the inspector shows a session event log instead.
+
+**Whispers**
+- A manager's note is inserted into `manager_whispers` (RLS: only managers in the session's org).
+- The tech's live session subscribes to its own whispers. It also catches up on any sent before it connected, and hands each one to Gemini as a `[SERVICE MANAGER]` turn. The coach relays it out loud, and the session stamps `delivered_at`, which the dashboard shows as "✓ delivered to headset".
+- The system prompt says manager guidance never overrides the safety gate. Remote approve, clear-hold and dispatch buttons are demo-only.
+
+Migration: `supabase/migrations/*_team_accounts_and_whispers.sql`.
+
+**Vercel env for accounts:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, plus the server-only `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
 
 ## OEM manual ingestion (RAG over `pgvector`)
 

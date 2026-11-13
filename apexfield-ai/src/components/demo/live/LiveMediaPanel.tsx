@@ -1,6 +1,7 @@
 "use client";
 
 import type { RefObject } from "react";
+import Link from "next/link";
 import { Camera, CameraOff, Flashlight, FlashlightOff, Loader2, Mic, MicOff, Play, ScanLine, Square } from "lucide-react";
 import type { LiveCaption, LiveStatus } from "@/hooks/useGeminiLiveSession";
 
@@ -52,6 +53,8 @@ type Props = {
   captions: LiveCaption[];
   equipmentLabel: string | null;
   onStart: () => void;
+  /** Replaces the Start button (signed out, account not linked, still checking). */
+  startBlocked?: { message: string; href?: string; cta?: string } | null;
   onStop: () => void;
   onScan: () => void;
   onToggleMute: () => void;
@@ -124,13 +127,27 @@ export function LiveMediaPanel(p: Props) {
                     Uses your rear camera and mic. Earbuds recommended. Audio and 1 FPS video stream to Google Gemini only while the session is live.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={p.onStart}
-                  className="inline-flex min-h-13 items-center gap-2 rounded-xl bg-amber px-7 py-3 text-base font-bold text-slate-deep shadow-[0_8px_30px_-8px_rgba(245,158,11,0.6)] transition-colors hover:bg-amber-hi"
-                >
-                  <Play className="h-5 w-5" aria-hidden="true" /> Start Live Session
-                </button>
+                {p.startBlocked ? (
+                  <div className="flex flex-col items-center gap-3">
+                    <p className="max-w-xs text-sm text-amber-hi">{p.startBlocked.message}</p>
+                    {p.startBlocked.href && (
+                      <Link
+                        href={p.startBlocked.href}
+                        className="inline-flex min-h-13 items-center gap-2 rounded-xl bg-amber px-7 py-3 text-base font-bold text-slate-deep transition-colors hover:bg-amber-hi"
+                      >
+                        {p.startBlocked.cta ?? "Continue"}
+                      </Link>
+                    )}
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={p.onStart}
+                    className="inline-flex min-h-13 items-center gap-2 rounded-xl bg-amber px-7 py-3 text-base font-bold text-slate-deep shadow-[0_8px_30px_-8px_rgba(245,158,11,0.6)] transition-colors hover:bg-amber-hi"
+                  >
+                    <Play className="h-5 w-5" aria-hidden="true" /> Start Live Session
+                  </button>
+                )}
               </>
             )}
           </div>
@@ -229,8 +246,8 @@ function LatestCaption({ captions, aiSpeaking }: { captions: LiveCaption[]; aiSp
       <p className="line-clamp-3 text-[15px] font-medium leading-snug text-white">
         {last ? (
           <>
-            <span className={`mr-1.5 font-mono text-[10px] font-bold tracking-wider ${last.role === "ai" ? "text-amber" : "text-sky-300"}`}>
-              {last.role === "ai" ? "APEX" : "YOU"}
+            <span className={`mr-1.5 font-mono text-[10px] font-bold tracking-wider ${last.role === "ai" ? "text-amber" : last.role === "manager" ? "text-gauge" : "text-sky-300"}`}>
+              {last.role === "ai" ? "APEX" : last.role === "manager" ? "MANAGER" : "YOU"}
             </span>
             {last.text}
           </>

@@ -3,6 +3,7 @@ import { parseLookupArgs } from "@/lib/ai/hvac-tools";
 import { createEmbedder, type Embedder } from "@/lib/rag/embeddings";
 import { searchOemKnowledge, type OemSearchHit } from "@/lib/rag/search";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { allowAnonymousLive, getAuthContext } from "@/lib/supabase/server-auth";
 import { guardRequest } from "@/lib/server/request-guard";
 
 export const runtime = "nodejs";
@@ -48,7 +49,10 @@ function toResult(h: OemSearchHit): LookupResult {
  * that unit's manuals. Read-only; nothing is persisted.
  */
 export async function POST(req: Request) {
-  const blocked = guardRequest(req, { key: "live-lookup", limit: 60, windowMs: 60_000 });
+  const auth = await getAuthContext();
+  if (!auth?.tech && !allowAnonymousLive()) return NextResponse.json({ error: "Sign in first." }, { status: 401 });
+
+  const blocked = guardRequest(req, { key: "live-lookup", limit: 60, windowMs: 60_000, subject: auth?.user.id });
   if (blocked) return blocked;
 
   let body: { query?: unknown; chunk_type?: unknown; manufacturer?: unknown; model?: unknown };
@@ -65,7 +69,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "manufacturer and model are required (register the data plate first)" }, { status: 400 });
   }
 
-  const db = getSupabaseAdmin();
+  // Signed in: search as the user (oem_knowledge_chunks is readable by any authenticated tech).
+  const db = auth?.tech ? auth.supabase : getSupabaseAdmin();
   const emb = getEmbedder();
   if (!db || !emb) {
     const reason = !db ? "Supabase is not configured on this server." : "No embedding API key is configured on this server.";

@@ -16,7 +16,17 @@ async function must<T>(p: PromiseLike<{ data: T; error: { message: string } | nu
   return data;
 }
 
-export async function persistLiveEvent(db: SupabaseClient, sessionId: string, call: HvacToolCall): Promise<Record<string, unknown>> {
+export type PersistContext = {
+  /** The signed-in tech's org; null only in anonymous local-dev mode. */
+  orgId: string | null;
+};
+
+export async function persistLiveEvent(
+  db: SupabaseClient,
+  sessionId: string,
+  call: HvacToolCall,
+  ctx: PersistContext = { orgId: null },
+): Promise<Record<string, unknown>> {
   const now = new Date().toISOString();
 
   switch (call.name) {
@@ -24,8 +34,9 @@ export async function persistLiveEvent(db: SupabaseClient, sessionId: string, ca
       const a = call.args;
       const model = a.model_number.toUpperCase();
       const serial = a.serial_number?.toUpperCase() ?? null;
-      // equipment_units has no unique key: reuse an existing org-less unit with the same identity.
-      let q = db.from("equipment_units").select("id").is("org_id", null).ilike("manufacturer", escapeLike(a.manufacturer)).eq("model_number", model);
+      // equipment_units has no unique key: reuse this org's unit with the same identity.
+      let q = db.from("equipment_units").select("id").ilike("manufacturer", escapeLike(a.manufacturer)).eq("model_number", model);
+      q = ctx.orgId ? q.eq("org_id", ctx.orgId) : q.is("org_id", null);
       q = serial ? q.eq("serial_number", serial) : q.is("serial_number", null);
       const existing = await must(q.limit(1).maybeSingle(), "equipment lookup");
       const equipmentId =
@@ -35,6 +46,7 @@ export async function persistLiveEvent(db: SupabaseClient, sessionId: string, ca
             db
               .from("equipment_units")
               .insert({
+                org_id: ctx.orgId,
                 manufacturer: a.manufacturer,
                 model_number: model,
                 serial_number: serial,

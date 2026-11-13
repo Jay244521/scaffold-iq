@@ -10,6 +10,7 @@ export function formatElapsed(sec: number): string {
 }
 
 export function experienceLabel(t: Pick<Technician, "role" | "experienceMonths">): string {
+  if (t.experienceMonths <= 0) return `${t.role} • new`;
   return t.experienceMonths < 12
     ? `${t.role} • ${t.experienceMonths} mos`
     : `${t.role} • ${Math.floor(t.experienceMonths / 12)} yr${t.experienceMonths >= 24 ? "s" : ""}`;
@@ -82,6 +83,7 @@ export const READING_TONE: Record<Reading["status"], string> = {
   ok: "border-line-strong text-slate-200",
   low: "border-amber/60 text-amber-hi bg-amber/10",
   high: "border-danger/60 text-red-300 bg-danger/10",
+  out: "border-gauge/60 text-amber-hi bg-gauge/10",
 };
 
 export function ReadingChip({ reading }: { reading: Reading }) {
