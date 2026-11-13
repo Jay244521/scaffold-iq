@@ -121,7 +121,7 @@ WebSocket (BidiGenerateContentConstrained) ◀────▶ Gemini Live
 - The tech's live session subscribes to its own whispers. It also catches up on any sent before it connected, and hands each one to Gemini as a `[SERVICE MANAGER]` turn. The coach relays it out loud, and the session stamps `delivered_at`, which the dashboard shows as "✓ delivered to headset".
 - The system prompt says manager guidance never overrides the safety gate. Remote approve, clear-hold and dispatch buttons are demo-only.
 
-Migration: `supabase/migrations/*_team_accounts_and_whispers.sql`.
+Migration: `supabase/migrations/20261113100000_team_accounts_and_whispers.sql`. It was applied through the Supabase SQL Editor, so it doesn't appear in the project's `supabase_migrations` history table. Every statement is idempotent, so running it again is safe.
 
 **Vercel env for accounts:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, plus the server-only `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
 
