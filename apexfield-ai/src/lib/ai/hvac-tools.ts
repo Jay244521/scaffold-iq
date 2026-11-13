@@ -12,6 +12,7 @@ import { Modality, Type, type FunctionDeclaration, type LiveConnectConfig } from
 export const DEFAULT_LIVE_MODEL = "gemini-2.5-flash-native-audio-preview-09-2025";
 
 import { DIAGNOSTIC_SEQUENCE } from "../diagnostic-sequence";
+import { CHUNK_TYPES, type ChunkType } from "../rag/classify";
 export { DIAGNOSTIC_SEQUENCE, SAFETY_STEP } from "../diagnostic-sequence";
 
 export const HVAC_SYSTEM_INSTRUCTION = `You are ApexField, an expert master HVAC technician coaching a junior technician on a live service call. You see the technician's rear phone camera at about one frame per second and hear them through their earbuds.
@@ -31,6 +32,7 @@ Tools:
 - Call log_diagnostic_reading every time the technician speaks a reading or you can clearly read a gauge or meter in the frame. Judge is_within_spec against the OEM spec for the registered unit and explain the target in target_spec_note.
 - Call advance_diagnostic_step whenever a check passes or fails and the diagnostic tree moves. step_number follows the 5-step sequence above.
 - Call complete_service_session only once the root cause is confirmed by readings, not suspected.
+- Call lookup_oem_spec whenever you need an exact OEM figure or procedure for the registered unit: charging targets, RLA/LRA/MCA/MOCP, capacitor ratings, fault or flash codes, wiring terminals, clearances. Ask a short, specific query ("target subcooling at 95°F outdoor", "E4 fault code"). Quote values exactly as returned and say where they came from ("per the install manual, page 14"). If the lookup finds nothing, say the manual isn't on file and label anything else you say as general field practice, not the OEM spec. A manual never overrides the safety rules below.
 - If a tool returns an error, follow it. Tool errors are hard safety and sequencing rules enforced by the system; never argue with them or work around them.
 
 Safety rules you never break:
@@ -55,6 +57,28 @@ export const DE_ENERGIZED_READINGS: readonly ReadingType[] = ["capacitance_uf"];
 
 const VERIFICATION_METHODS = ["visual_frame", "verbal_confirmation"] as const;
 const STEP_STATUSES = ["passed", "failed", "in_progress"] as const;
+
+export const LOOKUP_CHUNK_TYPES = CHUNK_TYPES.filter((t) => t !== "general");
+
+/** Read-only manual lookup. Handled by the browser via /api/live/lookup, never persisted. */
+export const LOOKUP_OEM_SPEC: FunctionDeclaration = {
+  name: "lookup_oem_spec",
+  description:
+    "Search the OEM service and installation manuals for the registered unit (brand and model are applied automatically). Returns short excerpts with section and page citations.",
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      query: { type: Type.STRING, description: "Short, specific question, e.g. 'target subcooling at 95F outdoor' or 'E4 flash code'." },
+      chunk_type: {
+        type: Type.STRING,
+        enum: [...LOOKUP_CHUNK_TYPES],
+        format: "enum",
+        description: "Optional: narrow to one kind of manual content.",
+      },
+    },
+    required: ["query"],
+  },
+};
 
 export const HVAC_FUNCTION_DECLARATIONS: FunctionDeclaration[] = [
   {
@@ -146,7 +170,7 @@ export function buildLiveConnectConfig(): LiveConnectConfig {
   return {
     responseModalities: [Modality.AUDIO],
     systemInstruction: HVAC_SYSTEM_INSTRUCTION,
-    tools: [{ functionDeclarations: HVAC_FUNCTION_DECLARATIONS }],
+    tools: [{ functionDeclarations: [...HVAC_FUNCTION_DECLARATIONS, LOOKUP_OEM_SPEC] }],
     inputAudioTranscription: {},
     outputAudioTranscription: {},
     // Audio + video sessions are capped at ~2 minutes without compression.
@@ -349,3 +373,21 @@ export const READING_LABELS: Record<ReadingType, string> = {
   static_pressure: "Static Pressure",
   capacitance_uf: "Capacitance",
 };
+
+/* ------------------------------ lookup_oem_spec ------------------------------ */
+
+export type LookupArgs = { query: string; chunk_type?: ChunkType };
+
+export function parseLookupArgs(rawArgs: unknown): { ok: true; args: LookupArgs } | { ok: false; error: string } {
+  const a: Obj = rawArgs && typeof rawArgs === "object" && !Array.isArray(rawArgs) ? (rawArgs as Obj) : {};
+  const query = typeof a.query === "string" ? a.query.replace(/\s+/g, " ").trim().slice(0, 300) : "";
+  if (query.length < 2) return { ok: false, error: "query is required" };
+  const ct = a.chunk_type;
+  if (ct !== undefined && ct !== null && ct !== "") {
+    if (typeof ct !== "string" || !(LOOKUP_CHUNK_TYPES as readonly string[]).includes(ct)) {
+      return { ok: false, error: `chunk_type must be one of: ${LOOKUP_CHUNK_TYPES.join(", ")}` };
+    }
+    return { ok: true, args: { query, chunk_type: ct as ChunkType } };
+  }
+  return { ok: true, args: { query } };
+}

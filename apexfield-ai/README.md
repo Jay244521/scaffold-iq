@@ -128,6 +128,13 @@ npm run oem:search -- "target subcooling at 95 degrees" --manufacturer Carrier -
 - Creates the `match_oem_chunks` and `hybrid_search_oem_chunks` functions. They run with the caller's permissions, so RLS applies, and they turn on pgvector 0.8 iterative scans so filtered queries still return enough rows.
 - Creates `idx_oem_chunks_hnsw` only if no cosine HNSW index exists. The project already has `idx_oem_embedding`, and a second HNSW index on the same column would double write cost for nothing.
 
+**Live coach lookups.** The Live AI session has a sixth tool, `lookup_oem_spec { query, chunk_type? }`:
+- **Scoped to the unit in code.** The browser (`src/lib/ai/oem-lookup-client.ts`) sends the query to `/api/live/lookup` with the brand and model of the equipment registered in the session. The model never chooses the brand. Before a data plate is registered the lookup is refused, so it can't quote another manufacturer's spec.
+- **Short excerpts.** The route embeds the query, calls `hybrid_search_oem_chunks`, drops weak matches (no keyword hit and similarity below 0.45), and returns up to 4 excerpts of at most 1,200 characters, each with a "brand › document › section (page)" citation. Results are cached for 5 minutes per unit and query, and the route allows 60 requests per minute per IP.
+- **Honest fallbacks.** When nothing matches, the library isn't configured, or the request fails, the coach is told to say so and to label anything it says as general field practice. A failed lookup is never a hard tool error.
+- **On screen.** Each lookup appears in the HUD's "Manual lookups" card with its sources. Lookups are read-only and aren't saved.
+- **Configuration.** The server needs `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` and the same embedding provider used at ingestion: `GEMINI_API_KEY`, or `EMBEDDING_PROVIDER=openai` with `OPENAI_API_KEY`.
+
 **Limits:** scanned PDFs (images, no text layer) need OCR first; the CLI lists pages with no text. Wiring diagrams contribute their text labels only, not the drawing. Token counts are estimated at about 4 characters per token.
 
 ## Fleet Command dashboard (`/dashboard`)
