@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Keelwell logo system</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 1280px; height: 820px; box-sizing: border-box; padding: 48px; background: #F3F4F5; color: #1F2A36; font-family: Inter, system-ui, sans-serif; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: 380px 1fr; gap: 24px;">
+
+  <div style="grid-column: span 7; background: #FFFFFF; border-radius: 6px; position: relative; display: flex; align-items: center; justify-content: center;">
+    <span style="position: absolute; top: 18px; left: 22px; font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #5A6672;">Primary lockup</span>
+    <div style="display: flex; align-items: center; gap: 22px;">
+      <svg viewBox="0 0 64 64" width="132" height="132" aria-hidden="true"><path d="M32 3 L57 11 V30 C57 46.5 46.5 56.5 32 61 C17.5 56.5 7 46.5 7 30 V11 Z" fill="#1F2A36"/><path d="M32 8 L52 14.5 V30 C52 43.5 43.5 51.8 32 55.6 C20.5 51.8 12 43.5 12 30 V14.5 Z" fill="none" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="1.5"/><path d="M24 18 V46 M24 35 L42 18 M29.5 30 L43.5 46" fill="none" stroke="#E8671B" stroke-width="6.5" stroke-linecap="square" stroke-linejoin="miter"/></svg>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <span style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: 104px; line-height: 0.85; letter-spacing: 0.05em; color: #1F2A36;">KEELWELL</span>
+        <span style="display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 600; letter-spacing: 0.34em; color: #5A6672;"><span style="width: 34px; height: 3px; background: #E8671B;"></span>PARTS &amp; ACCESSORIES</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="grid-column: span 5; display: grid; grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 24px;">
+    <div style="background: #1F2A36; border-radius: 6px; position: relative; display: flex; align-items: center; justify-content: center;">
+      <span style="position: absolute; top: 14px; left: 18px; font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #A9B4BF;">Reverse</span>
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <svg viewBox="0 0 64 64" width="70" height="70" aria-hidden="true"><path d="M32 3 L57 11 V30 C57 46.5 46.5 56.5 32 61 C17.5 56.5 7 46.5 7 30 V11 Z" fill="#E8671B"/><path d="M24 18 V46 M24 35 L42 18 M29.5 30 L43.5 46" fill="none" stroke="#1F2A36" stroke-width="6.5" stroke-linecap="square"/></svg>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: 54px; line-height: 0.85; letter-spacing: 0.05em; color: #FFFFFF;">KEELWELL</span>
+          <span style="font-size: 9px; font-weight: 600; letter-spacing: 0.34em; color: #A9B4BF;">PARTS &amp; ACCESSORIES</span>
+        </div>
+      </div>
+    </div>
+    <div style="background: #E8671B; border-radius: 6px; position: relative; display: flex; align-items: center; justify-content: center;">
+      <span style="position: absolute; top: 14px; left: 18px; font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #1F2A36;">One color</span>
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <svg viewBox="0 0 64 64" width="70" height="70" aria-hidden="true"><path d="M32 3 L57 11 V30 C57 46.5 46.5 56.5 32 61 C17.5 56.5 7 46.5 7 30 V11 Z" fill="#1F2A36"/><path d="M24 18 V46 M24 35 L42 18 M29.5 30 L43.5 46" fill="none" stroke="#E8671B" stroke-width="6.5" stroke-linecap="square"/></svg>
+        <span style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: 54px; line-height: 0.85; letter-spacing: 0.05em; color: #1F2A36;">KEELWELL</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="grid-column: span 3; background: #FFFFFF; border-radius: 6px; padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+    <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #5A6672;">Badge · sizes</span>
+    <div style="display: flex; align-items: flex-end; gap: 18px; flex-grow: 1;">
+      <svg viewBox="0 0 64 64" width="96" height="96" aria-hidden="true"><path d="M32 3 L57 11 V30 C57 46.5 46.5 56.5 32 61 C17.5 56.5 7 46.5 7 30 V11 Z" fill="#1F2A36"/><path d="M24 18 V46 M24 35 L42 18 M29.5 30 L43.5 46" fill="none" stroke="#E8671B" stroke-width="6.5" stroke-linecap="square"/></svg>
+      <svg viewBox="0 0 64 64" width="48" height="48" aria-hidden="true"><path d="M32 3 L57 11 V30 C57 46.5 46.5 56.5 32 61 C17.5 56.5 7 46.5 7 30 V11 Z" fill="#1F2A36"/><path d="M24 18 V46 M24 35 L42 18 M29.5 30 L43.5 46" fill="none" stroke="#E8671B" stroke-width="7" stroke-linecap="square"/></svg>
+      <svg viewBox="0 0 64 64" width="24" height="24" aria-hidden="true"><path d="M32 3 L57 11 V30 C57 46.5 46.5 56.5 32 61 C17.5 56.5 7 46.5 7 30 V11 Z" fill="#1F2A36"/><path d="M24 18 V46 M24 35 L42 18 M29.5 30 L43.5 46" fill="none" stroke="#E8671B" stroke-width="8" stroke-linecap="square"/></svg>
+    </div>
+    <span style="font-size: 12px; line-height: 1.45; color: #5A6672;">Minimum: badge 16 px / 6 mm. Full lockup 120 px / 30 mm wide. Use the badge alone on embroidery, deboss and app icons.</span>
+  </div>
+
+  <div style="grid-column: span 4; background: #FFFFFF; border-radius: 6px; padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+    <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #5A6672;">Color</span>
+    <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; flex-grow: 1;">
+      <div style="display: flex; flex-direction: column; gap: 6px;"><div style="flex-grow: 1; background: #1F2A36; border-radius: 4px;"></div><span style="font-size: 11px; font-weight: 600;">Graphite</span><span style="font-size: 10.5px; color: #5A6672;">#1F2A36</span></div>
+      <div style="display: flex; flex-direction: column; gap: 6px;"><div style="flex-grow: 1; background: #E8671B; border-radius: 4px;"></div><span style="font-size: 11px; font-weight: 600;">Signal</span><span style="font-size: 10.5px; color: #5A6672;">#E8671B</span></div>
+      <div style="display: flex; flex-direction: column; gap: 6px;"><div style="flex-grow: 1; background: #E9E2D6; border-radius: 4px;"></div><span style="font-size: 11px; font-weight: 600;">Sand</span><span style="font-size: 10.5px; color: #5A6672;">#E9E2D6</span></div>
+      <div style="display: flex; flex-direction: column; gap: 6px;"><div style="flex-grow: 1; background: #8A97A5; border-radius: 4px;"></div><span style="font-size: 11px; font-weight: 600;">Steel</span><span style="font-size: 10.5px; color: #5A6672;">#8A97A5</span></div>
+      <div style="display: flex; flex-direction: column; gap: 6px;"><div style="flex-grow: 1; background: #C8A97E; border-radius: 4px;"></div><span style="font-size: 11px; font-weight: 600;">Kraft</span><span style="font-size: 10.5px; color: #5A6672;">board</span></div>
+    </div>
+    <span style="font-size: 12px; line-height: 1.45; color: #5A6672;">Print: Graphite ≈ PMS 433 C, Signal ≈ PMS 1585 C. Match with the printer's proof before approving.</span>
+  </div>
+
+  <div style="grid-column: span 5; background: #FFFFFF; border-radius: 6px; padding: 20px; display: flex; flex-direction: column; gap: 10px;">
+    <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #5A6672;">Type</span>
+    <span style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: 52px; line-height: 0.95; text-transform: uppercase;">Fits right. Built for heat.</span>
+    <span style="font-size: 12px; color: #5A6672;">Barlow Condensed ExtraBold · headlines, product names, sizes</span>
+    <span style="font-size: 15px; line-height: 1.5;">Inter for body copy, instructions and legal text. Both are free Google Fonts.</span>
+    <span style="font-size: 12px; color: #5A6672;">Inter Regular / SemiBold · body, labels, legal</span>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":820}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
