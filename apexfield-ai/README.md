@@ -123,6 +123,17 @@ WebSocket (BidiGenerateContentConstrained) ◀────▶ Gemini Live
 
 Migration: `supabase/migrations/20261113100000_team_accounts_and_whispers.sql`. It was applied through the Supabase SQL Editor, so it doesn't appear in the project's `supabase_migrations` history table. Every statement is idempotent, so running it again is safe.
 
+**Session lifecycle, escalations and guardrails**
+- **Ending.** **End**, closing the tab (`sendBeacon`), or starting a new session marks open sessions `ended` (`/api/live/end`). The board shows **Session ended**, and an open session with no activity for 2 hours reads as ended, so dead phones don't leave ghost "active" cards.
+- **Escalation.** The coach can call `escalate_to_manager { reason, urgency: review | stop_work }`. The session becomes `escalated` with the reason, the tech sees a stop-work or review banner, and the card turns red. The manager taps **Mark reviewed · tech continues**, and the tech's coach hears that the escalation was reviewed.
+- **Daily cap.** `LIVE_MAX_SESSIONS_PER_ORG_PER_DAY` (default 60) limits new live sessions per company per day.
+- **Consent.** Once a day, before the first live session, the technician confirms that the customer knows about the AI camera and audio, that AI doesn't replace lockout/tagout or their training, and that they verify 0V themselves. The token route requires it, and the session stores `consent_acknowledged_at`. Have counsel review the wording for your states.
+- **Demo requests.** "Book a Live Field Demo" posts to `/api/demo-request` and lands in `demo_requests` (service role only, with a honeypot and rate limit). Read leads in Supabase → Table Editor.
+
+Migration: `supabase/migrations/20261114090000_session_lifecycle_and_leads.sql`.
+
+**Tests:** `npm test` runs the unit suite (`tests/`: safety gate, tool schemas, lookup client, live-fleet mapping, persistence, PDF pipeline, demo fleet). CI (`.github/workflows/apexfield-ai.yml`) runs typecheck, tests and build on every PR that touches `apexfield-ai/`.
+
 **Vercel env for accounts:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, plus the server-only `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
 
 ## OEM manual ingestion (RAG over `pgvector`)

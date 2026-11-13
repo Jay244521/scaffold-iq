@@ -48,6 +48,12 @@ export const STATUS_META: Record<TechStatus, { label: string; badge: string; bor
     border: "border-danger/70 animate-escalate",
     dot: "bg-danger",
   },
+  ended: {
+    label: "SESSION ENDED",
+    badge: "bg-line text-muted ring-line-strong",
+    border: "border-line opacity-75",
+    dot: "bg-muted",
+  },
   completed: {
     label: "JOB COMPLETED",
     badge: "bg-sky-400/10 text-sky-300 ring-sky-400/30",

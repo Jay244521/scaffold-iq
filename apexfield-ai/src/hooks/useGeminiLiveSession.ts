@@ -106,6 +106,7 @@ export function useGeminiLiveSession({ onToolCall }: { onToolCall: LiveToolHandl
   const reconnectsRef = useRef(0);
   const sessionIdRef = useRef<string | null>(null);
   const mutedRef = useRef(false);
+  const consentRef = useRef(false);
 
   const micStreamRef = useRef<MediaStream | null>(null);
   const camStreamRef = useRef<MediaStream | null>(null);
@@ -358,7 +359,7 @@ export function useGeminiLiveSession({ onToolCall }: { onToolCall: LiveToolHandl
       const res = await fetch("/api/live/token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: sessionIdRef.current }),
+        body: JSON.stringify({ sessionId: sessionIdRef.current, consentAcknowledged: consentRef.current }),
       });
       const data = (await res.json().catch(() => ({}))) as Partial<TokenResponse> & { error?: string };
       if (!res.ok || !data.token || !data.model) {
@@ -474,8 +475,9 @@ export function useGeminiLiveSession({ onToolCall }: { onToolCall: LiveToolHandl
 
   /* ------------------------------ public API ------------------------------ */
 
-  const start = useCallback(async () => {
+  const start = useCallback(async (opts: { consentAcknowledged?: boolean } = {}) => {
     if (sessionRef.current || (status === "connecting" && !error)) return;
+    consentRef.current = Boolean(opts.consentAcknowledged);
     stoppingRef.current = false;
     kickedOffRef.current = false;
     sessionIdRef.current = null;
