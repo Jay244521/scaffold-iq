@@ -45,7 +45,22 @@ cp .env.example .env.local
 
 Camera and microphone need a secure context: `http://localhost` works for development. To test on a phone, deploy (e.g. a Vercel preview) or tunnel over HTTPS.
 
-For persistence, apply `supabase/migrations/20261112000000_live_service_sessions.sql` (`supabase db push` or the SQL editor). Without Supabase the live session still runs; tool calls are not saved.
+For persistence, set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Without them the live session still runs; tool calls just aren't saved.
+
+**Database.** `supabase/migrations/` mirrors what is applied to the Supabase project, with the same versions: the coaching schema, RLS, hardening, and the OEM vector migration. The project also holds tables for other apps (for example `aura_waitlist` and `dfw_leads`) that aren't tracked here, so apply new ApexField migrations with the Supabase SQL editor or MCP rather than `supabase db push`.
+
+How live tool calls map onto the schema (`src/lib/ai/persist-live-event.ts`):
+
+| Tool call | Writes |
+|---|---|
+| session start (`/api/live/token`) | `service_sessions` row (`reported_symptom` defaults to "Not reported (live AI coaching session)") |
+| `register_equipment_plate` | reuses or inserts `equipment_units` (type normalized to `split_ac`/`heat_pump`/`gas_furnace`/`rtu`), sets `service_sessions.equipment_id` |
+| `verify_safety_disconnect` | `service_sessions.safety_disconnect_verified`, plus a step-3 `diagnostic_steps` row recording how it was verified |
+| `log_diagnostic_reading` | `diagnostic_readings` (unit normalized to `psi`/`degF`/`amps`/`volts`/`inWC`/`uF`, value rounded to 2 dp) |
+| `advance_diagnostic_step` | `diagnostic_steps` (`in_progress` → `pending`) and `service_sessions.current_step_index` |
+| `complete_service_session` | `service_sessions` status `completed`, `confirmed_root_cause`, `parts_replaced`, `ai_summary_report`, `completed_at` |
+
+The demo has no sign-in yet, so `org_id` and `tech_id` stay null. The org-scoped RLS policies then hide those rows from every signed-in user; only the service role sees them. Once technicians sign in, set both columns from the session. A reading's `target_spec_note` has no column in `diagnostic_readings`; it stays in the live transcript.
 
 ### How it works
 
@@ -108,7 +123,7 @@ npm run oem:search -- "target subcooling at 95 degrees" --manufacturer Carrier -
 | Store | `store.ts` | Upserts `oem_documents` by file hash, then inserts chunks under a new `ingest_run_id` and deletes the previous run only after every batch lands. A failed re-ingest leaves the old chunks serving. |
 | Search | `search.ts` | `hybrid_search_oem_chunks` RPC (vector + full-text, reciprocal rank fusion), filtered by brand, the equipment's full model number (matched against `model_prefix`), chunk types and embedding model. `formatHitsForPrompt` gives citeable context. |
 
-**Migration** `supabase/migrations/20261113000000_oem_vector_index.sql` is additive on top of the existing `oem_knowledge_chunks` table and safe to re-run:
+**Migration** `supabase/migrations/20261113014216_oem_vector_index.sql` (applied to the project) is additive on top of the existing `oem_knowledge_chunks` table and safe to re-run:
 - Adds `oem_documents`, plus metadata columns on the chunks table and a generated `fts` column, with indexes.
 - Creates the `match_oem_chunks` and `hybrid_search_oem_chunks` functions. They run with the caller's permissions, so RLS applies, and they turn on pgvector 0.8 iterative scans so filtered queries still return enough rows.
 - Creates `idx_oem_chunks_hnsw` only if no cosine HNSW index exists. The project already has `idx_oem_embedding`, and a second HNSW index on the same column would double write cost for nothing.

@@ -249,7 +249,8 @@ export function parseToolCall(name: unknown, rawArgs: unknown): ParseResult {
     switch (name) {
       case "register_equipment_plate": {
         const tonnage = num(args, "tonnage", false);
-        if (tonnage !== undefined && (tonnage <= 0 || tonnage > 200)) throw new Error("tonnage must be between 0 and 200");
+        // equipment_units.tonnage is numeric(4,2): light-commercial RTUs top out well below 100 tons.
+        if (tonnage !== undefined && (tonnage <= 0 || tonnage >= 100)) throw new Error("tonnage must be greater than 0 and below 100");
         return {
           ok: true,
           call: {
@@ -284,7 +285,11 @@ export function parseToolCall(name: unknown, rawArgs: unknown): ParseResult {
             name,
             args: {
               reading_type: oneOf(args, "reading_type", READING_TYPES),
-              numeric_value: num(args, "numeric_value", true)!,
+              numeric_value: (() => {
+                const v = num(args, "numeric_value", true)!;
+                if (Math.abs(v) >= 1e8) throw new Error("numeric_value is out of range");
+                return Math.round(v * 100) / 100;
+              })(),
               unit: str(args, "unit", true),
               is_within_spec: bool(args, "is_within_spec"),
               target_spec_note: str(args, "target_spec_note", true),

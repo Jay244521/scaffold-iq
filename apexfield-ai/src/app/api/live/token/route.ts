@@ -16,7 +16,7 @@ const CONNECT_WINDOW_SECONDS = 60;
 
 /**
  * POST /api/live/token
- * Body: { sessionId?: string }  (pass the existing id when resuming a dropped connection)
+ * Body: { sessionId?: string, reportedSymptom?: string }  (sessionId: resume a dropped connection)
  *
  * Mints a single-use ephemeral Gemini token locked to the HVAC coach model, system
  * instruction and tool schema. GEMINI_API_KEY never leaves the server.
@@ -33,13 +33,17 @@ export async function POST(req: Request) {
     );
   }
 
-  let body: { sessionId?: unknown } = {};
+  let body: { sessionId?: unknown; reportedSymptom?: unknown } = {};
   try {
     body = await req.json();
   } catch {
     /* empty body is fine */
   }
   const resumeId = typeof body.sessionId === "string" && UUID.test(body.sessionId) ? body.sessionId : null;
+  const reportedSymptom =
+    typeof body.reportedSymptom === "string" && body.reportedSymptom.trim()
+      ? body.reportedSymptom.trim().slice(0, 500)
+      : "Not reported (live AI coaching session)";
 
   const model = process.env.GEMINI_LIVE_MODEL || DEFAULT_LIVE_MODEL;
   const now = Date.now();
@@ -71,7 +75,13 @@ export async function POST(req: Request) {
   let sessionId: string | null = resumeId;
   const db = getSupabaseAdmin();
   if (db && !resumeId) {
-    const { data, error } = await db.from("service_sessions").insert({ model }).select("id").single();
+    // service_sessions.reported_symptom is NOT NULL; live mode doesn't capture a symptom up front.
+    // org_id / tech_id stay null until the demo has sign-in (rows are then visible only to the service role).
+    const { data, error } = await db
+      .from("service_sessions")
+      .insert({ reported_symptom: reportedSymptom, status: "in_progress", current_step_index: 1 })
+      .select("id")
+      .single();
     if (error) console.error("[live/token] service_sessions insert failed:", error.message);
     else sessionId = data.id as string;
   }

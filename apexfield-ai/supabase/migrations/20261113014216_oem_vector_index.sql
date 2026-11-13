@@ -249,6 +249,12 @@ begin
 end;
 $$;
 
+-- Functions are executable by PUBLIC by default; keep these off the anonymous API.
+revoke execute on function public.oem_chunk_matches_filters(public.oem_knowledge_chunks, text, text, text[], text) from public, anon;
+revoke execute on function public.oem_tune_vector_scan(integer) from public, anon;
+revoke execute on function public.match_oem_chunks(extensions.vector, integer, text, text, text[], text, double precision) from public, anon;
+revoke execute on function public.hybrid_search_oem_chunks(text, extensions.vector, integer, text, text, text[], text, double precision, double precision, integer) from public, anon;
+grant execute on function public.oem_chunk_matches_filters(public.oem_knowledge_chunks, text, text, text[], text) to authenticated, service_role;
 grant execute on function public.oem_tune_vector_scan(integer) to authenticated, service_role;
 grant execute on function public.match_oem_chunks(extensions.vector, integer, text, text, text[], text, double precision) to authenticated, service_role;
 grant execute on function public.hybrid_search_oem_chunks(text, extensions.vector, integer, text, text, text[], text, double precision, double precision, integer) to authenticated, service_role;
