@@ -11,16 +11,8 @@ import { Modality, Type, type FunctionDeclaration, type LiveConnectConfig } from
 /** Default Live model. Override with GEMINI_LIVE_MODEL on the server. */
 export const DEFAULT_LIVE_MODEL = "gemini-2.5-flash-native-audio-preview-09-2025";
 
-export const DIAGNOSTIC_SEQUENCE = [
-  "Identify equipment data plate",
-  "Verify 24V control signal",
-  "High-voltage disconnect verification",
-  "Contactor / capacitor / amp draw",
-  "Refrigerant pressures, superheat & subcooling",
-] as const;
-
-/** Step number (1-based) of the safety gate in DIAGNOSTIC_SEQUENCE. */
-export const SAFETY_STEP = 3;
+import { DIAGNOSTIC_SEQUENCE } from "../diagnostic-sequence";
+export { DIAGNOSTIC_SEQUENCE, SAFETY_STEP } from "../diagnostic-sequence";
 
 export const HVAC_SYSTEM_INSTRUCTION = `You are ApexField, an expert master HVAC technician coaching a junior technician on a live service call. You see the technician's rear phone camera at about one frame per second and hear them through their earbuds.
 

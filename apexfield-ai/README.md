@@ -83,6 +83,16 @@ WebSocket (BidiGenerateContentConstrained) ◀────▶ Gemini Live
 
 **Abuse limits.** The token route allows 8 requests per minute per IP, in memory, so the limit is per server instance. Before a public launch, put the demo behind sign-in or an edge rate limiter so strangers can't spend your Gemini quota.
 
+## Fleet Command dashboard (`/dashboard`)
+
+A service manager's view of 12 DFW technicians mid-shift. Everything is client-side mock data; no backend is involved.
+
+- `src/lib/mock-fleet-data.ts` holds the 12 seeded techs (apprentices at 3–11 months, techs at 1–4 years; residential and light commercial jobs in Dallas, Plano, Irving, Mesquite, Garland and Arlington), with readings, transcripts and step findings. Times are seconds since the job started, so server and client render the same markup.
+- `src/lib/fleet-sim.ts` is a pure reducer. `tick` runs every 4 s while **Simulate Live Updates** is on. Each tick advances job timers, jitters live gauges and moves a coaching tech one step every 24–40 s. A tech who reaches step 3 without disconnect verification drops into a simulated safety hold, which clears after they confirm 0V. Seeded escalations and holds wait for the manager.
+- Manager actions are `whisper` (logged as `[MANAGER OVERRIDE]` and relayed by the AI coach), `clear` (approve an escalation, or clear a safety hold; holds need a second confirmation that the tech reported 0V) and `dispatch` (senior backup with an ETA, logged once per job).
+- The KPI strip's first-time-fix rate and prevented truck rolls are seeded figures. Escalations and holds are counted live.
+- Components live in `src/components/dashboard/`.
+
 ## Guided browser simulator (`/demo?mode=sim`)
 
 A self-contained, in-browser simulation of a coached HVAC service call. It needs no API keys or hardware, and is the fallback for visitors without a camera or mic.

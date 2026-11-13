@@ -22,6 +22,22 @@
   --animate-fade-up: fade-up 0.35s ease-out both;
   --animate-progress: progress 1.2s linear forwards;
   --animate-scan-fast: scan 0.6s ease-in-out infinite;
+  --animate-escalate: escalate 1.8s ease-in-out infinite;
+  --animate-slide-in: slide-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-in: fade-in 0.2s ease-out both;
+
+  @keyframes escalate {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); border-color: rgba(239, 68, 68, 0.55); }
+    50% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.18), 0 0 28px -6px rgba(239, 68, 68, 0.55); border-color: rgba(239, 68, 68, 0.95); }
+  }
+  @keyframes slide-in {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
 
   @keyframes wave {
     0%, 100% { transform: scaleY(0.25); }

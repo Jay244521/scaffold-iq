@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Menu, PlayCircle, X } from "lucide-react";
+import { LayoutDashboard, Menu, PlayCircle, X } from "lucide-react";
 import { Logo } from "./Logo";
 import { DemoButton } from "./DemoModal";
 import { NAV_LINKS } from "./navLinks";
@@ -42,12 +42,18 @@ export function Navbar() {
 
         <div className="flex items-center gap-2">
           <Link
+            href="/dashboard"
+            className="hidden min-h-11 items-center gap-1.5 rounded-xl px-2 text-sm font-medium text-slate-400 transition-colors hover:text-amber xl:inline-flex"
+          >
+            <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
+            Fleet Dashboard
+          </Link>
+          <Link
             href="/demo"
             className="hidden min-h-11 items-center gap-2 rounded-xl border border-line-strong px-4 text-sm font-semibold text-ink transition-colors hover:border-amber hover:text-amber lg:inline-flex"
           >
             <PlayCircle className="h-4 w-4 text-amber" aria-hidden="true" />
-            <span className="hidden xl:inline">Try Interactive Field Demo</span>
-            <span className="xl:hidden">Field Demo</span>
+            Live Simulator
           </Link>
           <DemoButton className="hidden min-h-11 px-5 text-sm sm:inline-flex">Book a Live Field Demo</DemoButton>
           <button
@@ -84,7 +90,15 @@ export function Navbar() {
             className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-line-strong px-5 text-base font-semibold text-ink"
           >
             <PlayCircle className="h-5 w-5 text-amber" aria-hidden="true" />
-            Try Interactive Field Demo
+            Live Simulator
+          </Link>
+          <Link
+            href="/dashboard"
+            onClick={() => setMobileOpen(false)}
+            className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-line px-5 text-base font-medium text-slate-300"
+          >
+            <LayoutDashboard className="h-5 w-5" aria-hidden="true" />
+            Fleet Dashboard
           </Link>
           <DemoButton className="mt-3 min-h-12 w-full px-5 text-base">Book a Live Field Demo</DemoButton>
         </div>
