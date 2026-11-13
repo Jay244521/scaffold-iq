@@ -1,6 +1,6 @@
 # 10 — Website (aftermarket storefront)
 
-- `index.html` is the source: a RealTruck-style storefront (year/make/model fit finder, 5 categories, catalog with honest availability, Cargo System flagship, dealer/installer programs). The preview is published as a private Claude artifact.
+- `index.html` is the source: a RealTruck-style storefront (year/make/model fit finder, a Maintenance Parts department plus 5 accessory categories, catalog with honest availability, Cargo System flagship, dealer/installer programs). The preview is published as a private Claude artifact.
 - `deploy/index.html` is the same page as a complete HTML document, ready for any static host.
 
 ## Before it goes public
@@ -21,6 +21,6 @@
 Everything shown is driven by three lists in the `<script>`:
 - `VEHICLES`: make → model → body class (sedan / compact / midsize / fullsize). Add models here.
 - `PRODUCTS`: each product's category, status (`now`, `dev`, `plan`), price (only for `now`) and which body classes it fits.
-- `CATS`: the five categories.
+- `CATS`: the six categories (Maintenance Parts + 5 accessory categories).
 
 Change a product's `status` to `"now"` and give it a `price` when it launches. The fit finder, category counts and catalog all update automatically. This list is the seed of the fitment database described in the expansion strategy.

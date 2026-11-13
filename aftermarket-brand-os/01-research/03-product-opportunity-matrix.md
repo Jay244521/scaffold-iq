@@ -49,6 +49,21 @@ Each product is scored 1–5 on 10 criteria, where a higher score is always bett
 | 22 | Cup-holder organizer | 60 | 41 | 52.4 | Avoid |
 | 23 | Windshield frost cover | 55 | 47 | 51.8 | Avoid for DFW |
 
+## Parts added (RealTruck model)
+Seven parts were scored afterwards (live ranks in the workbook):
+
+| Rank | Part | Overall | Verdict |
+|---|---|---|---|
+| 6 | Cabin air filter (vehicle-specific) | 69.8 | Parts line #2 (Stage 2) |
+| 12 | Beam wiper blades | 68.2 | Parts line #1 (Stage 2) |
+| 15 | Splash guards / mud flaps | 64.2 | Stage 3 |
+| 17 | Interior LED bulb kits | 63.0 | Stage 2-3, interior only |
+| 20 | Exterior LED headlight / signal bulbs | 61.0 | Avoid (FMVSS 108 / DOT) |
+| 22 | Engine air filter | 60.0 | After cabin filters |
+| 26 | Brake pads & rotors | 55.6 | Avoid until Stage 4+ |
+
+See [`../09-strategy/21-parts-and-accessories-strategy.md`](../09-strategy/21-parts-and-accessories-strategy.md).
+
 ## How to read the result
 - **The launch lens and the strategic lens disagree.** That is the point. The products that build a durable brand (cargo protection system, custom liners, pet cargo liner) need capital we don't have. The products we can afford (microfiber, brushes, pet-hair tool) are commodities. **The plan uses the affordable products to earn the capital and customer data needed for the strategic ones.** See [`04-top-five-product-analysis.md`](04-top-five-product-analysis.md).
 - **The trunk organizer slipped from the brief's #1 to #10.** Three reasons:

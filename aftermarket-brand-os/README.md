@@ -17,6 +17,7 @@ The operating folder for a bootstrapped U.S. automotive-aftermarket private-labe
 - **Backup:** Pet cargo liner with integrated bumper flap. Best unit economics, but needs about $2.7k+ for a first order.
 - **Flagship to build toward:** Complete SUV Cargo Protection System.
 - **First channel:** local DFW direct sales plus a free storefront. eBay next. Amazon after the trademark filing.
+- **Parts + accessories (RealTruck model):** add wear parts with low liability (wiper blades, then cabin air filters) in Stage 2; brakes, suspension and exterior lighting stay out until Stage 4+. See `09-strategy/21`.
 - **Biggest constraint:** growth is cash-limited. Inventory needs outpace monthly profit, so expansion is paced by the reinvestment rule and gates G1–G5.
 
 ## The 20 deliverables
@@ -24,10 +25,10 @@ The operating folder for a bootstrapped U.S. automotive-aftermarket private-labe
 |---|---|---|
 | 1 | Executive business plan | [00-start-here/01-executive-business-plan.md](00-start-here/01-executive-business-plan.md) |
 | 2 | Market research report | [01-research/02-market-research-report.md](01-research/02-market-research-report.md) |
-| 3 | Ranked 20-product opportunity matrix (23 scored) | [01-research/03-product-opportunity-matrix.md](01-research/03-product-opportunity-matrix.md) · live: workbook `Opportunity Matrix` |
+| 3 | Ranked 20-product opportunity matrix (30 scored, incl. 7 parts) | [01-research/03-product-opportunity-matrix.md](01-research/03-product-opportunity-matrix.md) · live: workbook `Opportunity Matrix` |
 | 4 | Top-five product analysis | [01-research/04-top-five-product-analysis.md](01-research/04-top-five-product-analysis.md) |
 | 5 | Competitor teardown | [01-research/05-competitor-teardown.md](01-research/05-competitor-teardown.md) |
-| 6 | Supplier database (25 candidates) | [02-sourcing/06-supplier-database.md](02-sourcing/06-supplier-database.md) · [CSV](02-sourcing/supplier-database.csv) · workbook `Supplier Database` |
+| 6 | Supplier database (32 candidates, incl. 7 parts suppliers) | [02-sourcing/06-supplier-database.md](02-sourcing/06-supplier-database.md) · [CSV](02-sourcing/supplier-database.csv) · workbook `Supplier Database` |
 | 7 | U.S. vs overseas manufacturing comparison | [02-sourcing/07-us-vs-overseas-comparison.md](02-sourcing/07-us-vs-overseas-comparison.md) |
 | 8 | Supplier RFQ document | [02-sourcing/08-supplier-rfq.md](02-sourcing/08-supplier-rfq.md) |
 | 9 | Supplier outreach email templates | [02-sourcing/09-supplier-outreach-emails.md](02-sourcing/09-supplier-outreach-emails.md) |
@@ -42,7 +43,8 @@ The operating folder for a bootstrapped U.S. automotive-aftermarket private-labe
 | 18 | 30-day execution roadmap | [08-execution/18-30-day-roadmap.md](08-execution/18-30-day-roadmap.md) |
 | 19 | First-product recommendation | [00-start-here/19-first-product-recommendation.md](00-start-here/19-first-product-recommendation.md) |
 | 20 | Long-term expansion strategy | [09-strategy/20-long-term-expansion-strategy.md](09-strategy/20-long-term-expansion-strategy.md) |
-| + | Pre-launch landing page | [10-website/](10-website/README.md) |
+| + | Parts + accessories strategy (RealTruck model) | [09-strategy/21-parts-and-accessories-strategy.md](09-strategy/21-parts-and-accessories-strategy.md) |
+| + | Parts & accessories storefront | [10-website/](10-website/README.md) |
 
 ## Changes to the brief's assumptions (with reasons)
 | Brief said | Recommendation | Reason |
