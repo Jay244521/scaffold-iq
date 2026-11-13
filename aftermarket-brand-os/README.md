@@ -42,6 +42,7 @@ The operating folder for a bootstrapped U.S. automotive-aftermarket private-labe
 | 18 | 30-day execution roadmap | [08-execution/18-30-day-roadmap.md](08-execution/18-30-day-roadmap.md) |
 | 19 | First-product recommendation | [00-start-here/19-first-product-recommendation.md](00-start-here/19-first-product-recommendation.md) |
 | 20 | Long-term expansion strategy | [09-strategy/20-long-term-expansion-strategy.md](09-strategy/20-long-term-expansion-strategy.md) |
+| + | Pre-launch landing page | [10-website/](10-website/README.md) |
 
 ## Changes to the brief's assumptions (with reasons)
 | Brief said | Recommendation | Reason |
