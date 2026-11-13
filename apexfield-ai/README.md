@@ -83,6 +83,38 @@ WebSocket (BidiGenerateContentConstrained) ◀────▶ Gemini Live
 
 **Abuse limits.** The token route allows 8 requests per minute per IP, in memory, so the limit is per server instance. Before a public launch, put the demo behind sign-in or an edge rate limiter so strangers can't spend your Gemini quota.
 
+## OEM manual ingestion (RAG over `pgvector`)
+
+This turns OEM service manuals (PDF) into searchable chunks in Supabase, so the coach can pull exact specs (charging charts, electrical data, fault codes, wiring notes) during a live call.
+
+```bash
+npm run oem:sample -- /tmp/sample.pdf                                   # synthetic test manual (fictional brand)
+npm run oem:ingest -- /tmp/sample.pdf --manufacturer Apexair --model-prefix AXC --dry-run --out chunks.json
+npm run oem:ingest -- ./manuals/carrier --manufacturer Carrier --model-prefix 24ACC6   # embed + store
+npm run oem:search -- "target subcooling at 95 degrees" --manufacturer Carrier --model 24ACC636A003
+```
+
+`--dry-run` needs no keys. A real run needs `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` and `GEMINI_API_KEY` (or `OPENAI_API_KEY` with `EMBEDDING_PROVIDER=openai`). Re-running on an unchanged file is skipped (matched by SHA-256) unless you pass `--force`.
+
+**Pipeline** (`src/lib/rag/`)
+
+| Stage | File | What it does |
+|---|---|---|
+| Extract | `pdf-extract.ts` | `pdfjs-dist` text items with coordinates and font size; rotated diagram labels skipped |
+| Layout | `layout.ts` | Groups items into lines and cells. Strips running headers, footers and page numbers. Detects two-column pages and reads the left column then the right. Rebuilds tables from column-aligned rows, including wrapped cells. Stitches tables that cross a page break and drops the repeated header. Detects headings by font size or ALL CAPS. |
+| Chunk | `chunker.ts` | Chunks never cross a heading. Tables are never split mid-row, and every piece of a long table repeats its header row plus caption. Prose splits at sentences with overlap (~450-token cap). Identical chunks, such as a repeated WARNING, are stored once. |
+| Classify | `classify.ts` | `chunk_type` (`specifications`, `charging_chart`, `error_codes`, `wiring`, `troubleshooting`, `installation`, `maintenance`, `safety`, `general`), model numbers in each chunk, and brand detection |
+| Embed | `embeddings.ts` | 1536-dim vectors. Gemini `gemini-embedding-001` (`text-embedding-004` is 768-dim only and can't fill `vector(1536)`) or OpenAI `text-embedding-3-small`. Batched, retries on 429/5xx, L2-normalized. The embedded text is prefixed with brand, document and section path; the stored `content` stays clean. |
+| Store | `store.ts` | Upserts `oem_documents` by file hash, then inserts chunks under a new `ingest_run_id` and deletes the previous run only after every batch lands. A failed re-ingest leaves the old chunks serving. |
+| Search | `search.ts` | `hybrid_search_oem_chunks` RPC (vector + full-text, reciprocal rank fusion), filtered by brand, the equipment's full model number (matched against `model_prefix`), chunk types and embedding model. `formatHitsForPrompt` gives citeable context. |
+
+**Migration** `supabase/migrations/20261113000000_oem_vector_index.sql` is additive on top of the existing `oem_knowledge_chunks` table and safe to re-run:
+- Adds `oem_documents`, plus metadata columns on the chunks table and a generated `fts` column, with indexes.
+- Creates the `match_oem_chunks` and `hybrid_search_oem_chunks` functions. They run with the caller's permissions, so RLS applies, and they turn on pgvector 0.8 iterative scans so filtered queries still return enough rows.
+- Creates `idx_oem_chunks_hnsw` only if no cosine HNSW index exists. The project already has `idx_oem_embedding`, and a second HNSW index on the same column would double write cost for nothing.
+
+**Limits:** scanned PDFs (images, no text layer) need OCR first; the CLI lists pages with no text. Wiring diagrams contribute their text labels only, not the drawing. Token counts are estimated at about 4 characters per token.
+
 ## Fleet Command dashboard (`/dashboard`)
 
 A service manager's view of 12 DFW technicians mid-shift. Everything is client-side mock data; no backend is involved.
