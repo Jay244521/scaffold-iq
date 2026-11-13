@@ -13,6 +13,7 @@ import {
   parseToolCall,
   type AdvanceStepArgs,
   type CompleteSessionArgs,
+  type EscalateArgs,
   type HvacToolCall,
   type LogReadingArgs,
   type RegisterEquipmentArgs,
@@ -31,6 +32,8 @@ export type LiveSessionState = {
   steps: Record<number, LiveStep>;
   currentStep: number;
   completion: (CompleteSessionArgs & { at: string }) | null;
+  /** Open escalation awaiting the service manager, if any. */
+  escalation: (EscalateArgs & { at: string }) | null;
   /** Rejected tool calls, surfaced so the tech can see the gate working. */
   blocked: { name: string; reason: string; at: string }[];
 };
@@ -42,8 +45,14 @@ export const initialLiveState: LiveSessionState = {
   steps: {},
   currentStep: 1,
   completion: null,
+  escalation: null,
   blocked: [],
 };
+
+/** The manager reviewed the escalation on the dashboard. */
+export function clearEscalation(state: LiveSessionState): LiveSessionState {
+  return state.escalation ? { ...state, escalation: null } : state;
+}
 
 /** What the model gets back. `output` = success, `error` = rule the model must follow. */
 export type ToolResponse = { output: Record<string, unknown> } | { error: string };
@@ -176,6 +185,25 @@ export function applyToolCall(
       return {
         state: { ...state, steps, currentStep },
         response: { output: { step_number: a.step_number, status: a.status, current_step: currentStep } },
+        accepted: call,
+      };
+    }
+
+    case "escalate_to_manager": {
+      if (state.escalation) {
+        return block(state, call.name, "This call is already escalated and waiting for the service manager. Don't escalate again; wait for their reply.", at);
+      }
+      return {
+        state: { ...state, escalation: { ...call.args, at } },
+        response: {
+          output: {
+            escalated: true,
+            instruction:
+              call.args.urgency === "stop_work"
+                ? "Tell the technician to stop work, step back from the equipment and wait for the service manager."
+                : "Tell the technician the service manager is reviewing it, and continue only safe, non-invasive checks meanwhile.",
+          },
+        },
         accepted: call,
       };
     }

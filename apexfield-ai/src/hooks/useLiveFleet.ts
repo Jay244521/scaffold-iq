@@ -5,7 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { mapLiveFleet, type DbSession, type DbTechnician } from "@/lib/live-fleet";
 
 const SESSION_SELECT = `id, org_id, tech_id, status, reported_symptom, current_step_index, safety_disconnect_verified,
-  confirmed_root_cause, parts_replaced, ai_summary_report, started_at, completed_at,
+  confirmed_root_cause, parts_replaced, ai_summary_report, started_at, completed_at, ended_at, escalation_reason, escalated_at,
   equipment_units ( manufacturer, model_number, equipment_type, refrigerant_type, tonnage ),
   diagnostic_readings ( id, reading_type, numeric_value, unit, is_within_spec, recorded_at ),
   diagnostic_steps ( id, step_number, instruction, expected_target, tech_observation, status, created_at ),
@@ -38,7 +38,9 @@ export function useLiveFleet(sb: SupabaseClient | null, enabled: boolean) {
       sb
         .from("service_sessions")
         .select(SESSION_SELECT)
-        .or(`status.eq.in_progress,started_at.gte.${startOfDay.toISOString()}`)
+        // Today's sessions, plus anything still open from the last 24 h (overnight calls).
+        .gte("started_at", new Date(Date.now() - 24 * 60 * 60_000).toISOString())
+        .or(`status.in.(in_progress,escalated),started_at.gte.${startOfDay.toISOString()}`)
         .order("started_at", { ascending: false })
         .limit(200),
     ]);

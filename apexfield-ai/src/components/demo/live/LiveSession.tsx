@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { AlertTriangle, MonitorPlay, RotateCcw } from "lucide-react";
 import { useGeminiLiveSession, type LiveToolHandler } from "@/hooks/useGeminiLiveSession";
-import { applyToolCall, initialLiveState, type LiveSessionState } from "@/lib/ai/live-session-state";
+import { applyToolCall, clearEscalation, initialLiveState, type LiveSessionState } from "@/lib/ai/live-session-state";
 import type { HvacToolCall } from "@/lib/ai/hvac-tools";
 import { runOemLookup, type LookupRecord } from "@/lib/ai/oem-lookup-client";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,7 +11,8 @@ import { useManagerWhispers } from "@/hooks/useManagerWhispers";
 import { AccountMenu } from "@/components/auth/AccountMenu";
 import { DemoTopBar } from "../DemoTopBar";
 import { LiveMediaPanel } from "./LiveMediaPanel";
-import { BlockedNotice, EquipmentCard, LiveReport, ManualLookups, PersistenceBadge, ReadingsFeed, SafetyCard, StepTracker, TranscriptCard } from "./LiveHud";
+import { ConsentGate, hasAcknowledgedToday } from "./ConsentGate";
+import { BlockedNotice, EscalationBanner, EquipmentCard, LiveReport, ManualLookups, PersistenceBadge, ReadingsFeed, SafetyCard, StepTracker, TranscriptCard } from "./LiveHud";
 
 export function LiveSession({ modeSwitch, onUseSimulator }: { modeSwitch: ReactNode; onUseSimulator: () => void }) {
   const [state, setState] = useState<LiveSessionState>(initialLiveState);
@@ -77,25 +78,77 @@ export function LiveSession({ modeSwitch, onUseSimulator }: { modeSwitch: ReactN
     sessionIdRef.current = live.sessionInfo?.sessionId ?? null;
   }, [live.sessionInfo]);
 
-  const begin = useCallback(() => {
+  const userId = auth.status === "signed_in" ? auth.user.id : null;
+  const [consentOpen, setConsentOpen] = useState(false);
+
+  const launch = useCallback(() => {
     stateRef.current = initialLiveState;
     setState(initialLiveState);
     setLookups([]);
     setPersistError(false);
-    void live.start();
+    void live.start({ consentAcknowledged: true });
   }, [live]);
 
-  const newCall = useCallback(() => {
+  /** Signed-in techs acknowledge consent + safety once a day before the first session. */
+  const begin = useCallback(() => {
+    if (userId && !hasAcknowledgedToday(userId)) setConsentOpen(true);
+    else launch();
+  }, [userId, launch]);
+
+  /** Tell the server the session is over so the fleet board stops showing it as active. */
+  const markEnded = useCallback((beacon = false) => {
+    const sessionId = sessionIdRef.current;
+    if (!sessionId || stateRef.current.completion) return;
+    const body = JSON.stringify({ sessionId });
+    if (beacon && typeof navigator.sendBeacon === "function") {
+      navigator.sendBeacon("/api/live/end", new Blob([body], { type: "application/json" }));
+      return;
+    }
+    void fetch("/api/live/end", { method: "POST", headers: { "Content-Type": "application/json" }, body, keepalive: true }).catch(() => {});
+  }, []);
+
+  const stop = useCallback(() => {
+    markEnded();
     live.stop();
+  }, [live, markEnded]);
+
+  useEffect(() => {
+    const onHide = () => live.status === "active" && markEnded(true);
+    window.addEventListener("pagehide", onHide);
+    return () => window.removeEventListener("pagehide", onHide);
+  }, [live.status, markEnded]);
+
+  // The manager reviewed an escalation on the dashboard (status back to in_progress): tell the tech.
+  const sb = auth.supabase;
+  const liveSessionId = live.sessionInfo?.sessionId ?? null;
+  const sendManagerNote = live.sendManagerNote;
+  useEffect(() => {
+    if (!sb || !liveSessionId) return;
+    const channel = sb
+      .channel(`session-status:${liveSessionId}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "service_sessions", filter: `id=eq.${liveSessionId}` }, (payload) => {
+        const next = payload.new as { status?: string };
+        if (next.status === "in_progress" && stateRef.current.escalation) {
+          stateRef.current = clearEscalation(stateRef.current);
+          setState(stateRef.current);
+          sendManagerNote("I've reviewed your escalation. Go ahead and continue the diagnostic.");
+        }
+      })
+      .subscribe();
+    return () => void sb.removeChannel(channel);
+  }, [sb, liveSessionId, sendManagerNote]);
+
+  const newCall = useCallback(() => {
+    stop();
     begin();
-  }, [begin, live]);
+  }, [begin, stop]);
 
   const e = state.equipment;
   const equipmentLabel = e ? `${e.manufacturer.toUpperCase()} ${e.model_number}` : null;
 
   return (
     <div className="min-h-screen">
-      <DemoTopBar onReset={live.stop} canReset={live.status === "active" || live.status === "connecting"} resetLabel="End Session" />
+      <DemoTopBar onReset={stop} canReset={live.status === "active" || live.status === "connecting"} resetLabel="End Session" />
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-8 sm:py-12">
         {modeSwitch}
@@ -156,7 +209,7 @@ export function LiveSession({ modeSwitch, onUseSimulator }: { modeSwitch: ReactN
               equipmentLabel={equipmentLabel}
               onStart={begin}
               startBlocked={startBlocked}
-              onStop={live.stop}
+              onStop={stop}
               onScan={live.scanDataPlate}
               onToggleMute={live.toggleMute}
               onToggleTorch={live.toggleTorch}
@@ -168,6 +221,7 @@ export function LiveSession({ modeSwitch, onUseSimulator }: { modeSwitch: ReactN
               <LiveReport state={state} onNewSession={newCall} />
             ) : (
               <>
+                <EscalationBanner escalation={state.escalation} />
                 <BlockedNotice blocked={state.safety.verified ? state.blocked.filter((b) => !b.reason.startsWith("SAFETY GATE")) : state.blocked} />
                 <EquipmentCard equipment={state.equipment} />
                 <SafetyCard safety={state.safety} />
@@ -180,6 +234,16 @@ export function LiveSession({ modeSwitch, onUseSimulator }: { modeSwitch: ReactN
           </div>
         </div>
       </main>
+      {consentOpen && userId && (
+        <ConsentGate
+          userId={userId}
+          onCancel={() => setConsentOpen(false)}
+          onConfirm={() => {
+            setConsentOpen(false);
+            launch();
+          }}
+        />
+      )}
     </div>
   );
 }

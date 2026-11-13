@@ -282,7 +282,7 @@ const FILTERS: Record<FleetFilter, (t: Technician) => boolean> = {
   all: () => true,
   attention: needsAttention,
   apprentices: (t) => t.role === "Apprentice" && t.experienceMonths < 12,
-  in_progress: (t) => t.status !== "completed",
+  in_progress: (t) => t.status !== "completed" && t.status !== "ended",
   completed: (t) => t.status === "completed",
 };
 
@@ -292,7 +292,7 @@ export function filterCounts(techs: Technician[]): Record<FleetFilter, number> {
   ) as Record<FleetFilter, number>;
 }
 
-const STATUS_ORDER: Record<Technician["status"], number> = { escalated: 0, safety_hold: 1, coaching: 2, completed: 3 };
+const STATUS_ORDER: Record<Technician["status"], number> = { escalated: 0, safety_hold: 1, coaching: 2, completed: 3, ended: 4 };
 
 export function selectTechs(techs: Technician[], filter: FleetFilter, query: string): Technician[] {
   const q = query.trim().toLowerCase();

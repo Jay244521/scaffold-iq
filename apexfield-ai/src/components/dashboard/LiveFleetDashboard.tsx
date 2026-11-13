@@ -63,7 +63,19 @@ export function LiveFleetDashboard({
     [cards, sb, profile.org_id, userId, pushToast, fleet],
   );
 
-  const active = cards.filter((c) => c.status !== "completed").length;
+  const reviewEscalation = useCallback(
+    async (id: string) => {
+      const tech = cards.find((t) => t.id === id);
+      if (!tech?.live) return;
+      const { error } = await sb.from("service_sessions").update({ status: "in_progress" }).eq("id", tech.live.sessionId).eq("status", "escalated");
+      if (error) return pushToast({ tone: "dispatch", title: "Couldn't mark reviewed", body: error.message });
+      pushToast({ tone: "success", title: "Escalation reviewed", body: `${tech.name}'s coach will tell them to continue.` });
+      void fleet.refetch();
+    },
+    [cards, sb, pushToast, fleet],
+  );
+
+  const active = cards.filter((c) => c.status !== "completed" && c.status !== "ended").length;
   const completed = cards.filter((c) => c.status === "completed").length;
   const escalated = cards.filter((c) => c.status === "escalated").length;
   const holds = cards.filter((c) => c.status === "safety_hold").length;
@@ -152,7 +164,7 @@ export function LiveFleetDashboard({
       </main>
 
       {inspected && (
-        <SessionInspectorDrawer tech={inspected} onClose={close} onWhisper={(id, text) => void whisper(id, text)} onClear={() => {}} onDispatch={() => {}} />
+        <SessionInspectorDrawer tech={inspected} onClose={close} onWhisper={(id, text) => void whisper(id, text)} onClear={(id) => void reviewEscalation(id)} onDispatch={() => {}} />
       )}
       {teamOpen && (
         <TeamPanel

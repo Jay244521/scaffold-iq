@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "oem:ingest": "tsx scripts/oem-ingest.ts",
     "oem:search": "tsx scripts/oem-search.ts",
-    "oem:sample": "tsx scripts/fixtures/make-sample-manual.ts"
+    "oem:sample": "tsx scripts/fixtures/make-sample-manual.ts",
+    "test": "node --import tsx --test tests/*.test.ts"
   },
   "dependencies": {
     "@google/genai": "^3.3.0",

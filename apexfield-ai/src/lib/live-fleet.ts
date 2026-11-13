@@ -30,6 +30,9 @@ export type DbSession = {
   ai_summary_report: string | null;
   started_at: string;
   completed_at: string | null;
+  ended_at?: string | null;
+  escalation_reason?: string | null;
+  escalated_at?: string | null;
   equipment_units: {
     manufacturer: string;
     model_number: string;
@@ -59,8 +62,21 @@ const KIND: Record<string, EquipmentKind> = { split_ac: "split_ac", heat_pump: "
 
 const secsBetween = (from: string, to: number) => Math.max(0, Math.floor((to - new Date(from).getTime()) / 1000));
 
+/** An open session with no activity for this long is treated as abandoned (app killed, phone died). */
+export const STALE_AFTER_MS = 2 * 60 * 60_000;
+
+export function lastActivity(s: DbSession): number {
+  const times = [s.started_at, s.escalated_at, ...s.diagnostic_readings.map((r) => r.recorded_at), ...s.diagnostic_steps.map((st) => st.created_at)]
+    .filter(Boolean)
+    .map((t) => new Date(t as string).getTime());
+  return Math.max(...times);
+}
+
+const isOpen = (s: Pick<DbSession, "status">) => s.status === "in_progress" || s.status === "escalated";
+
 export function deriveStatus(s: Pick<DbSession, "status" | "safety_disconnect_verified" | "current_step_index">): TechStatus {
   if (s.status === "completed") return "completed";
+  if (s.status === "ended") return "ended";
   if (s.status === "escalated") return "escalated";
   // Sitting at (or past) the high-voltage gate without verification = safety hold.
   if (!s.safety_disconnect_verified && s.current_step_index >= SAFETY_STEP) return "safety_hold";
@@ -76,6 +92,7 @@ function mapSteps(s: DbSession, status: TechStatus): DiagnosticStep[] {
     let st: StepStatus;
     if (row?.status === "passed" || row?.status === "failed") st = row.status;
     else if (status === "completed") st = "passed";
+    else if (status === "ended") st = n < current ? "passed" : "upcoming";
     else if (n < current) st = n === SAFETY_STEP && !s.safety_disconnect_verified ? "hold" : "passed";
     else if (n === current) st = status === "safety_hold" ? "hold" : status === "escalated" ? "failed" : "active";
     else st = "upcoming";
@@ -129,6 +146,12 @@ function mapEventLog(s: DbSession, readings: Reading[]): TranscriptLine[] {
   for (const w of s.manager_whispers ?? []) {
     lines.push({ id: w.id, role: "manager", text: `${w.body}${w.delivered_at ? " ✓ delivered to headset" : " · waiting for the tech's session"}`, atSec: at(w.created_at), sort: w.created_at });
   }
+  if (s.escalated_at && s.escalation_reason) {
+    lines.push({ id: `esc-${s.id}`, role: "system", text: `AI escalated to the service manager: ${s.escalation_reason}`, atSec: at(s.escalated_at), sort: s.escalated_at });
+  }
+  if (s.ended_at && s.status === "ended") {
+    lines.push({ id: `end-${s.id}`, role: "system", text: "Session ended before a root cause was confirmed.", atSec: at(s.ended_at), sort: s.ended_at });
+  }
   if (s.completed_at) {
     lines.push({
       id: `done-${s.id}`,
@@ -141,8 +164,12 @@ function mapEventLog(s: DbSession, readings: Reading[]): TranscriptLine[] {
   return lines.sort((a, b) => a.sort.localeCompare(b.sort)).map(({ sort: _sort, ...l }) => l);
 }
 
-export function mapSessionToTechnician(tech: DbTechnician, s: DbSession, now: number): Technician {
+export function mapSessionToTechnician(tech: DbTechnician, raw: DbSession, now: number): Technician {
+  // Abandoned open sessions read as ended so the board doesn't show ghosts as active.
+  const stale = isOpen(raw) && now - lastActivity(raw) > STALE_AFTER_MS;
+  const s: DbSession = stale ? { ...raw, status: "ended", ended_at: new Date(lastActivity(raw)).toISOString() } : raw;
   const status = deriveStatus(s);
+  const endedEarly = s.status === "ended";
   const e = s.equipment_units;
   const readings = mapReadings(s);
   const current = Math.min(Math.max(s.current_step_index || 1, 1), 5);
@@ -162,10 +189,14 @@ export function mapSessionToTechnician(tech: DbTechnician, s: DbSession, now: nu
       status === "safety_hold"
         ? "Waiting on high-voltage disconnect verification"
         : status === "escalated"
-          ? "Escalated for review"
-          : status === "completed"
-            ? (s.confirmed_root_cause ?? "Completed")
-            : undefined,
+          ? (s.escalation_reason ?? "Escalated for review")
+          : endedEarly
+            ? stale
+              ? "No activity for 2+ hours · treated as ended"
+              : "Ended before a root cause was confirmed"
+            : status === "completed"
+              ? (s.confirmed_root_cause ?? "Completed")
+              : undefined,
     equipment: e
       ? {
           brand: e.manufacturer,
@@ -175,9 +206,13 @@ export function mapSessionToTechnician(tech: DbTechnician, s: DbSession, now: nu
           size: e.tonnage !== null && e.tonnage !== undefined ? `${Number(e.tonnage)}T` : "—",
         }
       : { brand: "Unregistered", model: "data plate not scanned yet", kind: "split_ac", refrigerant: "—", size: "—" },
-    elapsedSec: secsBetween(s.started_at, s.completed_at ? new Date(s.completed_at).getTime() : now),
+    elapsedSec: secsBetween(s.started_at, s.completed_at ? new Date(s.completed_at).getTime() : s.ended_at ? new Date(s.ended_at).getTime() : now),
     currentStep: current,
-    stepSummary: status === "completed" ? "Job complete · dispatch report saved" : (currentRow?.instruction ?? STEP_SUMMARY[current]),
+    stepSummary: endedEarly
+      ? "Session ended · no root cause confirmed"
+      : status === "completed"
+        ? "Job complete · dispatch report saved"
+        : (currentRow?.instruction ?? STEP_SUMMARY[current]),
     steps: mapSteps(s, status),
     readings,
     transcript: mapEventLog(s, readings),
@@ -195,7 +230,7 @@ export function mapLiveFleet(techs: DbTechnician[], sessions: DbSession[], now: 
   for (const s of [...sessions].sort((a, b) => b.started_at.localeCompare(a.started_at))) {
     if (!s.tech_id) continue;
     const prev = byTech.get(s.tech_id);
-    if (!prev || (prev.status !== "in_progress" && s.status === "in_progress")) byTech.set(s.tech_id, s);
+    if (!prev || (!isOpen(prev) && isOpen(s))) byTech.set(s.tech_id, s);
   }
   const cards: Technician[] = [];
   const idle: DbTechnician[] = [];

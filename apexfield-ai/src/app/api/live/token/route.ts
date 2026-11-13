@@ -14,6 +14,8 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SESSION_MINUTES = 30;
 /** The browser must open the WebSocket within this window. */
 const CONNECT_WINDOW_SECONDS = 60;
+/** Cost guardrail: live sessions a company may start per day (override with LIVE_MAX_SESSIONS_PER_ORG_PER_DAY). */
+const MAX_SESSIONS_PER_ORG_PER_DAY = Number(process.env.LIVE_MAX_SESSIONS_PER_ORG_PER_DAY) || 60;
 
 /**
  * POST /api/live/token
@@ -49,7 +51,7 @@ export async function POST(req: Request) {
     );
   }
 
-  let body: { sessionId?: unknown; reportedSymptom?: unknown } = {};
+  let body: { sessionId?: unknown; reportedSymptom?: unknown; consentAcknowledged?: unknown } = {};
   try {
     body = await req.json();
   } catch {
@@ -60,6 +62,30 @@ export async function POST(req: Request) {
     typeof body.reportedSymptom === "string" && body.reportedSymptom.trim()
       ? body.reportedSymptom.trim().slice(0, 500)
       : "Not reported (live AI coaching session)";
+
+  // New signed-in sessions need the technician's daily safety + consent acknowledgment.
+  if (auth?.tech && !resumeId && body.consentAcknowledged !== true) {
+    return NextResponse.json(
+      { error: "Confirm the customer consent and safety acknowledgment before starting.", code: "consent_required" },
+      { status: 400 },
+    );
+  }
+
+  // Cost guardrail: cap new sessions per company per day.
+  if (auth?.tech && !resumeId) {
+    const since = new Date(Date.now() - 24 * 60 * 60_000).toISOString();
+    const { count } = await auth.supabase
+      .from("service_sessions")
+      .select("id", { count: "exact", head: true })
+      .eq("org_id", auth.tech.org_id)
+      .gte("started_at", since);
+    if ((count ?? 0) >= MAX_SESSIONS_PER_ORG_PER_DAY) {
+      return NextResponse.json(
+        { error: `Your company has reached today's limit of ${MAX_SESSIONS_PER_ORG_PER_DAY} live sessions. Contact ApexField to raise it.`, code: "daily_limit" },
+        { status: 429 },
+      );
+    }
+  }
 
   // Resuming: the session must belong to this technician.
   if (resumeId && auth?.tech) {
@@ -99,9 +125,22 @@ export async function POST(req: Request) {
   if (auth?.tech) {
     // Signed in: insert as the user so RLS checks the org; the session is owned by this tech.
     if (!resumeId) {
+      // One live session per tech: close anything they left open (app killed, phone died).
+      await auth.supabase
+        .from("service_sessions")
+        .update({ status: "ended", ended_at: new Date().toISOString() })
+        .eq("tech_id", auth.user.id)
+        .in("status", ["in_progress", "escalated"]);
       const { data, error } = await auth.supabase
         .from("service_sessions")
-        .insert({ org_id: auth.tech.org_id, tech_id: auth.user.id, reported_symptom: reportedSymptom, status: "in_progress", current_step_index: 1 })
+        .insert({
+          org_id: auth.tech.org_id,
+          tech_id: auth.user.id,
+          reported_symptom: reportedSymptom,
+          status: "in_progress",
+          current_step_index: 1,
+          consent_acknowledged_at: new Date().toISOString(),
+        })
         .select("id")
         .single();
       if (error) console.error("[live/token] service_sessions insert failed:", error.message);
