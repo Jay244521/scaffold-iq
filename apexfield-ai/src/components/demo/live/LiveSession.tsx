@@ -5,9 +5,10 @@ import { AlertTriangle, MonitorPlay, RotateCcw } from "lucide-react";
 import { useGeminiLiveSession, type LiveToolHandler } from "@/hooks/useGeminiLiveSession";
 import { applyToolCall, initialLiveState, type LiveSessionState } from "@/lib/ai/live-session-state";
 import type { HvacToolCall } from "@/lib/ai/hvac-tools";
+import { runOemLookup, type LookupRecord } from "@/lib/ai/oem-lookup-client";
 import { DemoTopBar } from "../DemoTopBar";
 import { LiveMediaPanel } from "./LiveMediaPanel";
-import { BlockedNotice, EquipmentCard, LiveReport, PersistenceBadge, ReadingsFeed, SafetyCard, StepTracker, TranscriptCard } from "./LiveHud";
+import { BlockedNotice, EquipmentCard, LiveReport, ManualLookups, PersistenceBadge, ReadingsFeed, SafetyCard, StepTracker, TranscriptCard } from "./LiveHud";
 
 export function LiveSession({ modeSwitch, onUseSimulator }: { modeSwitch: ReactNode; onUseSimulator: () => void }) {
   const [state, setState] = useState<LiveSessionState>(initialLiveState);
@@ -35,8 +36,16 @@ export function LiveSession({ modeSwitch, onUseSimulator }: { modeSwitch: ReactN
     });
   }, []);
 
+  const [lookups, setLookups] = useState<LookupRecord[]>([]);
+
   const onToolCall = useCallback<LiveToolHandler>(
-    (call) => {
+    async (call) => {
+      // Read-only manual search: scoped to the registered unit, never persisted, no state change.
+      if (call.name === "lookup_oem_spec") {
+        const { response, record } = await runOemLookup(call.args, stateRef.current.equipment);
+        setLookups((prev) => [...prev, record].slice(-12));
+        return response;
+      }
       const outcome = applyToolCall(stateRef.current, call.name, call.args);
       stateRef.current = outcome.state;
       setState(outcome.state);
@@ -55,6 +64,7 @@ export function LiveSession({ modeSwitch, onUseSimulator }: { modeSwitch: ReactN
   const begin = useCallback(() => {
     stateRef.current = initialLiveState;
     setState(initialLiveState);
+    setLookups([]);
     setPersistError(false);
     void live.start();
   }, [live]);
@@ -145,6 +155,7 @@ export function LiveSession({ modeSwitch, onUseSimulator }: { modeSwitch: ReactN
               </>
             )}
             <ReadingsFeed readings={state.readings} />
+            <ManualLookups lookups={lookups} />
             <TranscriptCard captions={live.captions} />
           </div>
         </div>

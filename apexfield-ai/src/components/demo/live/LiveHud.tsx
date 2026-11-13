@@ -9,6 +9,7 @@ import {
   Cpu,
   Database,
   Lock,
+  BookOpen,
   MessageSquareText,
   OctagonAlert,
   ShieldAlert,
@@ -20,6 +21,7 @@ import {
 import { DIAGNOSTIC_SEQUENCE, READING_LABELS, SAFETY_STEP } from "@/lib/ai/hvac-tools";
 import type { LiveSessionState } from "@/lib/ai/live-session-state";
 import type { LiveCaption, LiveSessionInfo } from "@/hooks/useGeminiLiveSession";
+import type { LookupRecord } from "@/lib/ai/oem-lookup-client";
 import { StatusBadge } from "../TelemetryLog";
 
 const time = (iso: string) => new Date(iso).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
@@ -201,6 +203,52 @@ export function ReadingsFeed({ readings }: { readings: LiveSessionState["reading
           ))}
         </ol>
       )}
+    </div>
+  );
+}
+
+const LOOKUP_STATUS: Record<LookupRecord["status"], { label: string; cls: string }> = {
+  found: { label: "FOUND", cls: "bg-emerald/15 text-emerald" },
+  none: { label: "NOT IN MANUALS", cls: "bg-amber/15 text-amber-hi" },
+  unavailable: { label: "LIBRARY OFFLINE", cls: "bg-line text-muted" },
+  error: { label: "FAILED", cls: "bg-danger/15 text-danger" },
+  blocked: { label: "NEEDS DATA PLATE", cls: "bg-danger/15 text-danger" },
+};
+
+/** What the coach looked up in the OEM manuals, and where each answer came from. */
+export function ManualLookups({ lookups }: { lookups: LookupRecord[] }) {
+  if (!lookups.length) return null;
+  return (
+    <div className={card}>
+      <p className={label}>
+        <BookOpen className="h-3.5 w-3.5 text-amber" aria-hidden="true" /> MANUAL LOOKUPS · {lookups.length}
+      </p>
+      <ol className="mt-3 flex flex-col gap-2">
+        {[...lookups].reverse().map((l) => {
+          const st = LOOKUP_STATUS[l.status];
+          return (
+            <li key={l.id} className="animate-fade-up rounded-xl border border-line bg-slate-deep p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-sm font-medium text-ink">&ldquo;{l.query}&rdquo;</span>
+                <span className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-bold tracking-wide ${st.cls}`}>{st.label}</span>
+              </div>
+              {l.sources.length > 0 && (
+                <ul className="mt-1.5 flex flex-col gap-0.5">
+                  {l.sources.map((src, i) => (
+                    <li key={i} className="truncate font-mono text-[11px] text-muted" title={src}>
+                      [{i + 1}] {src}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="mt-1 font-mono text-[10px] text-muted">
+                {time(l.at)}
+                {l.chunkType ? ` · ${l.chunkType.replace("_", " ")}` : ""}
+              </p>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }
