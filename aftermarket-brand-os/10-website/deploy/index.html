@@ -3,354 +3,324 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Keelwell Care Kit</title>
-<meta name="description" content="Keelwell Care Kit: 9 color-coded microfiber towels and a 15-minute interior reset guide for everyday drivers. Launching in Dallas–Fort Worth.">
+<title>Keelwell Auto</title>
+<meta name="description" content="Keelwell: interior protection, cargo, pet travel and car-care accessories for sedans, crossovers and SUVs. Shop by vehicle.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&display=swap">
 <style>
-/* Layout: launch page for a car-care kit. Graphite hero with the kit drawn as stacked towels, then a single column of selling sections, ending in the pre-order call. */
+/* Layout: aftermarket storefront. Utility strip + header with category nav; hero is a year/make/model fitment finder; then shop by category, shop by vehicle type, catalog with honest availability, fit-guide promise, dealer & installer programs. */
 :root{
-  --bg:#F4F2EE; --surface:#FFFFFF; --ink:#18212B; --muted:#5A6570; --line:#DDD8D0;
-  --graphite:#1F2A36; --graphite-ink:#EEF1F4; --graphite-muted:#AEB8C2;
+  --bg:#F3F4F5; --surface:#FFFFFF; --ink:#151D26; --muted:#5A6672; --line:#D8DDE2;
+  --graphite:#1F2A36; --graphite-2:#2A3746; --g-ink:#EEF1F4; --g-muted:#A9B4BF;
   --accent:#E8671B; --accent-ink:#FFFFFF; --accent-soft:#FCE8DA;
-  --t-blue:#2F6FB3; --t-gray:#8A97A5; --t-orange:#E8671B; --t-sand:#D9CFBF;
+  --ok:#1E7A4C; --ok-soft:#E2F2E9; --dev:#2F6FB3; --dev-soft:#E3EDF8; --plan:#6B6F76; --plan-soft:#ECEDEF;
   --display:"Barlow Condensed","Arial Narrow",ui-sans-serif,system-ui,sans-serif;
   --body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#13181E; --surface:#1B232C; --ink:#E7EBEF; --muted:#9BA6B1; --line:#2D3742;
-  --graphite:#0D1217; --graphite-ink:#EEF1F4; --graphite-muted:#9FAAB5;
-  --accent:#F27A30; --accent-ink:#16110D; --accent-soft:#3A2416;
-  --t-sand:#B8AD9C; color-scheme:dark}}
+  --bg:#11161C; --surface:#1A222B; --ink:#E6EAEE; --muted:#9AA5B0; --line:#2C3641;
+  --graphite:#0C1116; --graphite-2:#16202A; --g-ink:#EEF1F4; --g-muted:#9AA6B2;
+  --accent:#F27A30; --accent-ink:#17110C; --accent-soft:#3A2416;
+  --ok:#5FC490; --ok-soft:#15301F; --dev:#7FB2EA; --dev-soft:#172A40; --plan:#A5ABB3; --plan-soft:#262D35;
+  color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#13181E; --surface:#1B232C; --ink:#E7EBEF; --muted:#9BA6B1; --line:#2D3742;
-  --graphite:#0D1217; --graphite-ink:#EEF1F4; --graphite-muted:#9FAAB5;
-  --accent:#F27A30; --accent-ink:#16110D; --accent-soft:#3A2416;
-  --t-sand:#B8AD9C; color-scheme:dark}
+  --bg:#11161C; --surface:#1A222B; --ink:#E6EAEE; --muted:#9AA5B0; --line:#2C3641;
+  --graphite:#0C1116; --graphite-2:#16202A; --g-ink:#EEF1F4; --g-muted:#9AA6B2;
+  --accent:#F27A30; --accent-ink:#17110C; --accent-soft:#3A2416;
+  --ok:#5FC490; --ok-soft:#15301F; --dev:#7FB2EA; --dev-soft:#172A40; --plan:#A5ABB3; --plan-soft:#262D35;
+  color-scheme:dark}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15.5px;line-height:1.55}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--graphite)}
-.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 a{color:inherit}
-h1,h2,h3{font-family:var(--display);line-height:1.02;margin:0;text-wrap:balance;letter-spacing:.005em}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.02;text-wrap:balance}
 p{margin:0}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:600 16px/1 var(--body);text-decoration:none;padding:15px 22px;border-radius:8px;border:2px solid transparent;cursor:pointer;transition:transform .15s ease,background .15s ease}
-.btn:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:600 15px/1 var(--body);text-decoration:none;padding:14px 20px;border-radius:6px;border:2px solid transparent;cursor:pointer;background:none;color:inherit}
+.btn:focus-visible,select:focus-visible,a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .btn-primary{background:var(--accent);color:var(--accent-ink)}
-.btn-primary:hover{transform:translateY(-1px)}
-.btn-ghost{border-color:currentColor;background:transparent}
+.btn-dark{background:var(--graphite);color:var(--g-ink)}
+.btn-line{border-color:var(--line);background:var(--surface)}
+.pill{display:inline-block;font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:4px;white-space:nowrap}
+.s-now{background:var(--ok-soft);color:var(--ok)}
+.s-dev{background:var(--dev-soft);color:var(--dev)}
+.s-plan{background:var(--plan-soft);color:var(--plan)}
 
-/* top bar */
-.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--graphite);color:var(--graphite-ink);border-bottom:1px solid #ffffff14}
-.bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:12px}
-.logo{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:.06em;text-transform:uppercase;text-decoration:none}
-.logo svg{flex:none}
-.bar nav{display:flex;gap:20px;font-size:14px;font-weight:500}
-.bar nav a{text-decoration:none;color:var(--graphite-muted)}
-.bar nav a:hover{color:var(--graphite-ink)}
-.bar .btn{padding:10px 16px;font-size:14px}
-@media (max-width:760px){.bar nav{display:none}}
+/* utility + header */
+.util{background:var(--graphite);color:var(--g-muted);font-size:12.5px}
+.util .wrap{display:flex;justify-content:space-between;gap:16px;padding-block:7px;overflow-x:auto;white-space:nowrap}
+.util b{color:var(--g-ink);font-weight:600}
+header.main{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--graphite-2);color:var(--g-ink);border-bottom:3px solid var(--accent)}
+header.main .row{display:flex;align-items:center;gap:20px;padding-block:12px}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:26px;letter-spacing:.07em;text-transform:uppercase;text-decoration:none;flex:none}
+.logo small{font-family:var(--body);font-size:10px;font-weight:600;letter-spacing:.18em;color:var(--g-muted);display:block;line-height:1;margin-top:2px}
+.myveh{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--g-muted);min-width:0}
+.myveh b{color:var(--g-ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.myveh button{font:600 12.5px var(--body);color:var(--accent);background:none;border:0;cursor:pointer;padding:4px}
+@media (max-width:560px){.logo small,.myveh > span{display:none}.logo{font-size:22px}header.main .row{gap:12px}}
+.catnav{border-top:1px solid #ffffff12}
+.catnav .wrap{display:flex;gap:2px;overflow-x:auto;padding-block:4px}
+.catnav a{flex:none;font-size:13.5px;font-weight:600;text-decoration:none;color:var(--g-muted);padding:9px 12px;border-radius:4px;white-space:nowrap}
+.catnav a:hover{color:var(--g-ink);background:#ffffff0d}
 
-/* hero */
-.hero{background:var(--graphite);color:var(--graphite-ink);overflow:hidden}
-.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding-block:56px 64px}
-.kicker{font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
-.hero h1{font-size:clamp(48px,8vw,92px);font-weight:800;text-transform:uppercase;margin-top:12px}
-.hero h1 em{font-style:normal;color:var(--accent)}
-.hero .sub{font-size:18px;color:var(--graphite-muted);max-width:46ch;margin-top:18px}
-.hero .ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
-.hero .ctas .btn-ghost{color:var(--graphite-ink)}
-.hero .facts{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:28px;font-size:14px;color:var(--graphite-muted)}
-.hero .facts span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:8px;vertical-align:middle}
-.stack{position:relative;aspect-ratio:1/1;max-width:440px;width:100%;justify-self:center}
-.towel{position:absolute;left:8%;right:8%;height:17%;border-radius:10px;box-shadow:0 10px 24px #00000040;background-image:repeating-linear-gradient(90deg,#ffffff10 0 2px,transparent 2px 6px)}
-.towel::after{content:"";position:absolute;inset:6px;border:1.5px dashed #ffffff40;border-radius:6px}
-.towel:nth-child(1){bottom:6%;background-color:var(--t-sand);transform:rotate(-2deg)}
-.towel:nth-child(2){bottom:20%;background-color:var(--t-gray);transform:rotate(1.5deg)}
-.towel:nth-child(3){bottom:34%;background-color:var(--t-blue);transform:rotate(-1deg)}
-.towel:nth-child(4){bottom:48%;background-color:var(--t-orange);transform:rotate(2deg)}
-.towel:nth-child(5){bottom:62%;left:14%;right:14%;background-color:var(--t-gray);transform:rotate(-1.5deg)}
-.tag{position:absolute;top:4%;right:2%;background:var(--surface);color:var(--ink);border-radius:10px;padding:12px 14px;box-shadow:0 10px 30px #00000055;transform:rotate(4deg);display:grid;gap:2px;min-width:132px}
-.tag b{font-family:var(--display);font-size:30px;line-height:1}
-.tag small{font-size:12px;color:var(--muted)}
-@media (max-width:820px){.hero .wrap{grid-template-columns:1fr;padding-block:40px 48px}.stack{max-width:320px}}
+/* hero finder */
+.hero{background:linear-gradient(180deg,var(--graphite) 0%,var(--graphite-2) 100%);color:var(--g-ink);position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;inset:auto -10% -40% 40%;height:120%;background:repeating-linear-gradient(115deg,#ffffff07 0 2px,transparent 2px 22px);pointer-events:none}
+.hero .wrap{position:relative;z-index:1;display:grid;gap:22px;padding-block:52px 56px}
+.kicker{font-size:12.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.hero h1{font-size:clamp(42px,6.6vw,78px);font-weight:800;text-transform:uppercase;max-width:15ch}
+.hero .sub{font-size:17px;color:var(--g-muted);max-width:56ch}
+.finder{background:var(--surface);color:var(--ink);border-radius:10px;padding:18px;display:grid;grid-template-columns:repeat(3,1fr) auto;gap:10px;align-items:end;max-width:900px;box-shadow:0 18px 40px #00000040}
+.finder label{display:grid;gap:5px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);min-width:0}
+.finder select{font:500 15px var(--body);padding:12px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%}
+.finder select:disabled{opacity:.55}
+.finder .btn{height:46px}
+@media (max-width:760px){.finder{grid-template-columns:1fr 1fr}.finder .btn{grid-column:1/-1}}
+@media (max-width:420px){.finder{grid-template-columns:1fr}}
+.trust{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:13.5px;color:var(--g-muted)}
+.trust span::before{content:"✓";color:var(--accent);font-weight:700;margin-right:7px}
+
+/* fit results */
+#fit{scroll-margin-top:120px}
+.fitpanel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:24px;display:grid;gap:18px}
+.fithead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:10px}
+.fithead h2{font-size:34px;font-weight:700;text-transform:uppercase}
+.fithead .cls{font-size:14px;color:var(--muted)}
+.fitlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.fitrow{border:1px solid var(--line);border-radius:8px;padding:14px;display:grid;gap:6px;align-content:start;background:var(--bg);min-width:0}
+.fitrow h3{font-family:var(--body);font-size:15px;font-weight:600;line-height:1.3}
+.fitrow p{font-size:13.5px;color:var(--muted)}
+.fitnote{font-size:13.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.empty{color:var(--muted);font-size:15px}
 
 /* sections */
-main section{padding-block:72px}
-.sec-head{display:grid;gap:12px;max-width:640px;margin-bottom:36px}
-.sec-head h2{font-size:clamp(36px,5vw,54px);font-weight:700;text-transform:uppercase}
-.sec-head p{color:var(--muted);font-size:17px}
-.eyebrow{font-size:12.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+main > section{padding-block:60px}
+.sh{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px;margin-bottom:26px}
+.sh h2{font-size:clamp(32px,4.4vw,48px);font-weight:700;text-transform:uppercase}
+.sh p{color:var(--muted);max-width:58ch}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:6px}
 
-/* problem strip */
-.pains{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.pain{display:grid;gap:8px;border-top:3px solid var(--ink);padding-top:16px}
-.pain h3{font-size:26px;font-weight:700}
-.pain p{color:var(--muted)}
-@media (max-width:760px){.pains{grid-template-columns:1fr}}
+/* categories */
+.cats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.cat{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;text-decoration:none;display:grid;grid-template-rows:auto 1fr;transition:border-color .15s}
+.cat:hover{border-color:var(--accent)}
+.cat .art{aspect-ratio:4/3;background:var(--graphite-2);display:grid;place-items:center;max-width:100%}
+.cat .art svg{width:58%;height:auto}
+.cat .txt{padding:14px;display:grid;gap:4px;align-content:start}
+.cat h3{font-size:22px;font-weight:700;text-transform:uppercase}
+.cat p{font-size:13px;color:var(--muted)}
+.cat .cnt{font-size:12px;font-weight:600;color:var(--accent);margin-top:4px}
+@media (max-width:980px){.cats{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:620px){.cats{grid-template-columns:repeat(2,1fr)}}
 
-/* kit contents */
-.kit{background:var(--surface);border-block:1px solid var(--line)}
-.contents{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
-.item{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;padding:18px;border:1px solid var(--line);border-radius:12px;background:var(--bg);min-width:0}
-.qty{font-family:var(--display);font-weight:800;font-size:40px;line-height:.9;color:var(--accent)}
-.item h3{font-family:var(--body);font-size:16px;font-weight:600;line-height:1.3}
-.item p{font-size:14px;color:var(--muted);margin-top:4px}
-.chips{display:flex;gap:6px;margin-top:8px}
-.chip{width:22px;height:14px;border-radius:3px;border:1px solid #0000001a}
+/* vehicle types */
+.vtypes{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.vtype{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:10px;cursor:pointer;text-align:left;font:inherit;color:inherit;transition:border-color .15s}
+.vtype:hover,.vtype[aria-pressed="true"]{border-color:var(--accent)}
+.vtype svg{width:100%;height:56px}
+.vtype b{font-family:var(--display);font-size:22px;text-transform:uppercase}
+.vtype span{font-size:13px;color:var(--muted)}
+@media (max-width:820px){.vtypes{grid-template-columns:repeat(2,1fr)}}
 
-/* how it works */
-.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;counter-reset:s}
-.step{display:grid;gap:10px;align-content:start;min-width:0}
-.step .min{font-family:var(--display);font-weight:800;font-size:46px;line-height:1;color:var(--ink)}
-.step .min small{font-size:20px;color:var(--muted);margin-left:4px}
-.step h3{font-family:var(--body);font-size:17px;font-weight:600}
-.step p{font-size:15px;color:var(--muted)}
-.step .swatch{height:6px;border-radius:3px}
-@media (max-width:860px){.steps{grid-template-columns:1fr 1fr}}
-@media (max-width:480px){.steps{grid-template-columns:1fr}}
+/* catalog */
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.filters button{font:600 13px var(--body);padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:grid;grid-template-rows:auto 1fr}
+.card .img{aspect-ratio:1/1;background:var(--bg);display:grid;place-items:center;border-bottom:1px solid var(--line);position:relative;max-width:100%}
+.card .img svg{width:62%;height:auto}
+.card .img .pill{position:absolute;top:10px;left:10px}
+.card .body{padding:14px;display:grid;gap:8px;align-content:start}
+.card .line{font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.card h3{font-family:var(--body);font-size:15.5px;font-weight:600;line-height:1.3}
+.card p{font-size:13.5px;color:var(--muted)}
+.card .foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px}
+.card .price{font-family:var(--display);font-weight:800;font-size:26px}
+.card .fitchip{font-size:12px;color:var(--muted)}
+.card .btn{padding:10px 14px;font-size:13.5px}
 
-/* offers */
-.offers{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
-.offer{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:28px;display:grid;gap:14px;align-content:start;min-width:0}
-.offer.featured{border:2px solid var(--accent)}
-.offer .badge{justify-self:start;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:999px}
-.offer h3{font-size:34px;font-weight:700;text-transform:uppercase}
-.price{font-family:var(--display);font-weight:800;font-size:52px;line-height:1}
-.price small{font-family:var(--body);font-weight:500;font-size:14px;color:var(--muted);margin-left:6px}
-.offer ul{margin:0;padding:0;list-style:none;display:grid;gap:8px;font-size:15px}
-.offer li{display:grid;grid-template-columns:18px 1fr;gap:10px}
-.offer li::before{content:"";width:12px;height:12px;margin-top:6px;border-radius:3px;background:var(--accent)}
-.offer .btn{justify-self:start;margin-top:6px}
-@media (max-width:760px){.offers{grid-template-columns:1fr}}
+/* flagship */
+.flag{background:var(--graphite-2);color:var(--g-ink)}
+.flag .wrap{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.flag h2{font-size:clamp(36px,5vw,56px);font-weight:800;text-transform:uppercase}
+.flag p{color:var(--g-muted);max-width:52ch}
+.flag ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.flag li{display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start}
+.flag li b{font-family:var(--display);font-size:24px;color:var(--accent);line-height:1}
+.flag .diagram{background:var(--graphite);border-radius:12px;padding:20px;max-width:100%}
+.flag .diagram svg{width:100%;height:auto;display:block}
+@media (max-width:860px){.flag .wrap{grid-template-columns:1fr}}
 
 /* promise */
-.promise{background:var(--graphite);color:var(--graphite-ink)}
-.promise .sec-head p{color:var(--graphite-muted)}
-.pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
-.pillar{display:grid;gap:8px}
-.pillar h3{font-size:30px;font-weight:700;text-transform:uppercase;color:var(--accent)}
-.pillar p{color:var(--graphite-muted)}
-@media (max-width:760px){.pillars{grid-template-columns:1fr}}
+.promise{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.pr{border-top:3px solid var(--ink);padding-top:14px;display:grid;gap:6px}
+.pr h3{font-size:24px;font-weight:700;text-transform:uppercase}
+.pr p{font-size:14.5px;color:var(--muted)}
+@media (max-width:860px){.promise{grid-template-columns:1fr 1fr}}
+@media (max-width:480px){.promise{grid-template-columns:1fr}}
 
-/* wholesale */
-.wholesale .box{display:grid;grid-template-columns:1.2fr .8fr;gap:32px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:36px}
-.wholesale ul{margin:0;padding-left:18px;display:grid;gap:6px;color:var(--muted)}
-@media (max-width:760px){.wholesale .box{grid-template-columns:1fr;padding:24px}}
+/* programs */
+.programs{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.prog{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:22px;display:grid;gap:10px;align-content:start}
+.prog h3{font-size:26px;font-weight:700;text-transform:uppercase}
+.prog p{font-size:14.5px;color:var(--muted)}
+.prog .btn{justify-self:start;margin-top:4px}
+@media (max-width:860px){.programs{grid-template-columns:1fr}}
 
-/* faq */
-.faq{display:grid;gap:10px;max-width:780px}
-details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:0 18px}
-summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;display:flex;justify-content:space-between;gap:12px}
-summary::-webkit-details-marker{display:none}
-summary::after{content:"+";font-family:var(--display);font-size:24px;line-height:1;color:var(--accent)}
-details[open] summary::after{content:"–"}
-summary:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:4px}
-details p{padding:0 0 16px;color:var(--muted)}
-
-/* final cta */
-.final{background:var(--accent);color:var(--accent-ink)}
-.final .wrap{display:grid;gap:18px;justify-items:start;padding-block:64px}
-.final h2{font-size:clamp(40px,6vw,68px);font-weight:800;text-transform:uppercase}
-.final p{font-size:18px;max-width:52ch}
-.final .btn{background:var(--graphite);color:var(--graphite-ink)}
-.final .note{font-size:14px;opacity:.85}
-
-footer{background:var(--graphite);color:var(--graphite-muted);font-size:14px}
-footer .wrap{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:28px;padding-block:44px}
-footer h4{margin:0 0 10px;color:var(--graphite-ink);font-size:13px;letter-spacing:.1em;text-transform:uppercase}
-footer ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+/* cta + footer */
+.cta{background:var(--accent);color:var(--accent-ink)}
+.cta .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:20px;padding-block:44px}
+.cta h2{font-size:clamp(32px,4.6vw,50px);font-weight:800;text-transform:uppercase}
+.cta p{max-width:52ch}
+.cta .note{font-size:13px;opacity:.85;margin-top:6px}
+footer{background:var(--graphite);color:var(--g-muted);font-size:13.5px}
+footer .cols{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:24px;padding-block:44px}
+footer h4{margin:0 0 10px;color:var(--g-ink);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+footer ul{list-style:none;margin:0;padding:0;display:grid;gap:7px}
 footer a{text-decoration:none}
-footer a:hover{color:var(--graphite-ink)}
-.legal{border-top:1px solid #ffffff14}
-.legal .wrap{display:block;padding-block:16px;font-size:12.5px}
-@media (max-width:760px){footer .wrap{grid-template-columns:1fr}}
+footer a:hover{color:var(--g-ink)}
+footer .legal{border-top:1px solid #ffffff14;padding-block:16px;font-size:12px}
+@media (max-width:860px){footer .cols{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
 
-<header class="bar">
-  <div class="wrap">
+<div class="util"><div class="wrap"><span><b>Launching in Dallas–Fort Worth</b> · local pickup and delivery first</span><span>30-day returns, test-fit allowed</span><span>Real people answer: <b id="util-email">hello@keelwell.com</b></span></div></div>
+
+<header class="main">
+  <div class="wrap row">
     <a class="logo" href="#top" aria-label="Keelwell home">
-      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 2 25 7v7c0 6.2-4.6 10.6-11 12C7.6 24.6 3 20.2 3 14V7l11-5Z" fill="#E8671B"/><path d="M9 19 14 8l5 11" fill="none" stroke="#1F2A36" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Keelwell
+      <svg width="30" height="30" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 2 25 7v7c0 6.2-4.6 10.6-11 12C7.6 24.6 3 20.2 3 14V7l11-5Z" fill="#E8671B"/><path d="M9 19 14 8l5 11" fill="none" stroke="#1F2A36" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Keelwell<small>Interior · Cargo · Pet · Care</small></span>
     </a>
-    <nav aria-label="Page sections">
-      <a href="#kit">The kit</a>
-      <a href="#how">How it works</a>
-      <a href="#pricing">Launch pricing</a>
-      <a href="#shops">For shops</a>
-      <a href="#faq">FAQ</a>
-    </nav>
-    <a class="btn btn-primary js-preorder" href="#reserve">Reserve a kit</a>
+    <div class="myveh" aria-live="polite"><span>My vehicle:</span> <b id="myveh-label">None selected</b> <button type="button" id="myveh-change">Change</button></div>
   </div>
+  <nav class="catnav" aria-label="Categories"><div class="wrap">
+    <a href="#catalog" data-filter="all">Shop all</a>
+    <a href="#catalog" data-filter="interior">Interior Protection</a>
+    <a href="#catalog" data-filter="cargo">Cargo &amp; Organization</a>
+    <a href="#catalog" data-filter="pet">Pet Travel</a>
+    <a href="#catalog" data-filter="care">Care &amp; Detailing</a>
+    <a href="#catalog" data-filter="sun">Sun &amp; Heat</a>
+    <a href="#system">Cargo System</a>
+    <a href="#programs">Dealers &amp; Installers</a>
+  </div></nav>
 </header>
 
 <section class="hero" id="top">
   <div class="wrap">
-    <div>
-      <span class="kicker">Launching in Dallas–Fort Worth</span>
-      <h1>Clean car.<br><em>Fifteen</em> minutes.</h1>
-      <p class="sub">The Keelwell Care Kit gives everyday drivers a simple color-coded towel system and a step-by-step guide, so the inside of your car stays clean without becoming a hobby.</p>
-      <div class="ctas">
-        <a class="btn btn-primary js-preorder" href="#reserve">Reserve a launch kit · $29.99</a>
-        <a class="btn btn-ghost" href="#kit">See what's inside</a>
-      </div>
-      <div class="facts">
-        <span>9 microfiber pieces</span>
-        <span>Color-coded by surface</span>
-        <span>Local DFW delivery</span>
-      </div>
-    </div>
-    <div class="stack" aria-hidden="true">
-      <div class="towel"></div><div class="towel"></div><div class="towel"></div><div class="towel"></div><div class="towel"></div>
-      <div class="tag"><small>Care Kit · 9 pc</small><b>$29.99</b><small>Launch batch</small></div>
-    </div>
+    <span class="kicker">Accessories for sedans, crossovers &amp; SUVs</span>
+    <h1>Gear that fits the car you actually drive</h1>
+    <p class="sub">Interior protection, cargo organization, pet travel and car care, built around your vehicle. Tell us what you drive and we'll show what fits.</p>
+    <form class="finder" id="finder" aria-label="Find parts for your vehicle">
+      <label for="f-year">Year<select id="f-year" required><option value="">Select year</option></select></label>
+      <label for="f-make">Make<select id="f-make" required disabled><option value="">Select make</option></select></label>
+      <label for="f-model">Model<select id="f-model" required disabled><option value="">Select model</option></select></label>
+      <button class="btn btn-primary" type="submit">Show what fits</button>
+    </form>
+    <div class="trust"><span>Fit guide for every product</span><span>Test-fit returns for 30 days</span><span>Designed for Texas summers</span></div>
   </div>
 </section>
 
 <main>
 
-<section id="problem">
+<section id="fit" aria-live="polite">
   <div class="wrap">
-    <div class="sec-head">
-      <span class="eyebrow">Why we made it</span>
-      <h2>Car care shouldn't need a YouTube degree</h2>
-    </div>
-    <div class="pains">
-      <div class="pain"><h3>Too many products</h3><p>Shelves full of sprays, cloths and gadgets, with no clear idea of which one goes where.</p></div>
-      <div class="pain"><h3>The wrong cloth</h3><p>One rag for the dash, the windows and the door jambs spreads grime around and streaks the glass.</p></div>
-      <div class="pain"><h3>No time</h3><p>Long DFW commutes mean the car gets used hard and cleaned rarely. You need a routine that fits a lunch break.</p></div>
+    <div class="fitpanel" id="fitpanel">
+      <p class="empty">Select your year, make and model above to see which Keelwell products fit your vehicle.</p>
     </div>
   </div>
 </section>
 
-<section class="kit" id="kit">
+<section id="categories">
   <div class="wrap">
-    <div class="sec-head">
-      <span class="eyebrow">What's in the box</span>
-      <h2>The Care Kit</h2>
-      <p>Everything you need for the inside of your car and the glass, sorted by color so each towel has one job.</p>
+    <div class="sh"><div><span class="eyebrow">Shop by category</span><h2>Five ways to protect your vehicle</h2></div><p>One brand across the whole interior. Every product line shares the same fit guide and the same return promise.</p></div>
+    <div class="cats" id="cats"></div>
+  </div>
+</section>
+
+<section id="vehicles" style="padding-top:0">
+  <div class="wrap">
+    <div class="sh"><div><span class="eyebrow">Shop by vehicle type</span><h2>Built around your body style</h2></div></div>
+    <div class="vtypes" id="vtypes"></div>
+  </div>
+</section>
+
+<section id="catalog" style="padding-top:0">
+  <div class="wrap">
+    <div class="sh"><div><span class="eyebrow">The catalog</span><h2>Products</h2></div><p>We release products one tested batch at a time. Status tells you what you can order today and what's on the way.</p></div>
+    <div class="filters" id="filters" role="group" aria-label="Filter by category"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+
+<section class="flag" id="system">
+  <div class="wrap">
+    <div style="display:grid;gap:18px">
+      <span class="eyebrow">In development · flagship</span>
+      <h2>The Keelwell Cargo System</h2>
+      <p>Four pieces that lock together, patterned to your specific vehicle. Protect the whole cargo area from dogs, sports gear, groceries and Texas mud, then take it out in a minute to wash it.</p>
+      <ul>
+        <li><b>1</b><span><strong>Fitted cargo liner</strong> with high side walls that stay up</span></li>
+        <li><b>2</b><span><strong>Fold-out bumper flap</strong> that protects paint during loading</span></li>
+        <li><b>3</b><span><strong>Seat-back protector</strong> covering the rear of the second row</span></li>
+        <li><b>4</b><span><strong>Clip-in organizer</strong> that anchors to the liner so nothing slides</span></li>
+      </ul>
+      <a class="btn btn-primary js-notify" href="#join" style="justify-self:start">Get notified for your vehicle</a>
     </div>
-    <div class="contents">
-      <div class="item"><span class="qty">6</span><div><h3>All-purpose towels, 16×16 in</h3><p>Plush microfiber for dash, console, doors and screens. Two each in three colors.</p><div class="chips"><i class="chip" style="background:var(--t-blue)"></i><i class="chip" style="background:var(--t-gray)"></i><i class="chip" style="background:var(--t-orange)"></i></div></div></div>
-      <div class="item"><span class="qty">1</span><div><h3>Large drying towel</h3><p>Absorbent twisted-loop towel for drying after a wash or wiping down after rain.</p></div></div>
-      <div class="item"><span class="qty">2</span><div><h3>Glass towels</h3><p>Low-lint waffle weave for windows, mirrors and the inside of the windshield.</p></div></div>
-      <div class="item"><span class="qty">1</span><div><h3>Mesh wash bag</h3><p>Keeps the set together in the washing machine so the colors stay sorted.</p></div></div>
-      <div class="item"><span class="qty">1</span><div><h3>15-Minute Reset card</h3><p>A one-card routine with a QR code to a short how-to video.</p></div></div>
+    <div class="diagram" aria-hidden="true">
+      <svg viewBox="0 0 420 300">
+        <path d="M40 230 L120 90 L330 90 L390 230 Z" fill="#2A3746" stroke="#5B6B7C" stroke-width="2"/>
+        <path d="M78 214 L136 112 L318 112 L360 214 Z" fill="#E8671B" opacity=".85"/>
+        <path d="M136 112 L136 60 L318 60 L318 112 Z" fill="#3A4A5C" stroke="#5B6B7C" stroke-width="2"/>
+        <path d="M150 104 L150 70 L304 70 L304 104 Z" fill="#8A97A5"/>
+        <path d="M40 230 L390 230 L372 272 L58 272 Z" fill="#D9CFBF"/>
+        <rect x="170" y="150" width="110" height="40" rx="6" fill="#1F2A36" stroke="#EEF1F4" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <g font-family="Inter,sans-serif" font-size="13" font-weight="600" fill="#EEF1F4">
+          <circle cx="352" cy="170" r="13" fill="#E8671B"/><text x="347" y="175">1</text>
+          <circle cx="215" cy="256" r="13" fill="#1F2A36"/><text x="210" y="261">2</text>
+          <circle cx="227" cy="46" r="13" fill="#E8671B"/><text x="222" y="51">3</text>
+          <circle cx="225" cy="170" r="13" fill="#E8671B"/><text x="220" y="175">4</text>
+        </g>
+      </svg>
     </div>
   </div>
 </section>
 
-<section id="how">
+<section id="promise">
   <div class="wrap">
-    <div class="sec-head">
-      <span class="eyebrow">How it works</span>
-      <h2>The 15-minute interior reset</h2>
-      <p>Follow the colors. Work top to bottom. Done before your coffee gets cold.</p>
-    </div>
-    <div class="steps">
-      <div class="step"><span class="swatch" style="background:var(--t-gray)"></span><span class="min">3<small>min</small></span><h3>Clear out</h3><p>Trash, receipts and loose items out. Shake out the floor mats.</p></div>
-      <div class="step"><span class="swatch" style="background:var(--t-blue)"></span><span class="min">5<small>min</small></span><h3>Dash and console</h3><p>Blue towels for the dash, vents, console and cup holders.</p></div>
-      <div class="step"><span class="swatch" style="background:var(--t-orange)"></span><span class="min">4<small>min</small></span><h3>Doors and touch points</h3><p>Orange towels for door panels, handles, the steering wheel and seat belts.</p></div>
-      <div class="step"><span class="swatch" style="background:var(--t-sand)"></span><span class="min">3<small>min</small></span><h3>Glass last</h3><p>Glass towels for the windshield, windows, mirrors and screens. No streaks.</p></div>
+    <div class="sh"><div><span class="eyebrow">Why Keelwell</span><h2>The fit-first promise</h2></div></div>
+    <div class="promise">
+      <div class="pr"><h3>Fit guide</h3><p>Every product lists the vehicles it fits and how we know. If we haven't measured your vehicle yet, we say so.</p></div>
+      <div class="pr"><h3>Test-fit returns</h3><p>Try it in your vehicle. If it doesn't fit right, return it within 30 days, even out of the bag.</p></div>
+      <div class="pr"><h3>Heat-ready hardware</h3><p>We design around adhesive Velcro and suction cups, which let go in a Texas summer, and use straps and hooks instead.</p></div>
+      <div class="pr"><h3>Real support</h3><p>A Dallas–Fort Worth team that answers within one business day and actually knows the products.</p></div>
     </div>
   </div>
 </section>
 
-<section id="pricing" class="kit">
+<section id="programs" style="padding-top:0">
   <div class="wrap">
-    <div class="sec-head">
-      <span class="eyebrow">Launch pricing</span>
-      <h2>Reserve from the first batch</h2>
-      <p>The first batch is small. Reserve now and pay on pickup or delivery in DFW. No card needed to reserve.</p>
-    </div>
-    <div class="offers">
-      <div class="offer featured">
-        <span class="badge">Most popular</span>
-        <h3>Care Kit</h3>
-        <div class="price">$29.99<small>+ Texas sales tax</small></div>
-        <ul>
-          <li>6 all-purpose towels in 3 colors</li>
-          <li>1 large drying towel</li>
-          <li>2 glass towels</li>
-          <li>Mesh wash bag and 15-Minute Reset card</li>
-        </ul>
-        <a class="btn btn-primary js-preorder" href="#reserve">Reserve a Care Kit</a>
-      </div>
-      <div class="offer">
-        <span class="badge">For dog owners</span>
-        <h3>Pet Owner Kit</h3>
-        <div class="price">$36.99<small>+ Texas sales tax</small></div>
-        <ul>
-          <li>Everything in the Care Kit</li>
-          <li>Rubber pet-hair tool that lifts fur out of carpet and cloth seats</li>
-          <li>Dog-hair routine on the reset card</li>
-        </ul>
-        <a class="btn btn-ghost js-preorder" href="#reserve">Reserve a Pet Owner Kit</a>
-      </div>
+    <div class="sh"><div><span class="eyebrow">Partner programs</span><h2>Dealers, installers &amp; shops</h2></div><p>Keelwell products are built to be sold and fitted by local businesses, not just shipped in a box.</p></div>
+    <div class="programs">
+      <div class="prog"><h3>Dealerships</h3><p>New-owner care kits for delivery day, and fitted cargo protection for your accessory menu as the line grows.</p><a class="btn btn-line js-wholesale" href="#join">Become a dealer</a></div>
+      <div class="prog"><h3>Detailers &amp; car washes</h3><p>Stock care kits at the counter. Wholesale pricing from 10 units and local restocking across DFW.</p><a class="btn btn-line js-wholesale" href="#join">Request a free sample</a></div>
+      <div class="prog"><h3>Installers</h3><p>Fitted products need people who know vehicles. Join the installer network ahead of the Cargo System launch.</p><a class="btn btn-line js-wholesale" href="#join">Join the network</a></div>
     </div>
   </div>
 </section>
 
-<section class="promise" id="promise">
+<section class="cta" id="join">
   <div class="wrap">
-    <div class="sec-head">
-      <span class="eyebrow">The Keelwell promise</span>
-      <h2>Simple products. Straight answers.</h2>
-      <p>We're a small Dallas–Fort Worth company. When you have a question, a real person answers it.</p>
+    <div>
+      <h2>Reserve, get notified, or partner with us</h2>
+      <p>Reserve a launch kit, get notified when products for your vehicle arrive, or ask about wholesale. One short form. You pay nothing to reserve.</p>
+      <p class="note" id="form-note">The form opens in a new tab.</p>
     </div>
-    <div class="pillars">
-      <div class="pillar"><h3>Easy returns</h3><p>Not happy within 30 days? Bring it back or send it back. No arguments.</p></div>
-      <div class="pillar"><h3>Built to last</h3><p>Machine-washable microfiber that's meant to be used hundreds of times.</p></div>
-      <div class="pillar"><h3>Real help</h3><p>Message us with any question about cleaning your car. We'll answer within one business day.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="wholesale" id="shops">
-  <div class="wrap">
-    <div class="box">
-      <div class="sec-head" style="margin:0">
-        <span class="eyebrow">For DFW businesses</span>
-        <h2>Detailers, car washes and dealerships</h2>
-        <p>Offer a branded care kit to your customers at delivery, or sell it at the counter. Wholesale pricing from 10 kits.</p>
-        <ul>
-          <li>Free sample kit dropped off in person</li>
-          <li>New-owner kits for dealership deliveries</li>
-          <li>Local restocking, no shipping wait</li>
-        </ul>
-      </div>
-      <div><a class="btn btn-primary js-wholesale" href="#reserve">Request a free sample kit</a></div>
-    </div>
-  </div>
-</section>
-
-<section id="faq">
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="eyebrow">Questions</span>
-      <h2>FAQ</h2>
-    </div>
-    <div class="faq">
-      <details><summary>When will kits be ready?</summary><p>We're assembling the first small batch now. Everyone who reserves gets a message with the pickup or delivery date before we ask for payment.</p></details>
-      <details><summary>Do I pay when I reserve?</summary><p>No. Reserving holds a kit from the first batch. You pay on pickup or delivery by card or cash.</p></details>
-      <details><summary>Where do you deliver?</summary><p>Across Dallas–Fort Worth to start, with pickup points in Dallas and Fort Worth. Shipping to the rest of Texas and the U.S. comes next.</p></details>
-      <details><summary>How do I wash the towels?</summary><p>Machine wash warm in the mesh bag, with no fabric softener (it clogs the fibers). Tumble dry low or hang dry. The reset card has the details.</p></details>
-      <details><summary>Will it scratch my screens or paint?</summary><p>Microfiber is the standard choice for screens, glass and clear-coat because it's soft and traps dirt instead of dragging it. Keep each color for its own job so grit from the floor never reaches your screens.</p></details>
-      <details><summary>What if I don't like it?</summary><p>Return it within 30 days for a full refund. Just message us.</p></details>
-    </div>
-  </div>
-</section>
-
-<section class="final" id="reserve">
-  <div class="wrap">
-    <h2>Reserve your kit</h2>
-    <p>Takes 30 seconds. Tell us which kit you want and where you are in DFW. We'll confirm your pickup or delivery date before you pay anything.</p>
-    <a class="btn js-preorder" href="#reserve" id="reserve-btn">Open the reservation form</a>
-    <p class="note" id="form-note">The reservation form opens in a new tab.</p>
+    <a class="btn btn-dark js-preorder" href="#join">Open the form</a>
   </div>
 </section>
 
@@ -358,37 +328,202 @@ footer a:hover{color:var(--graphite-ink)}
 
 <footer>
   <div class="wrap">
-    <div>
-      <a class="logo" href="#top" style="color:var(--graphite-ink)">Keelwell</a>
-      <p style="margin-top:10px;max-width:36ch">Car care and interior protection for everyday drivers. Dallas–Fort Worth, Texas.</p>
+    <div class="cols">
+      <div>
+        <a class="logo" href="#top" style="color:var(--g-ink)">Keelwell</a>
+        <p style="margin-top:10px;max-width:34ch">Interior protection, cargo, pet travel and car care for sedans, crossovers and SUVs. Based in Dallas–Fort Worth, Texas.</p>
+      </div>
+      <div><h4>Shop</h4><ul><li><a href="#catalog" data-filter="interior">Interior Protection</a></li><li><a href="#catalog" data-filter="cargo">Cargo &amp; Organization</a></li><li><a href="#catalog" data-filter="pet">Pet Travel</a></li><li><a href="#catalog" data-filter="care">Care &amp; Detailing</a></li><li><a href="#catalog" data-filter="sun">Sun &amp; Heat</a></li></ul></div>
+      <div><h4>Vehicles</h4><ul><li><a href="#vehicles">Sedans</a></li><li><a href="#vehicles">Compact crossovers</a></li><li><a href="#vehicles">Midsize SUVs</a></li><li><a href="#vehicles">Full-size SUVs</a></li></ul></div>
+      <div><h4>Partners</h4><ul><li><a href="#programs">Dealerships</a></li><li><a href="#programs">Detailers &amp; washes</a></li><li><a href="#programs">Installers</a></li></ul></div>
+      <div><h4>Help</h4><ul><li><a href="#promise">Fit guide</a></li><li><a href="#promise">Returns</a></li><li><span id="foot-email">hello@keelwell.com</span></li></ul></div>
     </div>
-    <div>
-      <h4>Shop</h4>
-      <ul><li><a href="#pricing">Care Kit</a></li><li><a href="#pricing">Pet Owner Kit</a></li><li><a href="#shops">Wholesale</a></li></ul>
-    </div>
-    <div>
-      <h4>Help</h4>
-      <ul><li><a href="#faq">FAQ</a></li><li><a href="#faq">Returns (30 days)</a></li><li><span id="contact-email">hello@keelwell.com</span></li></ul>
-    </div>
+    <div class="legal">© 2026 Keelwell. Keelwell is a working brand name. Prices before Texas sales tax. Products marked "In development" or "Planned" are not yet for sale.</div>
   </div>
-  <div class="legal"><div class="wrap">© 2026 Keelwell. Prices shown before Texas sales tax.</div></div>
 </footer>
 
 <script>
-/* Paste your Google Form links here once they exist. Until then, buttons scroll to the reservation section. */
-const RESERVE_FORM_URL = "";   // e.g. https://forms.gle/xxxxxxxx
-const WHOLESALE_FORM_URL = ""; // e.g. https://forms.gle/yyyyyyyy
+/* ---- Settings: paste your free Google Form links here ---- */
+const RESERVE_FORM_URL = "";   // reservations + "notify me"
+const WHOLESALE_FORM_URL = ""; // dealers, detailers, installers
 
-function wire(selector, url){
-  document.querySelectorAll(selector).forEach(a => {
-    if (url) { a.href = url; a.target = "_blank"; a.rel = "noopener"; }
-  });
+/* ---- Vehicle data: body class drives fit. Fit is marked unconfirmed until we've measured the vehicle. ---- */
+const VEHICLES = {
+  "Chevrolet": {"Equinox":"compact","Malibu":"sedan","Tahoe":"fullsize","Traverse":"midsize"},
+  "Ford": {"Bronco Sport":"compact","Escape":"compact","Explorer":"midsize","Expedition":"fullsize"},
+  "Honda": {"Accord":"sedan","Civic":"sedan","CR-V":"compact","HR-V":"compact","Pilot":"midsize"},
+  "Hyundai": {"Elantra":"sedan","Palisade":"midsize","Santa Fe":"midsize","Tucson":"compact"},
+  "Jeep": {"Cherokee":"compact","Grand Cherokee":"midsize","Wrangler 4-door":"midsize"},
+  "Kia": {"K5":"sedan","Sorento":"midsize","Sportage":"compact","Telluride":"midsize"},
+  "Nissan": {"Altima":"sedan","Pathfinder":"midsize","Rogue":"compact","Sentra":"sedan"},
+  "Subaru": {"Crosstrek":"compact","Forester":"compact","Outback":"compact"},
+  "Tesla": {"Model 3":"sedan","Model Y":"compact"},
+  "Toyota": {"4Runner":"midsize","Camry":"sedan","Corolla":"sedan","Highlander":"midsize","RAV4":"compact","Sequoia":"fullsize"}
+};
+const CLASS = {
+  sedan:{label:"Sedan",desc:"Trunk storage, rear seat, interior care"},
+  compact:{label:"Compact crossover",desc:"Mid-size cargo area, 60/40 rear seats"},
+  midsize:{label:"Midsize SUV",desc:"Larger cargo area, often 3 rows"},
+  fullsize:{label:"Full-size SUV",desc:"Largest cargo area, heavy family and pet use"}
+};
+
+/* ---- Catalog. status: now | dev | plan. fits: body classes, or "all". ---- */
+const CATS = {
+  interior:{name:"Interior Protection",blurb:"Seat-back, kick and door protection",art:"seat"},
+  cargo:{name:"Cargo & Organization",blurb:"Trunk and cargo-area organization",art:"box"},
+  pet:{name:"Pet Travel",blurb:"Liners and hammocks for dog owners",art:"paw"},
+  care:{name:"Care & Detailing",blurb:"Microfiber kits, brushes, pet-hair tools",art:"drop"},
+  sun:{name:"Sun & Heat",blurb:"Sunshades for Texas summers",art:"sun"}
+};
+const PRODUCTS = [
+  {id:"care-kit",cat:"care",line:"Care",name:"Care Kit, 9-piece",desc:"Color-coded microfiber towels and a 15-minute interior reset guide.",price:"$29.99",status:"now",fits:"all",art:"drop"},
+  {id:"pet-kit",cat:"care",line:"Care",name:"Pet Owner Kit",desc:"The Care Kit plus a rubber pet-hair tool for carpet and cloth seats.",price:"$36.99",status:"now",fits:"all",art:"paw"},
+  {id:"brush",cat:"care",line:"Care",name:"Interior Detailing Brush Set",desc:"Soft brushes for vents, seams, cup holders and buttons.",status:"dev",fits:"all",art:"drop"},
+  {id:"refill",cat:"care",line:"Care",name:"Microfiber Refill Pack",desc:"Six all-purpose towels in the Keelwell color system.",status:"dev",fits:"all",art:"drop"},
+  {id:"liner",cat:"pet",line:"Pet",name:"Pet Cargo Liner with Bumper Flap",desc:"High side walls, heat-safe straps and a fold-out flap. Two sizes.",status:"dev",fits:["compact","midsize","fullsize"],art:"paw"},
+  {id:"hammock",cat:"pet",line:"Pet",name:"Back-Seat Pet Hammock",desc:"Covers the rear bench with seat-belt and airbag clearance.",status:"dev",fits:["sedan","compact","midsize","fullsize"],art:"paw"},
+  {id:"kick",cat:"interior",line:"Interior",name:"Seat-Back Protectors (pair)",desc:"Stops shoe scuffs and mud on the backs of the front seats.",status:"plan",fits:"all",art:"seat"},
+  {id:"seatorg",cat:"interior",line:"Interior",name:"Seat-Back Storage System",desc:"Tablet sleeve, bottle pockets and a fold-down tray.",status:"plan",fits:"all",art:"seat"},
+  {id:"trunk",cat:"cargo",line:"Cargo",name:"Trunk Organizer",desc:"Collapsible, with rigid dividers, an anti-slip base and tie-downs.",status:"plan",fits:["sedan","compact"],art:"box"},
+  {id:"cargoorg",cat:"cargo",line:"Cargo",name:"Cargo-Area Organizer, Large",desc:"Sized for SUV cargo areas, anchors to the cargo hooks.",status:"plan",fits:["midsize","fullsize"],art:"box"},
+  {id:"system",cat:"cargo",line:"Cargo",name:"Keelwell Cargo System",desc:"Fitted liner, flap, seat-back protector and organizer that lock together.",status:"dev",fits:["compact","midsize","fullsize"],art:"box",flagship:true},
+  {id:"shade",cat:"sun",line:"Sun",name:"Windshield Sunshade",desc:"Reflective, folds flat, sized to your windshield.",status:"plan",fits:"all",art:"sun"}
+];
+const STATUS = {now:["Available now","s-now"],dev:["In development","s-dev"],plan:["Planned","s-plan"]};
+
+/* ---- Icons ---- */
+const ART = {
+  drop:'<svg viewBox="0 0 64 64"><rect x="10" y="30" width="44" height="9" rx="3" fill="#2F6FB3"/><rect x="12" y="21" width="40" height="9" rx="3" fill="#E8671B"/><rect x="14" y="12" width="36" height="9" rx="3" fill="#8A97A5"/><rect x="10" y="39" width="44" height="9" rx="3" fill="#D9CFBF"/></svg>',
+  paw:'<svg viewBox="0 0 64 64" fill="#E8671B"><ellipse cx="32" cy="42" rx="12" ry="10"/><circle cx="18" cy="28" r="5"/><circle cx="27" cy="20" r="5"/><circle cx="37" cy="20" r="5"/><circle cx="46" cy="28" r="5"/></svg>',
+  seat:'<svg viewBox="0 0 64 64"><path d="M20 8h18a4 4 0 0 1 4 4l-3 26H22L18 12a4 4 0 0 1 2-4Z" fill="#8A97A5"/><path d="M16 40h34a4 4 0 0 1 4 4v6H14v-8a2 2 0 0 1 2-2Z" fill="#E8671B"/><rect x="22" y="50" width="4" height="8" fill="#8A97A5"/><rect x="42" y="50" width="4" height="8" fill="#8A97A5"/></svg>',
+  box:'<svg viewBox="0 0 64 64"><path d="M8 22 32 12l24 10v24L32 56 8 46Z" fill="#8A97A5"/><path d="M8 22l24 10 24-10" fill="none" stroke="#1F2A36" stroke-width="2"/><path d="M32 32v24" stroke="#1F2A36" stroke-width="2"/><path d="M20 17l24 10" stroke="#E8671B" stroke-width="5"/></svg>',
+  sun:'<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="11" fill="#E8671B"/><g stroke="#E8671B" stroke-width="4" stroke-linecap="round"><path d="M32 6v8M32 50v8M6 32h8M50 32h8M13 13l6 6M45 45l6 6M13 51l6-6M45 19l6-6"/></g></svg>'
+};
+const CAR = {
+  sedan:'<svg viewBox="0 0 160 56"><path d="M8 40c0-6 4-8 10-9l18-12c4-3 8-4 13-4h34c6 0 10 2 14 6l12 10 30 3c6 1 9 4 9 9v4H8Z" fill="currentColor" opacity=".85"/><circle cx="40" cy="46" r="8" fill="var(--bg)" stroke="currentColor" stroke-width="3"/><circle cx="122" cy="46" r="8" fill="var(--bg)" stroke="currentColor" stroke-width="3"/></svg>',
+  compact:'<svg viewBox="0 0 160 56"><path d="M10 42c0-7 3-10 9-11l14-15c3-3 7-5 12-5h50c6 0 10 2 13 6l12 14 22 2c6 1 8 4 8 9v4H10Z" fill="currentColor" opacity=".85"/><circle cx="42" cy="46" r="8" fill="var(--bg)" stroke="currentColor" stroke-width="3"/><circle cx="120" cy="46" r="8" fill="var(--bg)" stroke="currentColor" stroke-width="3"/></svg>',
+  midsize:'<svg viewBox="0 0 160 56"><path d="M8 42c0-8 3-11 9-12l12-17c2-3 6-5 11-5h66c6 0 9 2 12 6l12 16 16 2c6 1 8 4 8 9v5H8Z" fill="currentColor" opacity=".85"/><circle cx="40" cy="46" r="8" fill="var(--bg)" stroke="currentColor" stroke-width="3"/><circle cx="124" cy="46" r="8" fill="var(--bg)" stroke="currentColor" stroke-width="3"/></svg>',
+  fullsize:'<svg viewBox="0 0 160 56"><path d="M6 42c0-8 2-12 8-13l10-20c2-3 5-5 10-5h82c6 0 9 2 11 6l10 19 13 2c6 1 8 4 8 9v6H6Z" fill="currentColor" opacity=".85"/><circle cx="38" cy="46" r="8" fill="var(--bg)" stroke="currentColor" stroke-width="3"/><circle cx="126" cy="46" r="8" fill="var(--bg)" stroke="currentColor" stroke-width="3"/></svg>'
+};
+
+/* ---- State ---- */
+let vehicle = null;   // {year, make, model, cls}
+let filter = "all";
+const store = { get(){ try{ return JSON.parse(localStorage.getItem("kw-vehicle")||"null"); }catch(e){ return null; } },
+                set(v){ try{ localStorage.setItem("kw-vehicle", JSON.stringify(v)); }catch(e){} } };
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fitsClass = (p, cls) => p.fits === "all" || p.fits.includes(cls);
+
+/* ---- Finder ---- */
+const yearSel = $("#f-year"), makeSel = $("#f-make"), modelSel = $("#f-model");
+for (let y = 2026; y >= 2012; y--) yearSel.add(new Option(y, y));
+Object.keys(VEHICLES).forEach(m => makeSel.add(new Option(m, m)));
+yearSel.addEventListener("change", () => { makeSel.disabled = !yearSel.value; });
+makeSel.addEventListener("change", () => {
+  modelSel.length = 1;
+  if (makeSel.value) Object.keys(VEHICLES[makeSel.value]).sort().forEach(m => modelSel.add(new Option(m, m)));
+  modelSel.disabled = !makeSel.value;
+});
+$("#finder").addEventListener("submit", e => {
+  e.preventDefault();
+  if (!yearSel.value || !makeSel.value || !modelSel.value) return;
+  setVehicle({year:yearSel.value, make:makeSel.value, model:modelSel.value, cls:VEHICLES[makeSel.value][modelSel.value]}, true);
+});
+$("#myveh-change").addEventListener("click", () => { document.getElementById("top").scrollIntoView(); yearSel.focus(); });
+
+function setVehicle(v, scroll){
+  vehicle = v; store.set(v);
+  yearSel.value = v.year; makeSel.disabled = false; makeSel.value = v.make;
+  makeSel.dispatchEvent(new Event("change")); modelSel.value = v.model;
+  renderAll();
+  if (scroll) document.getElementById("fit").scrollIntoView();
 }
-wire(".js-preorder", RESERVE_FORM_URL);
-wire(".js-wholesale", WHOLESALE_FORM_URL || RESERVE_FORM_URL);
-if (!RESERVE_FORM_URL) {
-  document.getElementById("form-note").textContent = "Preview: the reservation form isn't connected yet. Add your Google Form link to activate this button.";
+
+function fitLine(p, cls){
+  if (p.id === "liner") return cls === "compact" ? "Recommended size: Mid-SUV. Fit check on your exact vehicle pending." : "Recommended size: Full-SUV. Fit check on your exact vehicle pending.";
+  if (p.fits === "all") return p.cat === "care" ? "Universal: works in any vehicle." : "Universal fit, sized for most vehicles.";
+  if (p.flagship) return "Patterned per vehicle. We'll notify you when yours is measured.";
+  return "Sized for your body style.";
 }
+
+function renderFit(){
+  const panel = $("#fitpanel");
+  if (!vehicle){ panel.innerHTML = '<p class="empty">Select your year, make and model above to see which Keelwell products fit your vehicle.</p>'; return; }
+  const c = CLASS[vehicle.cls];
+  const list = PRODUCTS.filter(p => fitsClass(p, vehicle.cls));
+  const order = {now:0,dev:1,plan:2};
+  list.sort((a,b) => order[a.status]-order[b.status]);
+  panel.innerHTML = `
+    <div class="fithead"><h2>${esc(vehicle.year)} ${esc(vehicle.make)} ${esc(vehicle.model)}</h2><span class="cls">${esc(c.label)} · ${esc(c.desc)}</span></div>
+    <div class="fitlist">${list.map(p => `
+      <div class="fitrow"><span class="pill ${STATUS[p.status][1]}">${STATUS[p.status][0]}</span><h3>${esc(p.name)}</h3><p>${esc(fitLine(p, vehicle.cls))}</p></div>`).join("")}
+    </div>
+    <div class="fitnote"><span>${list.filter(p=>p.status==="now").length} available now · ${list.filter(p=>p.status!=="now").length} on the way for your vehicle.</span><a class="btn btn-primary js-notify" href="#join">Notify me for my ${esc(vehicle.model)}</a></div>`;
+  wireLinks();
+}
+
+/* ---- Categories, vehicle types, catalog ---- */
+function renderCats(){
+  $("#cats").innerHTML = Object.entries(CATS).map(([k,c]) => {
+    const n = PRODUCTS.filter(p => p.cat === k).length, now = PRODUCTS.filter(p => p.cat === k && p.status === "now").length;
+    return `<a class="cat" href="#catalog" data-filter="${k}"><div class="art">${ART[c.art]}</div><div class="txt"><h3>${esc(c.name)}</h3><p>${esc(c.blurb)}</p><span class="cnt">${now ? now + " available now" : n + " in the pipeline"}</span></div></a>`;
+  }).join("");
+}
+function renderTypes(){
+  $("#vtypes").innerHTML = Object.entries(CLASS).map(([k,c]) =>
+    `<button type="button" class="vtype" data-cls="${k}" aria-pressed="${vehicle && vehicle.cls===k}"><span style="color:var(--ink)">${CAR[k]}</span><b>${esc(c.label)}</b><span>${PRODUCTS.filter(p=>fitsClass(p,k)).length} products for this body style</span></button>`).join("");
+  document.querySelectorAll(".vtype").forEach(b => b.addEventListener("click", () => {
+    const cls = b.dataset.cls;
+    const make = Object.keys(VEHICLES).find(m => Object.values(VEHICLES[m]).includes(cls));
+    const model = Object.keys(VEHICLES[make]).find(md => VEHICLES[make][md] === cls);
+    document.getElementById("top").scrollIntoView(); yearSel.focus();
+    yearSel.value = yearSel.value || "2024"; makeSel.disabled = false; makeSel.value = make;
+    makeSel.dispatchEvent(new Event("change")); modelSel.value = model;
+  }));
+}
+function renderFilters(){
+  const opts = [["all","All"]].concat(Object.entries(CATS).map(([k,c]) => [k,c.name]));
+  $("#filters").innerHTML = opts.map(([k,n]) => `<button type="button" data-f="${k}" aria-pressed="${filter===k}">${esc(n)}</button>`).join("");
+  document.querySelectorAll("#filters button").forEach(b => b.addEventListener("click", () => { filter = b.dataset.f; renderFilters(); renderGrid(); }));
+}
+function renderGrid(){
+  const items = PRODUCTS.filter(p => filter === "all" || p.cat === filter);
+  $("#grid").innerHTML = items.map(p => {
+    const [label, cls] = STATUS[p.status];
+    const fit = vehicle ? (fitsClass(p, vehicle.cls) ? `Fits your ${esc(vehicle.model)}` : `Not for ${esc(CLASS[vehicle.cls].label.toLowerCase())}s`) : (p.fits === "all" ? "Universal" : p.fits.map(f => CLASS[f].label).join(", "));
+    const action = p.status === "now"
+      ? `<span class="price">${esc(p.price)}</span><a class="btn btn-primary js-preorder" href="#join">Reserve</a>`
+      : `<span class="fitchip">${esc(fit)}</span><a class="btn btn-line js-notify" href="#join">Notify me</a>`;
+    return `<article class="card"><div class="img">${ART[p.art]}<span class="pill ${cls}">${label}</span></div><div class="body"><span class="line">${esc(CATS[p.cat].name)}</span><h3>${esc(p.name)}</h3><p>${esc(p.desc)}</p>${p.status==="now" ? `<span class="fitchip">${esc(fit)}</span>` : ""}<div class="foot">${action}</div></div></article>`;
+  }).join("");
+  wireLinks();
+}
+function renderHeader(){ $("#myveh-label").textContent = vehicle ? `${vehicle.year} ${vehicle.make} ${vehicle.model}` : "None selected"; }
+function renderAll(){ renderHeader(); renderFit(); renderTypes(); renderGrid(); }
+
+/* category links set the filter */
+document.addEventListener("click", e => {
+  const a = e.target.closest("[data-filter]");
+  if (a && a.dataset.filter !== "all") { filter = a.dataset.filter; renderFilters(); renderGrid(); }
+  else if (a) { filter = "all"; renderFilters(); renderGrid(); }
+});
+
+/* ---- Form links ---- */
+function wireLinks(){
+  const set = (sel, url) => document.querySelectorAll(sel).forEach(a => { if (url){ a.href = url; a.target = "_blank"; a.rel = "noopener"; } });
+  set(".js-preorder", RESERVE_FORM_URL); set(".js-notify", RESERVE_FORM_URL); set(".js-wholesale", WHOLESALE_FORM_URL || RESERVE_FORM_URL);
+}
+if (!RESERVE_FORM_URL) document.getElementById("form-note").textContent = "Preview: the form isn't connected yet. Add your Google Form link to activate it.";
+
+/* ---- Boot ---- */
+renderCats(); renderFilters();
+const saved = store.get();
+if (saved && VEHICLES[saved.make] && VEHICLES[saved.make][saved.model]) setVehicle(saved, false);
+else { vehicle = {year:"2023", make:"Toyota", model:"RAV4", cls:"compact"}; renderAll(); vehicle = null; renderHeader();
+       document.getElementById("fitpanel").insertAdjacentHTML("afterbegin", '<p class="empty" style="margin-bottom:-6px">Example: a 2023 Toyota RAV4. Pick your own vehicle above.</p>'); renderTypes(); renderGrid(); }
+wireLinks();
 </script>
 </body>
 </html>
