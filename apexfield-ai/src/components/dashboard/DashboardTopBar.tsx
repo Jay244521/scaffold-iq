@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { Home, PlayCircle, Radio } from "lucide-react";
 import { Logo } from "@/components/landing/Logo";
 
-export function DashboardTopBar() {
+export function DashboardTopBar({ account }: { account?: ReactNode } = {}) {
   // Rendered only after mount so server and client markup match.
   const [now, setNow] = useState<string | null>(null);
   useEffect(() => {
@@ -44,6 +44,7 @@ export function DashboardTopBar() {
             <span className="hidden sm:inline">Live Simulator</span>
             <span className="sm:hidden">Simulator</span>
           </Link>
+          {account}
         </nav>
       </div>
     </header>

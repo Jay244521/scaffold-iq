@@ -49,7 +49,7 @@ export function FleetKpiHeader({ techs }: { techs: Technician[] }) {
   );
 }
 
-function Kpi({
+export function Kpi({
   icon,
   label,
   value,

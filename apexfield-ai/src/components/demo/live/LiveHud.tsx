@@ -263,8 +263,8 @@ export function TranscriptCard({ captions }: { captions: LiveCaption[] }) {
       <ol className="mt-3 flex max-h-64 flex-col gap-2 overflow-y-auto text-sm">
         {captions.map((c) => (
           <li key={c.id} className="leading-snug">
-            <span className={`mr-2 font-mono text-[10px] font-bold tracking-wider ${c.role === "ai" ? "text-amber" : "text-sky-300"}`}>
-              {c.role === "ai" ? "APEX" : "YOU"}
+            <span className={`mr-2 font-mono text-[10px] font-bold tracking-wider ${c.role === "ai" ? "text-amber" : c.role === "manager" ? "text-gauge" : "text-sky-300"}`}>
+              {c.role === "ai" ? "APEX" : c.role === "manager" ? "MANAGER" : "YOU"}
             </span>
             <span className={c.final ? "text-slate-200" : "text-slate-400"}>{c.text}</span>
           </li>

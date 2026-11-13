@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { FleetDashboard } from "@/components/dashboard/FleetDashboard";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
 
 export const metadata: Metadata = {
   title: "Fleet Command Dashboard — ApexField AI",
@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function DashboardPage() {
-  return <FleetDashboard />;
+  return <DashboardShell />;
 }

@@ -6,12 +6,14 @@
 
 export type TechStatus = "coaching" | "safety_hold" | "escalated" | "completed";
 export type StepStatus = "passed" | "failed" | "active" | "hold" | "upcoming";
-export type ReadingStatus = "ok" | "low" | "high";
+/** "out" = out of spec with no direction recorded (live sessions store only within/out). */
+export type ReadingStatus = "ok" | "low" | "high" | "out";
 export type EquipmentKind = "split_ac" | "heat_pump" | "rtu" | "furnace";
 export type Brand = "Carrier" | "Trane" | "Lennox" | "Daikin" | "York";
 
 export type Equipment = {
-  brand: Brand;
+  /** A seeded Brand in demo data; any manufacturer in live sessions. */
+  brand: Brand | (string & {});
   model: string;
   kind: EquipmentKind;
   /** Refrigerant for cooling equipment, fuel for furnaces. */
@@ -62,6 +64,8 @@ export type Technician = {
   backupDispatched: boolean;
   /** Simulation bookkeeping. */
   ticksOnStep: number;
+  /** Present for real sessions from Supabase (live fleet mode). */
+  live?: { sessionId: string; orgId: string; startedAt: string };
   /** Seeded holds wait for the manager; simulated ones resolve when the tech confirms 0V. */
   holdAutoResolves: boolean;
 };

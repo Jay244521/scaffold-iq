@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from "react";
 import { TICK_MS, filterCounts, fleetReducer, initialFleetState, selectTechs, type FleetFilter } from "@/lib/fleet-sim";
 import { DashboardTopBar } from "./DashboardTopBar";
 import { FleetKpiHeader } from "./FleetKpiHeader";
@@ -11,7 +11,8 @@ import { Toasts, type Toast } from "./Toasts";
 
 const TOAST_MS = 5_000;
 
-export function FleetDashboard() {
+/** Demo board: 12 simulated DFW technicians. Shown to visitors and as the demo mode for managers. */
+export function FleetDashboard({ account, banner }: { account?: ReactNode; banner?: ReactNode } = {}) {
   const [state, dispatch] = useReducer(fleetReducer, undefined, initialFleetState);
   const [filter, setFilter] = useState<FleetFilter>("all");
   const [query, setQuery] = useState("");
@@ -87,8 +88,9 @@ export function FleetDashboard() {
 
   return (
     <div className="min-h-screen">
-      <DashboardTopBar />
+      <DashboardTopBar account={account} />
       <main className="mx-auto flex max-w-[1600px] flex-col gap-5 px-4 py-6 sm:px-6 lg:px-8">
+        {banner}
         <div className="flex flex-col gap-1">
           <p className="font-mono text-[12px] tracking-[0.12em] text-amber">SERVICE MANAGER · FLEET COMMAND</p>
           <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">DFW field sessions, live.</h1>

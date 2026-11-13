@@ -19,7 +19,7 @@ export type LiveStatus = "idle" | "connecting" | "active" | "error";
 export type LiveToolCall = { id?: string; name: string; args: Record<string, unknown> };
 export type LiveToolHandler = (call: LiveToolCall) => ToolResponse | Promise<ToolResponse>;
 
-export type LiveCaption = { id: number; role: "tech" | "ai"; text: string; final: boolean };
+export type LiveCaption = { id: number; role: "tech" | "ai" | "manager"; text: string; final: boolean };
 
 export type LiveSessionInfo = { sessionId: string | null; persistence: boolean; model: string };
 
@@ -576,6 +576,25 @@ export function useGeminiLiveSession({ onToolCall }: { onToolCall: LiveToolHandl
     }
   }, [torchOn]);
 
+  /**
+   * Hand a service manager's whisper to the coach, which says it to the tech. Returns false
+   * when the session isn't ready yet, so the caller can retry once it is.
+   */
+  const sendManagerNote = useCallback(
+    (text: string): boolean => {
+      const sent = send((s) =>
+        s.sendClientContent({ turns: [{ role: "user", parts: [{ text: `[SERVICE MANAGER] ${text}` }] }], turnComplete: true }),
+      );
+      if (sent) {
+        setCaptions((prev) =>
+          [...prev.map((c) => (c.final ? c : { ...c, final: true })), { id: captionIdRef.current++, role: "manager" as const, text, final: true }].slice(-12),
+        );
+      }
+      return sent;
+    },
+    [send],
+  );
+
   /** Send an immediate high-res frame and ask the model to read the data plate. */
   const scanDataPlate = useCallback((): boolean => {
     const frame = captureFrame(SCAN_FRAME);
@@ -619,5 +638,6 @@ export function useGeminiLiveSession({ onToolCall }: { onToolCall: LiveToolHandl
     toggleMute,
     toggleTorch,
     scanDataPlate,
+    sendManagerNote,
   };
 }
