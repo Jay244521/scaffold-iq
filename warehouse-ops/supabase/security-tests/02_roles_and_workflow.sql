@@ -142,7 +142,8 @@ select tests.throws(format($$insert into storage.objects (bucket_id, name) value
   'Viewers cannot upload evidence');
 select tests.logout();
 select tests.login('op');
-select tests.lives(format($$insert into storage.objects (bucket_id, name) values ('incident-evidence', %L)$$, tests.id('org') || '/' || tests.id('inc') || '/a.jpg'),
+-- owner_id is what the Storage API records for the uploader.
+select tests.lives(format($$insert into storage.objects (bucket_id, name, owner_id) values ('incident-evidence', %L, %L)$$, tests.id('org') || '/' || tests.id('inc') || '/a.jpg', tests.id('op')),
   'Operators can upload evidence');
 select tests.throws(format($$insert into public.incident_attachments (org_id, incident_id, storage_path, file_name, mime_type, size_bytes) values (%L, %L, %L, 'a.exe', 'application/x-msdownload', 10)$$,
   tests.id('org'), tests.id('inc'), tests.id('org') || '/' || tests.id('inc') || '/a.exe'), 'Disallowed file types are rejected');
@@ -150,7 +151,12 @@ select tests.throws(format($$insert into public.incident_attachments (org_id, in
   tests.id('org'), tests.id('inc'), tests.id('org') || '/' || tests.id('inc') || '/b.jpg'), 'Files over 10 MB are rejected');
 select tests.throws(format($$insert into public.incident_attachments (org_id, incident_id, storage_path, file_name, mime_type, size_bytes) values (%L, %L, %L, 'a.jpg', 'image/jpeg', 10)$$,
   tests.id('org'), tests.id('inc'), 'elsewhere/a.jpg'), 'Evidence records must point inside the incident''s folder');
-select tests.eq(tests.affected($$delete from storage.objects$$), 0, 'Operators cannot delete evidence files');
+select tests.logout();
+select tests.login('op2');
+select tests.eq(tests.affected($$delete from storage.objects$$), 0, 'Operators cannot delete other people''s evidence files');
+select tests.logout();
+select tests.login('op');
+select tests.eq(tests.affected($$delete from storage.objects$$), 1, 'Operators can remove a file they uploaded themselves');
 select tests.logout();
 select tests.ok((select public from storage.buckets where id = 'incident-evidence') = false, 'The evidence bucket is private');
 

@@ -5,16 +5,25 @@
 #
 # By default this starts a throwaway local PostgreSQL 16 cluster, loads a minimal
 # Supabase stand-in (auth + storage), applies every migration in supabase/migrations,
-# then runs each supabase/tests/*.sql file. Any failed assertion stops with an error.
+# then runs each supabase/security-tests/*.sql file. Any failed assertion stops with an error.
 #
 # To use an existing empty database instead (e.g. in CI), set DATABASE_URL to a
 # superuser connection string.
+#
+# To test a local Supabase stack that already has the migrations applied
+# (`npx supabase start`), run:   npm run test:db -- --supabase
 set -euo pipefail
 cd "$(dirname "$0")/.."
 ROOT="$PWD"
 
 cleanup() { :; }
 trap 'cleanup' EXIT
+
+MODE="local"
+if [[ "${1:-}" == "--supabase" ]]; then
+  MODE="supabase"
+  DATABASE_URL="${DATABASE_URL:-postgresql://postgres:postgres@127.0.0.1:54322/postgres}"
+fi
 
 if [[ -z "${DATABASE_URL:-}" ]]; then
   PGBIN="$(ls -d /usr/lib/postgresql/*/bin 2>/dev/null | sort -V | tail -1 || true)"
@@ -39,17 +48,23 @@ fi
 
 PSQL=(psql "$DATABASE_URL" -X -q -v ON_ERROR_STOP=1 --set=SHOW_CONTEXT=never)
 
-echo "→ Loading Supabase stand-in"
-"${PSQL[@]}" -f "$ROOT/scripts/db/supabase-stub.sql"
-for f in "$ROOT"/supabase/migrations/*.sql; do
-  echo "→ Applying $(basename "$f")"
-  "${PSQL[@]}" -f "$f"
-done
+if [[ "$MODE" == "supabase" ]]; then
+  echo "→ Testing the real local Supabase database (migrations already applied)"
+  "${PSQL[@]}" -c "drop schema if exists tests cascade" >/dev/null
+  cleanup() { "${PSQL[@]}" -c "drop schema if exists tests cascade" >/dev/null 2>&1 || true; }
+else
+  echo "→ Loading Supabase stand-in"
+  "${PSQL[@]}" -f "$ROOT/scripts/db/supabase-stub.sql"
+  for f in "$ROOT"/supabase/migrations/*.sql; do
+    echo "→ Applying $(basename "$f")"
+    "${PSQL[@]}" -f "$f"
+  done
+fi
 "${PSQL[@]}" -f "$ROOT/scripts/db/test-helpers.sql"
 
 status=0
 ALL_OK=""
-for t in "$ROOT"/supabase/tests/*.sql; do
+for t in "$ROOT"/supabase/security-tests/*.sql; do
   echo "→ Running $(basename "$t")"
   if ! out="$("${PSQL[@]}" -o /dev/null -f "$t" 2>&1)"; then
     echo "$out" | sed -E 's/^psql:[^ ]+ (NOTICE|ERROR):  /  \1 /'

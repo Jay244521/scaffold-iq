@@ -43,3 +43,13 @@ create policy "wo_evidence_delete_supervisors" on storage.objects
     bucket_id = 'incident-evidence'
     and private.has_min_role(private.path_uuid(name, 1), 'supervisor')
   );
+
+-- Uploaders may remove their own files (used when the app rejects a file after
+-- inspecting its contents, so rejected uploads don't linger).
+create policy "wo_evidence_delete_own_upload" on storage.objects
+  for delete to authenticated
+  using (
+    bucket_id = 'incident-evidence'
+    and owner_id = (select auth.uid())::text
+    and private.has_min_role(private.path_uuid(name, 1), 'operator')
+  );

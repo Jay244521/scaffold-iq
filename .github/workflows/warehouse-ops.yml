@@ -1,0 +1,30 @@
+name: warehouse-ops
+
+on:
+  push:
+    paths: ["warehouse-ops/**", ".github/workflows/warehouse-ops.yml"]
+  pull_request:
+    paths: ["warehouse-ops/**", ".github/workflows/warehouse-ops.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: warehouse-ops
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: warehouse-ops/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run test:unit
+      - name: Database security tests (RLS, roles, storage, tenant isolation)
+        run: npm run test:db
+      - run: npm run build

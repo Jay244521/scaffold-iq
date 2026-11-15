@@ -9,8 +9,8 @@ grant select on tests.ids to anon, authenticated;
 create function tests.create_user(p_key text, p_email text) returns uuid language plpgsql as $$
 declare v uuid;
 begin
-  insert into auth.users (email, email_confirmed_at, raw_user_meta_data)
-  values (p_email, now(), jsonb_build_object('full_name', initcap(p_key)))
+  insert into auth.users (id, email, email_confirmed_at, raw_user_meta_data)
+  values (gen_random_uuid(), p_email, now(), jsonb_build_object('full_name', initcap(p_key)))
   returning id into v;
   insert into tests.ids values (p_key, v);
   return v;
@@ -28,6 +28,8 @@ create function tests.login(p_key text) returns void language plpgsql as $$
 begin
   perform set_config('request.jwt.claims',
     json_build_object('sub', tests.id(p_key), 'role', 'authenticated')::text, true);
+  -- The Storage API sets this before deleting objects, then relies on RLS policies.
+  perform set_config('storage.allow_delete_query', 'true', true);
   execute 'set local role authenticated';
 end $$;
 
