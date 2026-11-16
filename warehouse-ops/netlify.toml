@@ -1,0 +1,12 @@
+# Netlify settings for the Warehouse Ops staging demo.
+# In the Netlify UI set "Base directory" to: warehouse-ops
+# Netlify detects Next.js and adds its official Next.js runtime automatically.
+[build]
+  command = "npm run build"
+  publish = ".next"
+  # Skip builds when nothing in this app changed (each build uses free-plan credits,
+  # and this repository also contains unrelated projects).
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ."
+
+[build.environment]
+  NODE_VERSION = "22"

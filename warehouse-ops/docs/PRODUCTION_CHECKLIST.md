@@ -3,6 +3,8 @@
 ✅ done and tested · ⬜ to do before real customer data · 🔜 later phase
 
 ## Security
+- ✅ Live staging project security-tested through its public API: 24/24 cross-company and role checks pass (`tests/staging/api-isolation.mjs`)
+- ✅ Supabase Security Advisor on staging: no errors; 6 warnings reviewed and accepted (intentional RPC entry points — see STAGING.md)
 - ✅ Row Level Security on every table; 125 automated checks (cross-tenant reads/writes, roles, storage, invitations, audit) pass on plain PostgreSQL **and** real Supabase
 - ✅ Tests are shown to catch regressions (a deliberately broken policy makes them fail)
 - ✅ Server-side authorization in every server action, re-enforced by the database
@@ -15,13 +17,13 @@
 - ✅ Security headers (no framing, nosniff, HSTS, referrer policy); `npm audit`: 0 vulnerabilities
 - ⬜ Turn on leaked-password protection and review rate limits (Supabase → Auth)
 - ⬜ Custom SMTP sender for auth emails (needs your approval of a provider)
-- ⬜ Run Supabase Security Advisor on the production project; resolve findings
+- ⬜ Run Supabase Security Advisor on the future production project; resolve findings
 - ⬜ Content-Security-Policy header (tighten after the AI phase settles external calls)
 - ⬜ Enable MFA for owner/admin accounts (Supabase supports TOTP)
 - ⬜ Independent review / penetration test before handling a large customer's data
 
 ## Reliability & operations
-- ⬜ Supabase Pro for daily backups and no auto-pause (paid — approval needed)
+- ⬜ Supabase Pro for daily backups and no auto-pause (paid — **not approved**; staging uses synthetic data, so not needed yet)
 - ⬜ Error monitoring (free tiers exist; approval needed before adding a service)
 - ⬜ Uptime check on the login page
 - ⬜ Clean-up job for evidence files uploaded but never registered (rare: browser closed mid-upload; files remain private)
@@ -29,7 +31,7 @@
 
 ## Legal / business
 - ⬜ Terms of Service, Privacy Policy and a short Data Processing Addendum
-- ⬜ Hosting plan that permits commercial use (Vercel Hobby does not)
+- ✅ Hosting that permits commercial use at $0: Netlify Free (Vercel Hobby does not) — see STAGING.md
 - ⬜ Company name and domain
 
 ## Product

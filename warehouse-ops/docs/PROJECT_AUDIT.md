@@ -25,7 +25,7 @@ and I'll reconcile anything worth keeping from it.
 | `npm audit`: high-severity PostCSS advisory bundled inside Next.js | `overrides` pins patched PostCSS → **0 vulnerabilities** without a risky Next 16 jump |
 | Latest TypeScript (7.x) not supported by Next 15 | Pinned TypeScript 5.9 |
 | Protected pages were prerendered as static at build time | Forced dynamic rendering for all pages |
-| Vercel limits request bodies to 4.5 MB — server-side uploads would fail for phone photos | Browser uploads directly to private Storage under RLS; the server then verifies and registers each file |
+| Serverless hosts cap request bodies (Vercel 4.5 MB, Netlify ~6 MB) — server-side uploads would fail for phone photos | Browser uploads directly to private Storage under RLS; the server then verifies and registers each file |
 | React 19 auto-resets forms after submit → typed input lost on validation errors, and the status dropdown silently reverted (found by the E2E test) | Shared `useFormAction` hook submits without auto-reset |
 | Supplier table caused sideways scrolling on phones | Fixed; every page verified at 320 px |
 | Real Supabase Storage blocks direct SQL deletes and sets `owner_id` itself | Test harness mimics the Storage API so tests run identically on real Supabase |

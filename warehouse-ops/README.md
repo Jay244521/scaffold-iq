@@ -50,10 +50,18 @@ To stop: press `Ctrl+C` in the app window, then `npx supabase stop`.
 | `npm run test:db` | **125 database security checks** on a throwaway PostgreSQL: one company can't read or change another's data; role rules; private storage; invitations; audit log. Needs PostgreSQL installed, or set `DATABASE_URL`. |
 | `npm run test:db -- --supabase` | The same 125 checks against your running local Supabase |
 | `node tests/e2e/walkthrough.mjs` | 33-step browser walkthrough (signup → incidents → invites → second company blocked). Needs the app running against local Supabase and Playwright installed. |
+| `node tests/staging/api-isolation.mjs` | 24 security checks against a deployed Supabase project through its public API, using the synthetic demo accounts (see `docs/STAGING.md`) |
+| `node tests/staging/demo-smoke.mjs` | Browser check of the demo accounts against an app connected to staging |
 | `npm run typecheck` / `npm run build` | TypeScript and production build |
 
 GitHub Actions runs typecheck, unit tests, database security tests and the build on every push
 (`.github/workflows/warehouse-ops.yml`, free for this usage).
+
+## Staging demo
+
+A free staging environment with **synthetic data only** runs on Supabase (Free) and is set up for
+Netlify (Free). Demo logins, settings, limitations and costs ($0/month): **`docs/STAGING.md`**.
+Load demo data into a local database with `DEMO_PASSWORD='…' bash scripts/seed-demo.sh`.
 
 ## How it's organized
 
@@ -61,6 +69,7 @@ GitHub Actions runs typecheck, unit tests, database security tests and the build
 supabase/
   migrations/          Database: tables, Row Level Security policies, triggers, storage bucket
   security-tests/      SQL tests that try to break tenant isolation and role rules
+  demo/                Synthetic demo data (staging/demos only) and its removal script
   config.toml          Local Supabase settings
 src/
   middleware.ts        Refreshes login sessions; sends signed-out users to /login
@@ -69,8 +78,9 @@ src/
   app/onboarding/      Create your company workspace
   app/invite/[token]/  Accept a team invitation
   app/(app)/           The product: dashboard, incidents, settings
-tests/unit/            Unit tests     tests/e2e/   Browser walkthrough
-docs/                  Audit & plan, deployment guide, production checklist
+tests/unit/            Unit tests     tests/e2e/   Browser walkthrough     tests/staging/   Checks against staging
+docs/                  Audit & plan, staging, deployment guide, production checklist
+netlify.toml           Netlify build settings
 ```
 
 ## Security model (short version)
