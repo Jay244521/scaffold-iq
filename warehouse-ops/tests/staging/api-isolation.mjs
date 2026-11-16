@@ -58,6 +58,8 @@ const inv = await rosa.c.rpc("create_invitation", { p_org: orgA.id, p_email: "sp
 ok(Boolean(inv.error), "Company B cannot create invitations for company A");
 const sum = await rosa.c.rpc("incident_summary", { p_org: orgA.id });
 ok(sum.data?.total === 0, "Company B gets an empty dashboard summary for company A");
+const rep = await rosa.c.rpc("incident_report", { p_org: orgA.id });
+ok(rep.data?.total === 0 && rep.data?.by_supplier.length === 0, "Company B gets an empty report for company A");
 const up = await rosa.c.storage.from("incident-evidence").upload(`${orgA.id}/${incA.id}/x.png`, png, { contentType: "image/png" });
 ok(Boolean(up.error), "Company B cannot upload files into company A's evidence");
 const ls = await rosa.c.storage.from("incident-evidence").list(`${orgA.id}/${incA.id}`);

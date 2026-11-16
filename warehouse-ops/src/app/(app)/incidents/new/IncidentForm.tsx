@@ -7,13 +7,30 @@ import { Alert, Field, buttonClass, cx, fieldAria } from "@/components/ui";
 import { EVIDENCE_ACCEPT } from "@/lib/evidence";
 import { EXCEPTION_HINTS, EXCEPTION_LABELS, EXCEPTION_TYPES, formatBytes, formatQty, variance, type ExceptionType } from "@/lib/labels";
 import type { FieldErrors } from "@/lib/validation";
-import { createIncident } from "../actions";
+import { createIncident, updateIncidentDetails } from "../actions";
 import { precheckFiles, uploadEvidence } from "../upload";
+
+export type IncidentInitial = {
+  id: string;
+  type: ExceptionType;
+  facilityId: string;
+  supplierName: string | null;
+  poNumber: string | null;
+  shipmentRef: string | null;
+  sku: string | null;
+  itemDescription: string | null;
+  expectedQty: number | null;
+  receivedQty: number | null;
+  description: string;
+  occurredAt: string;
+};
 
 type Props = {
   facilities: { id: string; name: string }[];
   defaultFacilityId: string | null;
   suppliers: string[];
+  /** When set, the form edits this incident (no evidence upload; supervisors only). */
+  initial?: IncidentInitial;
 };
 
 const toLocalInput = (d: Date) => {
@@ -21,12 +38,12 @@ const toLocalInput = (d: Date) => {
   return new Date(d.getTime() - off).toISOString().slice(0, 16);
 };
 
-export function IncidentForm({ facilities, defaultFacilityId, suppliers }: Props) {
+export function IncidentForm({ facilities, defaultFacilityId, suppliers, initial }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
-  const [type, setType] = useState<ExceptionType | "">("");
-  const [expected, setExpected] = useState("");
-  const [received, setReceived] = useState("");
+  const [type, setType] = useState<ExceptionType | "">(initial?.type ?? "");
+  const [expected, setExpected] = useState(initial?.expectedQty != null ? String(Number(initial.expectedQty)) : "");
+  const [received, setReceived] = useState(initial?.receivedQty != null ? String(Number(initial.receivedQty)) : "");
   const [occurredAt, setOccurredAt] = useState("");
   const [maxDate, setMaxDate] = useState<string | undefined>();
   const [files, setFiles] = useState<File[]>([]);
@@ -37,9 +54,9 @@ export function IncidentForm({ facilities, defaultFacilityId, suppliers }: Props
 
   useEffect(() => {
     const now = new Date();
-    setOccurredAt(toLocalInput(now));
+    setOccurredAt(toLocalInput(initial ? new Date(initial.occurredAt) : now));
     setMaxDate(toLocalInput(new Date(now.getTime() + 5 * 60_000)));
-  }, []);
+  }, [initial]);
 
   const diff = variance(expected === "" ? null : expected, received === "" ? null : received);
   const fe = fieldErrors;
@@ -64,6 +81,18 @@ export function IncidentForm({ facilities, defaultFacilityId, suppliers }: Props
     fd.set("occurredAt", occurredAt ? new Date(occurredAt).toISOString() : "");
 
     try {
+      if (initial) {
+        const res = await updateIncidentDetails(initial.id, fd);
+        if (res.error || res.fieldErrors) {
+          setFieldErrors(res.fieldErrors ?? {});
+          setError(res.error ?? "Please fix the highlighted fields.");
+          setBusy(null);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return;
+        }
+        router.push(`/incidents/${initial.id}?updated=1`);
+        return;
+      }
       const res = await createIncident(fd);
       if (!res.incidentId || !res.orgId) {
         setFieldErrors(res.fieldErrors ?? {});
@@ -118,7 +147,7 @@ export function IncidentForm({ facilities, defaultFacilityId, suppliers }: Props
 
       <div className="card grid gap-4 p-4 sm:grid-cols-2 sm:p-5">
         <Field label="Facility" name="facilityId" error={fe.facilityId} required>
-          <select {...fieldAria("facilityId", fe.facilityId)} defaultValue={defaultFacilityId ?? facilities[0]?.id} className="input">
+          <select {...fieldAria("facilityId", fe.facilityId)} defaultValue={initial?.facilityId ?? defaultFacilityId ?? facilities[0]?.id} className="input">
             {facilities.map((f) => (
               <option key={f.id} value={f.id}>
                 {f.name}
@@ -139,7 +168,7 @@ export function IncidentForm({ facilities, defaultFacilityId, suppliers }: Props
           />
         </Field>
         <Field label="Supplier" name="supplierName" error={fe.supplierName} hint="Pick an existing supplier or type a new name.">
-          <input {...fieldAria("supplierName", fe.supplierName)} list="supplier-options" autoComplete="off" maxLength={160} className="input" />
+          <input {...fieldAria("supplierName", fe.supplierName)} defaultValue={initial?.supplierName ?? ""} list="supplier-options" autoComplete="off" maxLength={160} className="input" />
           <datalist id="supplier-options">
             {suppliers.map((s) => (
               <option key={s} value={s} />
@@ -147,16 +176,16 @@ export function IncidentForm({ facilities, defaultFacilityId, suppliers }: Props
           </datalist>
         </Field>
         <Field label="Purchase order (PO) number" name="poNumber" error={fe.poNumber}>
-          <input {...fieldAria("poNumber", fe.poNumber)} maxLength={64} autoComplete="off" className="input" />
+          <input {...fieldAria("poNumber", fe.poNumber)} defaultValue={initial?.poNumber ?? ""} maxLength={64} autoComplete="off" className="input" />
         </Field>
         <Field label="Shipment / BOL / ASN reference" name="shipmentRef" error={fe.shipmentRef}>
-          <input {...fieldAria("shipmentRef", fe.shipmentRef)} maxLength={64} autoComplete="off" className="input" />
+          <input {...fieldAria("shipmentRef", fe.shipmentRef)} defaultValue={initial?.shipmentRef ?? ""} maxLength={64} autoComplete="off" className="input" />
         </Field>
         <Field label="SKU / item number" name="sku" error={fe.sku}>
-          <input {...fieldAria("sku", fe.sku)} maxLength={64} autoComplete="off" className="input" />
+          <input {...fieldAria("sku", fe.sku)} defaultValue={initial?.sku ?? ""} maxLength={64} autoComplete="off" className="input" />
         </Field>
         <Field label="Item description" name="itemDescription" error={fe.itemDescription} className="sm:col-span-2">
-          <input {...fieldAria("itemDescription", fe.itemDescription)} maxLength={300} className="input" />
+          <input {...fieldAria("itemDescription", fe.itemDescription)} defaultValue={initial?.itemDescription ?? ""} maxLength={300} className="input" />
         </Field>
         <div className="grid grid-cols-2 gap-4 sm:col-span-2 sm:grid-cols-3">
           <Field label="Expected qty" name="expectedQty" error={fe.expectedQty} required={type === "shortage" || type === "overage"}>
@@ -191,10 +220,11 @@ export function IncidentForm({ facilities, defaultFacilityId, suppliers }: Props
           </div>
         </div>
         <Field label="Description" name="description" error={fe.description} required className="sm:col-span-2" hint="What did you find? Include carton counts, damage details, labels.">
-          <textarea {...fieldAria("description", fe.description)} rows={4} maxLength={5000} className="input" required />
+          <textarea {...fieldAria("description", fe.description)} defaultValue={initial?.description ?? ""} rows={4} maxLength={5000} className="input" required />
         </Field>
       </div>
 
+      {!initial && (
       <div className="card p-4 sm:p-5">
         <p className="label">Photos and documents</p>
         <p className="mb-3 text-xs text-slate-500">JPEG, PNG, WebP, HEIC or PDF · up to 10 MB each · stored privately.</p>
@@ -238,12 +268,14 @@ export function IncidentForm({ facilities, defaultFacilityId, suppliers }: Props
         )}
       </div>
 
+      )}
+
       <div className="sticky bottom-0 -mx-4 flex gap-2 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:flex-row sm:justify-end sm:border-0 sm:bg-transparent sm:p-0">
         <button type="button" onClick={() => router.back()} className={buttonClass("secondary", "md", "shrink-0")} disabled={Boolean(busy)}>
           Cancel
         </button>
         <button type="submit" className={buttonClass("primary", "lg", "flex-1 sm:flex-none")} disabled={Boolean(busy)} aria-busy={Boolean(busy)}>
-          {busy ?? "Submit exception"}
+          {busy ?? (initial ? "Save changes" : "Submit exception")}
         </button>
       </div>
     </form>

@@ -104,7 +104,7 @@ try {
   expect(publicTry.status() >= 400, `Public URL for evidence is refused (HTTP ${publicTry.status()})`);
 
   const inc2 = await reportIncident(page, { type: "damaged", supplier: "acme packaging", po: "PO-1002", description: "Two pallets crushed by forklift tines at trailer door." });
-  const inc3 = await reportIncident(page, { type: "wrong_item", supplier: "Globex Foods", po: "PO-2001", expected: 40, received: 40, description: "Received SKU 1123 instead of 1132." });
+  const inc3 = await reportIncident(page, { type: "wrong_item", supplier: "Globex Foods", po: "PO-2001", expected: 40, received: 40, description: '=HYPERLINK("http://evil.example","click") Received SKU 1123 instead of 1132.' });
   ok("Three incidents reported; supplier name matched case-insensitively");
 
   // Workflow on incident 1
@@ -189,6 +189,28 @@ try {
   expect(await page.locator("td a", { hasText: "Acme Packaging" }).isVisible(), "Supplier patterns list Acme");
   await shot(page, "09-dashboard");
 
+  // ------------------------------------------------------------ reports, CSV export, editing
+  await page.goto(`${BASE}/reports`);
+  await page.getByText("Exceptions by supplier").waitFor();
+  expect(await page.locator("td a", { hasText: "Acme Packaging" }).isVisible(), "Reports page shows exceptions by supplier");
+  expect(await page.getByText("Unresolved exceptions by age").isVisible(), "Reports page shows unresolved aging");
+  await shot(page, "10-reports");
+  const csvRes = await page.request.get(`${BASE}/incidents/export`);
+  const csv = await csvRes.text();
+  expect(csvRes.status() === 200 && (csvRes.headers()["content-type"] ?? "").includes("text/csv"), "CSV export downloads");
+  expect(csv.trim().split("\r\n").length === 4 && csv.includes('"EX-1"') && csv.includes('"Acme Packaging"'), "CSV contains the 3 incidents with a header row");
+  expect(csv.includes(`"'=HYPERLINK(`) && !csv.includes(`,"=HYPERLINK(`), "CSV neutralizes spreadsheet formulas in user text");
+  const filtered = await (await page.request.get(`${BASE}/incidents/export?status=unresolved`)).text();
+  expect(filtered.trim().split("\r\n").length === 3, "CSV export honors filters");
+
+  await page.goto(inc3.split("?")[0] + "/edit");
+  await page.fill("#poNumber", "PO-2001-A");
+  await page.click("button[type=submit]");
+  await page.waitForURL(/\?updated=1/);
+  expect(await page.getByText("edited po number").isVisible(), "Supervisor+ edits details; history records the changed field");
+  await op.goto(inc3.split("?")[0] + "/edit");
+  expect(await op.getByText("Only supervisors, managers, admins and owners can edit").isVisible(), "Operators cannot edit incident details");
+
   // ------------------------------------------------------------ another company
   const rivalCtx = await browser.newContext();
   const rp = await rivalCtx.newPage();
@@ -202,6 +224,8 @@ try {
   expect(await rp.getByText("Page not found").isVisible(), "Another company cannot open Lone Star's incident by URL");
   await rp.goto(`${BASE}/incidents`);
   expect(await rp.getByText("No incidents yet").isVisible(), "Another company sees none of Lone Star's incidents");
+  const rivalCsv = await (await rp.request.get(`${BASE}/incidents/export`)).text();
+  expect(rivalCsv.trim().split("\r\n").length === 1, "Another company's CSV export contains none of Lone Star's data");
   await rp.goto(link);
   expect(await rp.getByText("already been used").isVisible() || await rp.getByText("different email").isVisible(), "Another company's user cannot use the invitation");
 

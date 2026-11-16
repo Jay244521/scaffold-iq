@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Plus, Search } from "lucide-react";
+import { Download, Plus, Search } from "lucide-react";
 import { LocalTime } from "@/components/client";
 import { EmptyState, LinkButton, PageHeader, StatusBadge, TypeBadge, buttonClass } from "@/components/ui";
 import { getMembers, requireAppContext } from "@/lib/context";
@@ -17,7 +17,8 @@ import {
   type IncidentStatus,
 } from "@/lib/labels";
 import { can } from "@/lib/permissions";
-import { incidentFilterSchema, sanitizeSearch, type IncidentFilters } from "@/lib/validation";
+import { incidentQuery } from "@/lib/incident-query";
+import { incidentFilterSchema, type IncidentFilters } from "@/lib/validation";
 
 export const metadata: Metadata = { title: "Incidents" };
 
@@ -44,38 +45,13 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Pr
   const raw = Object.fromEntries(Object.entries(await searchParams).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v || undefined]));
   const f: IncidentFilters = incidentFilterSchema.parse(raw);
   const page = f.page ?? 1;
-  const facilityId = f.facility && ctx.facilities.some((x) => x.id === f.facility) ? f.facility : ctx.facility?.id;
-
-  let q = ctx.supabase
-    .from("incidents")
-    .select(
-      "id, number, type, status, occurred_at, po_number, shipment_ref, sku, expected_qty, received_qty, assigned_to, suppliers(name), facilities(name)",
-      { count: "exact" },
-    )
-    .eq("org_id", ctx.org.orgId);
-
-  if (facilityId) q = q.eq("facility_id", facilityId);
-  if (f.status === "unresolved") q = q.in("status", ["open", "in_progress"]);
-  else if (f.status) q = q.eq("status", f.status);
-  if (f.type) q = q.eq("type", f.type);
-  if (f.supplier) q = q.eq("supplier_id", f.supplier);
-  if (f.assignee === "me") q = q.eq("assigned_to", ctx.user.id);
-  else if (f.assignee === "unassigned") q = q.is("assigned_to", null);
-  else if (f.assignee) q = q.eq("assigned_to", f.assignee);
-  if (f.from) q = q.gte("occurred_at", `${f.from}T00:00:00Z`);
-  if (f.to) q = q.lt("occurred_at", new Date(Date.parse(`${f.to}T00:00:00Z`) + 86_400_000).toISOString());
-
-  const term = f.q ? sanitizeSearch(f.q) : "";
-  if (term) {
-    const num = term.match(/^(?:ex-?)?(\d{1,9})$/i);
-    const { data: sup } = await ctx.supabase.from("suppliers").select("id").eq("org_id", ctx.org.orgId).ilike("name", `%${term}%`).limit(50);
-    const ors = ["po_number", "shipment_ref", "sku", "item_description", "description"].map((c) => `${c}.ilike.*${term}*`);
-    if (num) ors.push(`number.eq.${num[1]}`);
-    if (sup?.length) ors.push(`supplier_id.in.(${sup.map((s) => s.id).join(",")})`);
-    q = q.or(ors.join(","));
-  }
-
-  const { data, count, error } = await q.order("occurred_at", { ascending: false }).range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+  const { query, facilityId } = await incidentQuery(
+    ctx,
+    f,
+    "id, number, type, status, occurred_at, po_number, shipment_ref, sku, expected_qty, received_qty, assigned_to, suppliers(name), facilities(name)",
+    true,
+  );
+  const { data, count, error } = await query.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
   if (error) logError("list incidents", error);
   const rows = (data ?? []) as unknown as Row[];
   const total = count ?? 0;
@@ -88,6 +64,9 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Pr
   const memberName = new Map(members.map((m) => [m.userId, m.name]));
   const filtered = Object.entries(f).some(([k, v]) => v && k !== "page");
 
+  const exportParams = new URLSearchParams(
+    Object.entries({ ...raw, page: undefined, facility: facilityId }).filter(([, v]) => v) as [string, string][],
+  ).toString();
   const pageHref = (p: number) => {
     const sp = new URLSearchParams(Object.entries({ ...raw, page: String(p) }).filter(([, v]) => v) as [string, string][]);
     return `/incidents?${sp}`;
@@ -99,11 +78,16 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Pr
         title="Incidents"
         description={`${total.toLocaleString()} receiving exception${total === 1 ? "" : "s"}${facilityId ? ` at ${ctx.facilities.find((x) => x.id === facilityId)?.name}` : ""}`}
         actions={
-          can.createIncident(ctx.org.role) ? (
-            <LinkButton href="/incidents/new">
-              <Plus className="h-4 w-4" aria-hidden /> Report exception
-            </LinkButton>
-          ) : undefined
+          <>
+            <a href={`/incidents/export?${exportParams}`} className={buttonClass("secondary")}>
+              <Download className="h-4 w-4" aria-hidden /> Export CSV
+            </a>
+            {can.createIncident(ctx.org.role) && (
+              <LinkButton href="/incidents/new">
+                <Plus className="h-4 w-4" aria-hidden /> Report exception
+              </LinkButton>
+            )}
+          </>
         }
       />
 
@@ -117,7 +101,7 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Pr
             <input id="q" name="q" defaultValue={f.q} placeholder="EX number, PO, shipment, SKU, supplier, description" className="input pl-9" maxLength={100} />
           </div>
         </div>
-        <FilterSelect name="status" label="Status" value={f.status} options={[["unresolved", "Unresolved (open + in progress)"], ...STATUSES.map((s) => [s, STATUS_LABELS[s]] as [string, string])]} />
+        <FilterSelect name="status" label="Status" value={f.status} options={[["unresolved", "Unresolved (open + in progress)"], ["done", "Done (resolved + closed)"], ...STATUSES.map((s) => [s, STATUS_LABELS[s]] as [string, string])]} />
         <FilterSelect name="type" label="Category" value={f.type} options={EXCEPTION_TYPES.map((t) => [t, EXCEPTION_LABELS[t]])} />
         <FilterSelect name="facility" label="Facility" value={facilityId} options={ctx.facilities.map((x) => [x.id, x.name])} />
         <FilterSelect name="supplier" label="Supplier" value={f.supplier} options={(suppliers ?? []).map((s) => [s.id as string, s.name as string])} />

@@ -3,7 +3,7 @@
 ✅ done and tested · ⬜ to do before real customer data · 🔜 later phase
 
 ## Security
-- ✅ Live staging project security-tested through its public API: 24/24 cross-company and role checks pass (`tests/staging/api-isolation.mjs`)
+- ✅ Live staging project security-tested through its public API: 25/25 cross-company and role checks pass (`tests/staging/api-isolation.mjs`)
 - ✅ Supabase Security Advisor on staging: no errors; 6 warnings reviewed and accepted (intentional RPC entry points — see STAGING.md)
 - ✅ Row Level Security on every table; 125 automated checks (cross-tenant reads/writes, roles, storage, invitations, audit) pass on plain PostgreSQL **and** real Supabase
 - ✅ Tests are shown to catch regressions (a deliberately broken policy makes them fail)
@@ -39,8 +39,8 @@
 - ✅ Organization onboarding, facilities, invitations, six roles, facility selection
 - ✅ Dashboard, incident entry with evidence, assignment, status, resolution, comments, history, search & filters
 - ✅ Responsive: verified with no horizontal scrolling at 320 px on every app page
-- ⬜ Edit incident details after submission (supervisors) — database rules exist, UI not yet
-- 🔜 Phase 4: Reports page, CSV export
+- ✅ Edit incident details after submission (supervisors), recorded in history
+- ✅ Phase 4: Reports page, CSV export (spreadsheet formula-injection protection)
 - 🔜 Phase 5: Inventory CSV import, preview, discrepancy review & approval
 - 🔜 Phase 6: AI summaries, supplier reports, recommendations (human-approved only)
 - ⬜ Facility time zones (dates currently show in each viewer's own time zone; list filters use UTC days)

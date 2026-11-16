@@ -64,7 +64,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     { label: "Total exceptions", value: s.total, href: "/incidents" },
     { label: "Open", value: n("open"), href: "/incidents?status=open", accent: "border-l-red-500" },
     { label: "In progress", value: n("in_progress"), href: "/incidents?status=in_progress", accent: "border-l-amber-500" },
-    { label: "Resolved", value: n("resolved") + n("closed"), href: "/incidents?status=resolved", accent: "border-l-emerald-500" },
+    { label: "Resolved", value: n("resolved") + n("closed"), href: "/incidents?status=done", accent: "border-l-emerald-500" },
   ];
 
   return (

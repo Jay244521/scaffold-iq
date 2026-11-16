@@ -159,6 +159,52 @@ export async function registerEvidence(incidentId: string, path: string, origina
   return { success: "uploaded" };
 }
 
+/** Supervisors and above correct an incident's details. History records which fields changed. */
+export async function updateIncidentDetails(incidentId: string, formData: FormData): Promise<ActionState> {
+  const ctx = await requireAppContext();
+  if (!can.editIncidentDetails(ctx.org.role)) return { error: "Only supervisors and above can edit incident details." };
+  const incident = await loadIncident(ctx.supabase, ctx.org.orgId, incidentId);
+  if (!incident) return { error: "Incident not found." };
+
+  const parsed = incidentSchema.safeParse(formToObject(formData));
+  if (!parsed.success) return { fieldErrors: fieldErrorsOf(parsed.error), error: "Please fix the highlighted fields." };
+  const v = parsed.data;
+  if (!ctx.facilities.some((f) => f.id === v.facilityId)) return { fieldErrors: { facilityId: ["Choose one of your facilities"] } };
+
+  let supplierId: string | null = null;
+  if (v.supplierName) {
+    supplierId = await findOrCreateSupplier(ctx.supabase, ctx.org.orgId, v.supplierName);
+    if (!supplierId) return { error: "We couldn't save the supplier. Please try again." };
+  }
+  const { data, error } = await ctx.supabase
+    .from("incidents")
+    .update({
+      facility_id: v.facilityId,
+      type: v.type,
+      supplier_id: supplierId,
+      po_number: v.poNumber ?? null,
+      shipment_ref: v.shipmentRef ?? null,
+      sku: v.sku ?? null,
+      item_description: v.itemDescription ?? null,
+      expected_qty: v.expectedQty,
+      received_qty: v.receivedQty,
+      description: v.description,
+      occurred_at: v.occurredAt,
+    })
+    .eq("id", incident.id)
+    .eq("org_id", ctx.org.orgId)
+    .select("id");
+  if (error) {
+    logError("update incident details", error);
+    return { error: friendlyError(error) };
+  }
+  if (!data?.length) return { error: "You don't have permission to edit this incident." };
+  revalidatePath(`/incidents/${incident.id}`);
+  revalidatePath("/incidents");
+  revalidatePath("/dashboard");
+  return { success: "Saved." };
+}
+
 export async function deleteEvidence(formData: FormData) {
   const ctx = await requireAppContext();
   if (!can.deleteEvidence(ctx.org.role)) return;

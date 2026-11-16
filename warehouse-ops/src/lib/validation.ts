@@ -149,7 +149,7 @@ const dateOnly = z
 /** Incident list filters from the URL. Invalid values are dropped, never trusted. */
 export const incidentFilterSchema = z.object({
   q: z.string().max(100).optional().catch(undefined),
-  status: z.enum([...STATUSES, "unresolved"]).optional().catch(undefined),
+  status: z.enum([...STATUSES, "unresolved", "done"]).optional().catch(undefined),
   type: z.enum(EXCEPTION_TYPES).optional().catch(undefined),
   facility: z.uuid().optional().catch(undefined),
   supplier: z.uuid().optional().catch(undefined),

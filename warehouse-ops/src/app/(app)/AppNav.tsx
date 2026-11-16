@@ -9,7 +9,7 @@ import { cx } from "@/components/ui";
 const items = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/incidents", label: "Incidents", icon: ClipboardList },
-  { href: "/reports", label: "Reports", icon: BarChart3, soon: true },
+  { href: "/reports", label: "Reports", icon: BarChart3 },
   { href: "/inventory", label: "Inventory checks", icon: PackageSearch, soon: true },
 ];
 const settings = [

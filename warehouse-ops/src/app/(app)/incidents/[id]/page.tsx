@@ -41,7 +41,7 @@ type Comment = { id: string; author_id: string; body: string; created_at: string
 type Event = { id: number; actor_id: string | null; event_type: string; from_value: string | null; to_value: string | null; metadata: { fields?: string[] }; created_at: string };
 type Attachment = { id: string; storage_path: string; file_name: string; mime_type: string; size_bytes: number; uploaded_by: string; created_at: string };
 
-export default async function IncidentPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ created?: string; failed?: string }> }) {
+export default async function IncidentPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ created?: string; failed?: string; updated?: string }> }) {
   const ctx = await requireAppContext();
   const { id } = await params;
   const sp = await searchParams;
@@ -128,10 +128,16 @@ export default async function IncidentPage({ params, searchParams }: { params: P
         <h1 className="font-mono text-2xl font-semibold text-slate-900">{incidentRef(inc.number)}</h1>
         <TypeBadge type={inc.type} />
         <StatusBadge status={inc.status} />
+        {can.editIncidentDetails(role) && (
+          <Link href={`/incidents/${inc.id}/edit`} className="ml-auto text-sm font-medium text-brand-600 hover:underline">
+            Edit details
+          </Link>
+        )}
       </div>
 
       <div className="mb-4 space-y-3">
         {sp.created && <Alert tone="success">Exception {incidentRef(inc.number)} was reported.</Alert>}
+        {sp.updated && <Alert tone="success">Changes saved. They're recorded in the activity history below.</Alert>}
         {sp.failed && <Alert tone="warning">{sp.failed} file(s) could not be uploaded. You can add them again below.</Alert>}
       </div>
 

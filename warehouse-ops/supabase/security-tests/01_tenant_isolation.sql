@@ -55,6 +55,8 @@ select tests.eq((select count(*) from public.audit_log where org_id = tests.id('
 select tests.eq((select count(*) from public.profiles where id = tests.id('alice')), 0, 'B cannot read Org A member profiles');
 select tests.eq((select count(*) from storage.objects where name like tests.id('orgA') || '/%'), 0, 'B cannot list Org A evidence files');
 select tests.eq((select (public.incident_summary(tests.id('orgA')) ->> 'total')::bigint), 0, 'B gets an empty dashboard summary for Org A');
+select tests.eq((select (public.incident_report(tests.id('orgA')) ->> 'total')::bigint), 0, 'B gets an empty report for Org A');
+select tests.eq((select jsonb_array_length(public.incident_report(tests.id('orgA')) -> 'by_supplier')::bigint), 0, 'B sees no Org A suppliers in reports');
 
 -- ---------------------------------------------------------------- writes across tenants
 select tests.throws(format($$insert into public.incidents (org_id, facility_id, type, description, occurred_at)
@@ -132,6 +134,7 @@ select tests.login_anon();
 select tests.throws('select count(*) from public.incidents', 'Anonymous visitors cannot query incidents');
 select tests.throws('select count(*) from public.organizations', 'Anonymous visitors cannot query organizations');
 select tests.throws($$select public.create_organization('anon org')$$, 'Anonymous visitors cannot create organizations');
+select tests.throws(format($$select public.incident_report(%L)$$, tests.id('orgA')), 'Anonymous visitors cannot run reports');
 select tests.eq((select count(*) from storage.objects), 0, 'Anonymous visitors cannot list evidence files');
 select tests.logout();
 
@@ -140,6 +143,8 @@ select tests.login('olive');
 select tests.eq((select count(*) from public.incidents), 1, 'Org A operator sees Org A incidents');
 select tests.eq((select count(*) from storage.objects), 1, 'Org A operator can see Org A evidence files');
 select tests.eq((select (public.incident_summary(tests.id('orgA')) ->> 'total')::bigint), 1, 'Org A dashboard summary counts Org A incidents');
+select tests.ok((select (r ->> 'total')::int = 1 and (r ->> 'unresolved')::int = 1 and (r -> 'by_supplier' -> 0 ->> 'name') = 'Acme Packaging'
+  from (select public.incident_report(tests.id('orgA')) as r) x), 'Org A report counts Org A incidents by supplier');
 select tests.logout();
 
 rollback;

@@ -29,6 +29,8 @@ and I'll reconcile anything worth keeping from it.
 | React 19 auto-resets forms after submit → typed input lost on validation errors, and the status dropdown silently reverted (found by the E2E test) | Shared `useFormAction` hook submits without auto-reset |
 | Supplier table caused sideways scrolling on phones | Fixed; every page verified at 320 px |
 | Real Supabase Storage blocks direct SQL deletes and sets `owner_id` itself | Test harness mimics the Storage API so tests run identically on real Supabase |
+| Editing incident details failed in the database: the history trigger built its "changed fields" list with an expression PostgreSQL read as a malformed array (found by the E2E test, Phase 4) | Fixed in migration `20261116160943_fix_details_history`; regression test added and shown to fail without the fix; fix applied to staging |
+| A Netlify "skip unchanged builds" rule cancels a site's very first deploy | Rule removed from `netlify.toml` |
 
 ## 3. Status by module
 
@@ -38,17 +40,15 @@ and I'll reconcile anything worth keeping from it.
 | B Organizations & facilities | ✅ secure onboarding, facilities CRUD/deactivate, invitations, 6 roles, role changes, facility selector |
 | C Dashboard | ✅ totals, open/in progress/resolved, avg resolution time, categories, supplier patterns, recent; 7/30/90/all ranges; facility scope |
 | D Incident creation | ✅ 5 types, supplier, facility, PO, shipment ref, SKU, qty expected/received (+variance), description, date/time, photos/PDFs |
-| E Tracking | ✅ assignment, status, comments, resolution notes, history, search, filters, responsible employee, resolution timestamps · ⬜ edit details UI |
+| E Tracking | ✅ assignment, status, comments, resolution notes, history, search, filters, responsible employee, resolution timestamps, supervisor editing |
 | F Evidence | ✅ private storage, 10 MB, type allowlist + content check, authorization, signed URLs |
-| G Reporting | 🔜 Phase 4 (summary function already supports date filtering) |
+| G Reporting | ✅ Reports page (by supplier with category breakdown, by category, unresolved aging, avg/median resolution time, oldest unresolved), date & facility filters, CSV export with formula-injection protection |
 | H Inventory reconciliation | 🔜 Phase 5 |
 | I AI | 🔜 Phase 6 |
 
 ## 4. Prioritized plan from here
 
-1. **Phase 4 — Reporting:** Reports page (by supplier, by category, unresolved aging, resolution
-   times, date range), CSV export (with spreadsheet-formula injection protection), supervisor
-   "edit incident details".
+1. ✅ **Phase 4 — Reporting:** done (Reports page, CSV export with formula-injection protection, supervisor editing).
 2. **Phase 5 — Inventory reconciliation:** CSV upload → parse in a size-limited, formula-safe way →
    column mapping and validation preview → discrepancy list (system vs counted) → proposed
    corrections that require a named human approval; nothing overwritten silently; everything audited.

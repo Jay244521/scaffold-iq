@@ -101,6 +101,10 @@ select tests.eq(tests.affected(format($$update public.incidents set status = 'op
   'Supervisors can reopen incidents');
 select tests.ok((select resolved_at is null and resolved_by is null from public.incidents where id = tests.id('inc')),
   'Reopening clears the resolution timestamp');
+select tests.eq(tests.affected(format($$update public.incidents set po_number = 'PO-777', description = 'Corrected description' where id = %L$$, tests.id('inc2'))), 1,
+  'Supervisors can edit incident details');
+select tests.ok(exists (select 1 from public.incident_events where incident_id = tests.id('inc2') and event_type = 'details_updated'
+  and metadata -> 'fields' ? 'po_number' and metadata -> 'fields' ? 'description'), 'Detail edits are recorded in history with the changed fields');
 select tests.throws(format($$update public.incidents set number = 50 where id = %L$$, tests.id('inc')), 'Incident numbers are immutable');
 select tests.throws(format($$update public.incidents set reported_by = %L where id = %L$$, tests.id('super'), tests.id('inc')), 'Reporter is immutable');
 select tests.logout();
