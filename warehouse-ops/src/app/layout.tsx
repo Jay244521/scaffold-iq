@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: { default: "Warehouse Ops", template: "%s · Warehouse Ops" },
   description: "Receiving and inventory exception management for warehouses, distributors and 3PLs.",
   robots: { index: false, follow: false },
+  appleWebApp: { capable: true, title: "Warehouse Ops", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#10294a" };

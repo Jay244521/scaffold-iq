@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BarChart3, Building2, ClipboardList, LayoutDashboard, Menu, PackageSearch, Plus, Users, X } from "lucide-react";
+import { BarChart3, Building2, ClipboardList, History, LayoutDashboard, Menu, PackageSearch, Plus, Truck, Users, X } from "lucide-react";
 import { cx } from "@/components/ui";
 
 const items = [
@@ -14,10 +14,12 @@ const items = [
 ];
 const settings = [
   { href: "/settings/facilities", label: "Facilities", icon: Building2 },
+  { href: "/settings/suppliers", label: "Suppliers", icon: Truck },
   { href: "/settings/team", label: "Team", icon: Users },
 ];
+const adminSettings = [{ href: "/settings/audit", label: "Audit log", icon: History }];
 
-function NavLinks({ canReport, onNavigate }: { canReport: boolean; onNavigate?: () => void }) {
+function NavLinks({ canReport, showAudit, onNavigate }: { canReport: boolean; showAudit?: boolean; onNavigate?: () => void }) {
   const path = usePathname();
   const active = (href: string) => path === href || (path.startsWith(`${href}/`) && !(href === "/incidents" && path === "/incidents/new"));
   const link = (i: (typeof items)[number] & { soon?: boolean }) =>
@@ -56,23 +58,24 @@ function NavLinks({ canReport, onNavigate }: { canReport: boolean; onNavigate?: 
       {items.map(link)}
       <p className="mb-1 mt-5 px-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Settings</p>
       {settings.map(link)}
+      {showAudit && adminSettings.map(link)}
     </nav>
   );
 }
 
-export function Sidebar({ canReport, header, footer }: { canReport: boolean; header: React.ReactNode; footer: React.ReactNode }) {
+export function Sidebar({ canReport, showAudit, header, footer }: { canReport: boolean; showAudit?: boolean; header: React.ReactNode; footer: React.ReactNode }) {
   return (
     <aside className="hidden w-64 shrink-0 flex-col bg-brand-900 px-3 py-4 lg:flex print:!hidden">
       <div className="mb-6 px-2">{header}</div>
       <div className="flex-1">
-        <NavLinks canReport={canReport} />
+        <NavLinks canReport={canReport} showAudit={showAudit} />
       </div>
       <div className="border-t border-white/10 pt-3">{footer}</div>
     </aside>
   );
 }
 
-export function MobileNav({ canReport, header, footer }: { canReport: boolean; header: React.ReactNode; footer: React.ReactNode }) {
+export function MobileNav({ canReport, showAudit, header, footer }: { canReport: boolean; showAudit?: boolean; header: React.ReactNode; footer: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const path = usePathname();
   useEffect(() => setOpen(false), [path]);
@@ -93,7 +96,7 @@ export function MobileNav({ canReport, header, footer }: { canReport: boolean; h
       </div>
       {open && (
         <div id="mobile-nav" className="bg-brand-900 px-3 pb-4">
-          <NavLinks canReport={canReport} onNavigate={() => setOpen(false)} />
+          <NavLinks canReport={canReport} showAudit={showAudit} onNavigate={() => setOpen(false)} />
           <div className="mt-4 border-t border-white/10 pt-3">{footer}</div>
         </div>
       )}

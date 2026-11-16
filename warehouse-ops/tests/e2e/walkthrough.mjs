@@ -250,6 +250,38 @@ try {
   await op.goto(`${BASE}/reports/supplier/${acmeId}`);
   expect(await op.getByText("Receiving discrepancy report").isVisible(), "Supplier report works on a phone");
 
+  // ------------------------------------------------------------ suppliers, audit log, install
+  await reportIncident(page, { type: "other", supplier: "ACME Packaging Inc.", description: "Duplicate-named supplier for merge test." });
+  await page.goto(`${BASE}/settings/suppliers`);
+  const dupRow = page.locator("li", { hasText: "ACME Packaging Inc." });
+  await dupRow.getByRole("button", { name: "Merge…" }).click();
+  await dupRow.locator("select[name=intoId]").selectOption({ label: "Acme Packaging" });
+  page.once("dialog", (d) => d.accept());
+  await dupRow.getByRole("button", { name: "Merge", exact: true }).click();
+  await page.getByText("Suppliers merged. 1 incident moved").waitFor();
+  await page.reload();
+  expect(!(await page.getByText("ACME Packaging Inc.").count()) && await page.locator("li", { hasText: "Acme Packaging" }).getByText("3 incidents").isVisible(),
+    "Managers merge duplicate suppliers; incidents move to the surviving supplier");
+  const glx = page.locator("li", { hasText: "Globex Foods" });
+  await glx.getByRole("button", { name: "Rename" }).click();
+  await glx.locator("input[name=name]").fill("Globex Foods LLC");
+  await glx.getByRole("button", { name: "Save" }).click();
+  await page.getByText("Renamed.").waitFor();
+  ok("Managers rename suppliers");
+  await page.goto(`${BASE}/settings/audit`);
+  expect(await page.getByText("renamed supplier Globex Foods to Globex Foods LLC").isVisible()
+    && await page.getByText("removed supplier ACME Packaging Inc. (merged or deleted)").isVisible()
+    && await page.getByText("joined as Operator").isVisible(), "Audit log shows supplier and team changes in plain English");
+  await shot(page, "16-audit-log");
+  await op.goto(`${BASE}/settings/audit`);
+  expect(await op.getByText("Only owners and admins can view the audit log").isVisible(), "Operators cannot view the audit log");
+  await op.goto(`${BASE}/settings/suppliers`);
+  expect(!(await op.getByRole("button", { name: "Merge…" }).count()), "Operators cannot rename or merge suppliers");
+  const mf = await page.request.get(`${BASE}/manifest.webmanifest`);
+  const mj = await mf.json();
+  expect(mf.status() === 200 && mj.name === "Warehouse Ops" && mj.display === "standalone" && (await page.request.get(`${BASE}/icons/icon-512.png`)).status() === 200,
+    "App can be added to a phone's home screen (manifest and icons served)");
+
   // ------------------------------------------------------------ inventory reconciliation
   const sysCsv = path.join(SHOTS, "wms-export.csv");
   fs.writeFileSync(sysCsv, "SKU,Location,Description,Qty\nSKU-A,A1,Corrugated boxes,100\nSKU-B,B1,Stretch film,50\nSKU-C,C1,Pallet labels,10\n");
