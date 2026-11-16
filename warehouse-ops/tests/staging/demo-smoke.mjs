@@ -39,9 +39,11 @@ try {
   await dana.screenshot({ path: path.join(SHOTS, "staging-dashboard.png"), fullPage: true });
   await dana.goto(`${BASE}/incidents`);
   await dana.screenshot({ path: path.join(SHOTS, "staging-incidents.png"), fullPage: true });
+  await dana.locator("tbody a").first().waitFor({ timeout: 30_000 });
   const firstHref = await dana.locator("tbody a").first().getAttribute("href");
   await dana.goto(BASE + firstHref);
-  ok(await dana.getByText("Activity and comments").isVisible(), "Incident detail with history renders");
+  await dana.getByText("Activity and comments").waitFor({ timeout: 30_000 });
+  ok(true, "Incident detail with history renders");
   await dana.screenshot({ path: path.join(SHOTS, "staging-incident.png"), fullPage: true });
 
   const grace = await login("grace.viewer@example.com");
@@ -49,9 +51,11 @@ try {
 
   const rosa = await login("rosa.owner@example.com", { ...devices["iPhone 13"] });
   await rosa.goto(`${BASE}/incidents`);
+  await rosa.locator("ul.md\\:hidden > li").first().waitFor({ timeout: 30_000 });
   ok((await rosa.locator("ul.md\\:hidden > li").count()) === 2, "Second company sees only its own 2 incidents");
   await rosa.goto(BASE + firstHref);
-  ok(await rosa.getByText("Page not found").isVisible(), "Second company cannot open the first company's incident URL");
+  await rosa.getByText("Page not found").waitFor({ timeout: 30_000 });
+  ok(true, "Second company cannot open the first company's incident URL");
   await rosa.screenshot({ path: path.join(SHOTS, "staging-mobile-second-company.png"), fullPage: true });
   console.log(`\nAll ${n} staging demo checks passed.`);
 } catch (e) {
