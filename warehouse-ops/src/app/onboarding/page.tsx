@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Logo } from "@/components/Logo";
 import { getAppContext, requireUser } from "@/lib/context";
-import { logOut } from "@/app/(auth)/actions";
+import { logOut } from "@/app/auth-forms/actions";
 import { OnboardingForm } from "./OnboardingForm";
 
 export const metadata: Metadata = { title: "Set up your workspace" };

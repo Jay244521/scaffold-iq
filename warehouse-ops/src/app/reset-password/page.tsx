@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/context";
-import { ResetPasswordForm } from "../AuthForms";
+import { ResetPasswordForm } from "@/app/auth-forms/AuthForms";
 
 export const metadata: Metadata = { title: "Choose a new password" };
 

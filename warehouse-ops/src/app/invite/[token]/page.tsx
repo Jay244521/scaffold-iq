@@ -4,7 +4,7 @@ import { Alert, LinkButton } from "@/components/ui";
 import { getUser } from "@/lib/context";
 import { ROLE_LABELS, type Role } from "@/lib/permissions";
 import { createServerSupabase } from "@/lib/supabase/server";
-import { logOut } from "@/app/(auth)/actions";
+import { logOut } from "@/app/auth-forms/actions";
 import { AcceptForm } from "./AcceptForm";
 
 export const metadata: Metadata = { title: "Team invitation" };

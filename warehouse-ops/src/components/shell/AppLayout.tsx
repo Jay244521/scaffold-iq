@@ -4,7 +4,7 @@ import { AutoSubmitSelect } from "@/components/client";
 import { Logo } from "@/components/Logo";
 import { requireAppContext } from "@/lib/context";
 import { ROLE_LABELS, can } from "@/lib/permissions";
-import { logOut } from "@/app/(auth)/actions";
+import { logOut } from "@/app/auth-forms/actions";
 import { switchFacility, switchOrganization } from "./context-actions";
 import { MobileNav, Sidebar } from "./AppNav";
 

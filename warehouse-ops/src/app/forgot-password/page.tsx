@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ForgotPasswordForm } from "../AuthForms";
+import { ForgotPasswordForm } from "@/app/auth-forms/AuthForms";
 
 export const metadata: Metadata = { title: "Reset password" };
 
