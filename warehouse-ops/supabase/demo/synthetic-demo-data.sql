@@ -290,3 +290,34 @@ begin
   perform set_config('request.jwt.claims', '', true);
 end
 $inventory$;
+
+-- Keep demo incidents realistic: each fictional supplier ships items from its own catalog.
+-- Safe to re-run (deterministic by incident number).
+update public.incidents i
+set sku = c.sku, item_description = c.descr
+from public.suppliers s,
+  (values
+    ('Trinity Corrugated', 0, 'CB-1824', '18x24 corrugated boxes (bundle of 25)'),
+    ('Trinity Corrugated', 1, 'CB-2436', '24x36 corrugated boxes (bundle of 20)'),
+    ('Trinity Corrugated', 2, 'CB-1212', '12x12 shipping cartons (bundle of 50)'),
+    ('Bluebonnet Provisions', 0, 'BP-0412', 'Canned black beans, 24 ct case'),
+    ('Bluebonnet Provisions', 1, 'BP-0977', 'Pinto beans 25 lb sack'),
+    ('Bluebonnet Provisions', 2, 'BP-1130', 'Long grain rice 50 lb sack'),
+    ('Redline Fastener Supply', 0, 'RF-M8x30', 'M8 x 30 hex bolts, box of 500'),
+    ('Redline Fastener Supply', 1, 'RF-M10x40', 'M10 x 40 hex bolts, box of 250'),
+    ('Redline Fastener Supply', 2, 'RF-W8', 'M8 flat washers, box of 1000'),
+    ('Pecos Paper Co.', 0, 'PP-LTR20', 'Letter copy paper, 10 ream case'),
+    ('Pecos Paper Co.', 1, 'PP-LGL10', 'Legal copy paper, 10 ream case'),
+    ('Pecos Paper Co.', 2, 'LB-4X6', 'Thermal labels 4x6, roll of 500'),
+    ('Lakeside Beverage Distributors', 0, 'LB-12OZ-CS', 'Sparkling water 12 oz, 24 ct case'),
+    ('Lakeside Beverage Distributors', 1, 'LB-20OZ-CS', 'Spring water 20 oz, 24 ct case'),
+    ('Lakeside Beverage Distributors', 2, 'LB-12OZ-CS', 'Sparkling water 12 oz, 24 ct case'),
+    ('Caddo Plastics', 0, 'CP-TOTE-L', 'Large stacking tote, gray'),
+    ('Caddo Plastics', 1, 'CP-TOTE-M', 'Medium stacking tote, gray'),
+    ('Caddo Plastics', 2, 'CP-LID-L', 'Lid for large tote')
+  ) as c(supplier, idx, sku, descr)
+where s.id = i.supplier_id
+  and s.name = c.supplier
+  and c.idx = i.number % 3
+  and i.org_id = (select id from public.organizations where name = 'Lone Star Distribution (Demo)')
+  and (i.sku is distinct from c.sku or i.item_description is distinct from c.descr);

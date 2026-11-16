@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Plus } from "lucide-react";
 import { LocalTime } from "@/components/client";
+import { PatternsCard, type Patterns } from "@/components/PatternsCard";
 import { Alert, Card, EmptyState, LinkButton, PageHeader, StatusBadge, TypeBadge, cx } from "@/components/ui";
 import { requireAppContext } from "@/lib/context";
 import { logError } from "@/lib/errors";
@@ -38,7 +39,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const range: RangeKey = sp.range && sp.range in RANGES ? (sp.range as RangeKey) : "30";
   const from = range === "all" ? null : new Date(Date.now() - Number(range) * 86_400_000).toISOString();
 
-  const [{ data: summaryData, error: summaryError }, { data: recentData }] = await Promise.all([
+  const [{ data: summaryData, error: summaryError }, { data: recentData }, { data: patternData }] = await Promise.all([
     ctx.supabase.rpc("incident_summary", { p_org: ctx.org.orgId, p_facility: ctx.facility?.id ?? null, p_from: from, p_to: null }),
     (() => {
       let q = ctx.supabase
@@ -50,6 +51,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       if (ctx.facility) q = q.eq("facility_id", ctx.facility.id);
       return q;
     })(),
+    ctx.supabase.rpc("exception_patterns", { p_org: ctx.org.orgId, p_facility: ctx.facility?.id ?? null }),
   ]);
   if (summaryError) logError("incident_summary", summaryError);
 
@@ -190,6 +192,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           )}
         </Card>
       </div>
+
+      <PatternsCard p={patternData as Patterns | null} className="mt-6" />
 
       <div className="mt-6">
         <Card title="Recent incidents" actions={<Link href="/incidents" className="text-sm font-medium text-brand-600 hover:underline">View all</Link>}>

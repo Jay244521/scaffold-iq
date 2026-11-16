@@ -44,15 +44,12 @@ and I'll reconcile anything worth keeping from it.
 | F Evidence | ✅ private storage, 10 MB, type allowlist + content check, authorization, signed URLs |
 | G Reporting | ✅ Reports page (by supplier with category breakdown, by category, unresolved aging, avg/median resolution time, oldest unresolved), date & facility filters, CSV export with formula-injection protection |
 | H Inventory reconciliation | ✅ CSV import (preview first; required-column and per-row validation; duplicates), discrepancy detection against records, manager approve/reject per line, explicit confirmation to apply, stale-record protection, append-only adjustment log; direct edits blocked in the database |
-| I AI | 🔜 Phase 6 |
+| I Assistance | ✅ $0 rules-based: supplier discrepancy report with editable draft message (print/PDF, copy; never sent automatically), pattern alerts (rising supplier issues, repeat SKUs, stale open items), suggested next steps per incident. 🔜 Optional paid AI (summaries) only with approval |
 
 ## 4. Prioritized plan from here
 
 1. ✅ **Phase 4 — Reporting:** done (Reports page, CSV export with formula-injection protection, supervisor editing).
 2. ✅ **Phase 5 — Inventory reconciliation:** done (see module H).
-3. **Phase 6 — AI (optional, needs your approval for an API provider and spend cap):** incident
-   summaries, recurring-pattern detection, supplier discrepancy report drafts, suggested next
-   steps. Read-only: AI output is a draft a person must accept; it cannot change inventory,
-   close incidents or contact suppliers.
+3. ✅ **Phase 6 ($0 version):** rules-based assistance done. Paid AI (summaries, smarter drafts) needs approval of a provider and a spending cap; it would only ever draft and suggest.
 4. **Phase 7 — Hardening & launch:** checklist in `PRODUCTION_CHECKLIST.md`, staging project,
    pilot with one friendly warehouse using non-sensitive data.

@@ -24,15 +24,23 @@ body {
   outline-offset: 2px;
 }
 
-.input {
-  @apply block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-[15px] text-slate-900 shadow-xs placeholder:text-slate-400 disabled:bg-slate-50 disabled:text-slate-500;
+/* In a layer so utility classes (including print: variants) can override them. */
+@layer components {
+  .input {
+    @apply block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-[15px] text-slate-900 shadow-xs placeholder:text-slate-400 disabled:bg-slate-50 disabled:text-slate-500;
+  }
+  .input[aria-invalid="true"] {
+    @apply border-red-500;
+  }
+  .label {
+    @apply mb-1 block text-sm font-medium text-slate-700;
+  }
+  .card {
+    @apply rounded-lg border border-slate-200 bg-white shadow-xs;
+  }
 }
-.input[aria-invalid="true"] {
-  @apply border-red-500;
-}
-.label {
-  @apply mb-1 block text-sm font-medium text-slate-700;
-}
-.card {
-  @apply rounded-lg border border-slate-200 bg-white shadow-xs;
+
+@media print {
+  body { background: #fff; }
+  main { padding: 0 !important; max-width: none !important; }
 }

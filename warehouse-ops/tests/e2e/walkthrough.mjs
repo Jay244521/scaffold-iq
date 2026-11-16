@@ -227,6 +227,29 @@ try {
   await op.goto(inc3.split("?")[0] + "/edit");
   expect(await op.getByText("Only supervisors, managers, admins and owners can edit").isVisible(), "Operators cannot edit incident details");
 
+  // ------------------------------------------------------------ $0 rules-based assistance
+  await page.goto(inc3.split("?")[0]);
+  const stepsCard = page.locator("section:has(h2:text-is('Suggested next steps'))");
+  expect(await stepsCard.getByText("Attach the signed BOL").isVisible() && await stepsCard.getByText("Ask Globex Foods for the correct item").isVisible(),
+    "Incident shows suggested next steps for its type and missing evidence");
+  expect(await stepsCard.getByText("nothing is changed or sent automatically").isVisible(), "Suggestions are clearly labeled as suggestions only");
+  await page.goto(inc2.split("?")[0]);
+  await page.click("text=Draft a discrepancy report for Acme Packaging");
+  await page.getByText("Receiving discrepancy report").waitFor();
+  expect((await page.locator("article tbody tr").count()) === 2, "Supplier report lists that supplier's incidents in the period");
+  const draft = await page.locator("#draft").inputValue();
+  expect(draft.includes("Hello Acme Packaging team") && draft.includes("credit or reship for 8 units") && draft.includes("EX-1"),
+    "Draft message summarizes the discrepancies and the request");
+  expect(await page.getByText("Warehouse Ops never sends anything to suppliers").isVisible(), "Report states that nothing is sent automatically");
+  await page.fill("#draft", draft + "\nPS: edited by hand");
+  expect((await page.locator("#draft").inputValue()).endsWith("edited by hand"), "Draft message can be edited before sending");
+  await shot(page, "15-supplier-report");
+  await page.goto(`${BASE}/dashboard`);
+  expect(await page.getByText("Patterns to watch").isVisible(), "Dashboard shows rules-based pattern alerts");
+  const acmeId = (await page.locator("td a", { hasText: "Acme Packaging" }).getAttribute("href")).split("supplier=")[1];
+  await op.goto(`${BASE}/reports/supplier/${acmeId}`);
+  expect(await op.getByText("Receiving discrepancy report").isVisible(), "Supplier report works on a phone");
+
   // ------------------------------------------------------------ inventory reconciliation
   const sysCsv = path.join(SHOTS, "wms-export.csv");
   fs.writeFileSync(sysCsv, "SKU,Location,Description,Qty\nSKU-A,A1,Corrugated boxes,100\nSKU-B,B1,Stretch film,50\nSKU-C,C1,Pallet labels,10\n");
@@ -306,13 +329,18 @@ try {
   await rp.click("button[type=submit]");
   await rp.waitForURL(/\/dashboard/);
   await rp.goto(inc1.split("?")[0]);
-  expect(await rp.getByText("Page not found").isVisible(), "Another company cannot open Lone Star's incident by URL");
+  await rp.getByText("Page not found").waitFor({ timeout: 15_000 });
+  expect(!(await rp.getByText("Acme Packaging").count()), "Another company cannot open Lone Star's incident by URL");
   await rp.goto(`${BASE}/incidents`);
   expect(await rp.getByText("No incidents yet").isVisible(), "Another company sees none of Lone Star's incidents");
   await rp.goto(`${BASE}/inventory`);
   expect(await rp.getByText("No inventory files yet").isVisible() && await rp.getByText("No inventory records yet").isVisible(), "Another company sees none of Lone Star's inventory");
+  await rp.goto(`${BASE}/reports/supplier/${acmeId}`);
+  await rp.getByText("Page not found").waitFor({ timeout: 15_000 });
+  expect(!(await rp.getByText("Acme Packaging").count()), "Another company cannot open Lone Star's supplier report");
   await rp.goto(reviewUrl);
-  expect(await rp.getByText("Page not found").isVisible(), "Another company cannot open Lone Star's inventory import");
+  await rp.getByText("Page not found").waitFor({ timeout: 15_000 });
+  expect(!(await rp.getByText("cycle-count.csv").count()), "Another company cannot open Lone Star's inventory import");
   const rivalCsv = await (await rp.request.get(`${BASE}/incidents/export`)).text();
   expect(rivalCsv.trim().split("\r\n").length === 1, "Another company's CSV export contains none of Lone Star's data");
   await rp.goto(link);

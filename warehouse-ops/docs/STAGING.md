@@ -27,6 +27,10 @@ Pecos Paper / Bluebonnet → shortages, Redline Fastener → wrong items.
 Inventory at Dallas DC: 24 records loaded from a "WMS export" a month ago (approved by Marcus), and
 **yesterday's cycle count by Tom awaiting review** (4 discrepancies, 1 SKU not in records, 1 invalid row).
 Log in as Marcus or Dana → Inventory to demo the approve-and-apply flow.
+Each fictional supplier ships items from its own catalog (boxes, dry goods, fasteners, paper, water, totes).
+Pattern alerts on the dashboard currently flag Redline Fastener (wrong items rising), Bluebonnet and Pecos Paper
+(shortages rising), repeat-problem SKUs and exceptions open over a week. These shift as the dates age.
+Try Reports → "Report" next to Trinity Corrugated for a printable supplier discrepancy report.
 
 | Demo login | Role | Shows |
 |---|---|---|
@@ -51,7 +55,7 @@ To wipe demo data: run `supabase/demo/remove-synthetic-demo-data.sql` in the Sup
 | Setting | Value | Who/how |
 |---|---|---|
 | Plan | Free ($0). No card on file needed | — |
-| Migrations | `20261116001120_core_schema`, `20261116001302_evidence_storage`, `20261116153203_reporting`, `20261116160943_fix_details_history`, `20261116161521_signed_bol`, `20261116163155_inventory_reconciliation` (same files as in `supabase/migrations/`) | Applied |
+| Migrations | `20261116001120_core_schema`, `20261116001302_evidence_storage`, `20261116153203_reporting`, `20261116160943_fix_details_history`, `20261116161521_signed_bol`, `20261116163155_inventory_reconciliation`, `20261116170007_exception_patterns` (same files as in `supabase/migrations/`) | Applied |
 | Storage bucket | `incident-evidence`: **private**, 10 MB per file, JPEG/PNG/WebP/HEIC/HEIF/PDF only | Applied by migration |
 | Email confirmation | On (Supabase default) | Default |
 | **Site URL / Redirect URLs** | Set to the Netlify URL once it exists: Site URL `https://<site>.netlify.app`, Redirect URL `https://<site>.netlify.app/auth/callback` | ⏳ Founder, in dashboard → Authentication → URL Configuration |
@@ -105,9 +109,9 @@ Once it's connected, tell me the URL and I'll run the staging test suites agains
 ## 5. Security controls (tested on the live staging project)
 
 Run on 2026-11-16 against `warehouse-ops-staging`:
-- `tests/staging/api-isolation.mjs` → **32/32 passed** (re-run after the Phase 5 inventory migration). It works through the public API with real logins: company B can't read, create, modify or delete company A's incidents, comments, history, people, memberships, invitations, dashboard numbers, reports, inventory or files; nobody, not even an owner, can change inventory quantities directly; viewers can't write; operators can't assign; reporter/status can't be forged; storage rejects HTML; evidence has no public URL; signed-out visitors are refused.
+- `tests/staging/api-isolation.mjs` → **34/34 passed** (re-run after the pattern-alerts migration). It works through the public API with real logins: company B can't read, create, modify or delete company A's incidents, comments, history, people, memberships, invitations, dashboard numbers, reports, inventory or files; nobody, not even an owner, can change inventory quantities directly; viewers can't write; operators can't assign; reporter/status can't be forged; storage rejects HTML; evidence has no public URL; signed-out visitors are refused.
 - `tests/staging/demo-smoke.mjs` (app connected to staging, real browser) → **6/6 passed**: dashboard, list and detail render with synthetic data; viewer has no write controls; company B sees only its own data and gets "Page not found" for company A's incident URL.
-- Same schema also passes the 176-check database suite and the 60-step browser walkthrough on local Supabase.
+- Same schema also passes the 181-check database suite and the 69-step browser walkthrough on local Supabase.
 
 Controls in place: Row Level Security on every table; database-enforced roles; server-side
 authorization; private evidence bucket with type/size limits and file-signature checks; 10-minute

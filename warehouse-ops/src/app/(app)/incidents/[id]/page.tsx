@@ -9,6 +9,7 @@ import { getMembers, requireAppContext } from "@/lib/context";
 import { EVIDENCE_BUCKET } from "@/lib/env";
 import { EXCEPTION_LABELS, STATUS_LABELS, formatBytes, formatQty, incidentRef, variance, type ExceptionType, type IncidentStatus } from "@/lib/labels";
 import { can, canUpdateIncident } from "@/lib/permissions";
+import { suggestNextSteps } from "@/lib/next-steps";
 import { deleteEvidence } from "../actions";
 import { AssignForm, CommentForm, EvidenceUploader, StatusForm } from "./IncidentControls";
 
@@ -34,6 +35,7 @@ type Incident = {
   resolved_at: string | null;
   resolved_by: string | null;
   created_at: string;
+  supplier_id: string | null;
   suppliers: { name: string } | null;
   facilities: { name: string } | null;
 };
@@ -74,6 +76,20 @@ export default async function IncidentPage({ params, searchParams }: { params: P
   const urlFor = new Map(signed.map((s) => [s.path, s.signedUrl]));
 
   const role = ctx.org.role;
+  const steps = suggestNextSteps({
+    type: inc.type,
+    status: inc.status,
+    supplierName: inc.suppliers?.name ?? null,
+    poNumber: inc.po_number,
+    shipmentRef: inc.shipment_ref,
+    expectedQty: inc.expected_qty,
+    receivedQty: inc.received_qty,
+    assignedTo: inc.assigned_to,
+    photoCount: others.length,
+    bolCount: bols.length,
+    commentCount: (comments ?? []).length,
+    ageDays: (Date.now() - Date.parse(inc.created_at)) / 86_400_000,
+  });
   const mayUpdate = canUpdateIncident(role, ctx.user.id, inc);
   const diff = variance(inc.expected_qty, inc.received_qty);
 
@@ -264,6 +280,27 @@ export default async function IncidentPage({ params, searchParams }: { params: P
         </div>
 
         <div className="space-y-6">
+          {steps.length > 0 && (
+            <Card title="Suggested next steps">
+              <ol className="space-y-2.5 text-sm">
+                {steps.map((st) => (
+                  <li key={st.key} className="flex gap-2">
+                    <span className={cx("mt-1.5 h-2 w-2 shrink-0 rounded-full", st.priority === "high" ? "bg-amber-500" : "bg-slate-300")} aria-hidden />
+                    <span className="text-slate-800">
+                      {st.priority === "high" && <span className="sr-only">Important: </span>}
+                      {st.text}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-3 text-xs text-slate-500">Based on standard receiving practice. Suggestions only: nothing is changed or sent automatically.</p>
+              {inc.suppliers && (
+                <Link href={`/reports/supplier/${inc.supplier_id}`} className="mt-2 inline-block text-sm font-medium text-brand-600 hover:underline">
+                  Draft a discrepancy report for {inc.suppliers.name}
+                </Link>
+              )}
+            </Card>
+          )}
           <Card title="Status and resolution">
             {mayUpdate ? (
               <StatusForm incidentId={inc.id} status={inc.status} resolutionNotes={inc.resolution_notes} canClose={can.closeIncident(role)} />

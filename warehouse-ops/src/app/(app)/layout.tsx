@@ -63,7 +63,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <Sidebar canReport={can.createIncident(ctx.org.role)} header={header} footer={footer} />
       <MobileNav canReport={can.createIncident(ctx.org.role)} header={header} footer={footer} />
       <div className="min-w-0 flex-1 overflow-x-clip">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-2.5 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-2.5 sm:px-6 print:hidden">
           <p className="truncate text-sm font-medium text-slate-900">{ctx.org.orgName}</p>
           <form action={switchFacility} className="flex items-center gap-2">
             <label htmlFor="facilityId" className="text-sm text-slate-600">

@@ -62,7 +62,7 @@ function NavLinks({ canReport, onNavigate }: { canReport: boolean; onNavigate?: 
 
 export function Sidebar({ canReport, header, footer }: { canReport: boolean; header: React.ReactNode; footer: React.ReactNode }) {
   return (
-    <aside className="hidden w-64 shrink-0 flex-col bg-brand-900 px-3 py-4 lg:flex">
+    <aside className="hidden w-64 shrink-0 flex-col bg-brand-900 px-3 py-4 lg:flex print:!hidden">
       <div className="mb-6 px-2">{header}</div>
       <div className="flex-1">
         <NavLinks canReport={canReport} />
@@ -77,7 +77,7 @@ export function MobileNav({ canReport, header, footer }: { canReport: boolean; h
   const path = usePathname();
   useEffect(() => setOpen(false), [path]);
   return (
-    <div className="lg:hidden">
+    <div className="lg:hidden print:hidden">
       <div className="flex items-center justify-between bg-brand-900 px-4 py-3">
         {header}
         <button

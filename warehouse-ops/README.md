@@ -6,7 +6,8 @@ manufacturers and 3PLs. Teams log shortages, overages, damage and wrong items at
 
 > Status: **MVP — Phases 1–5 complete** (auth, organizations, facilities, team, dashboard,
 > incidents with evidence and signed BOL capture, assignment, status, comments, history, search/filters, editing,
-> reports, CSV export, inventory reconciliation with manager approval). Optional AI features are next.
+> reports, CSV export, inventory reconciliation with manager approval) plus $0 rules-based assistance:
+> supplier discrepancy reports, pattern alerts and suggested next steps. Paid AI is optional and not set up.
 > See `docs/PROJECT_AUDIT.md`.
 
 **Stack:** Next.js 15 (App Router) · TypeScript · Tailwind CSS 4 · Supabase (Postgres, Auth,
@@ -47,11 +48,11 @@ To stop: press `Ctrl+C` in the app window, then `npx supabase stop`.
 
 | Command | What it proves |
 |---|---|
-| `npm run test:unit` | Validation, permissions, file-type, CSV-safety and inventory-file checks (31 tests) |
-| `npm run test:db` | **176 database security checks** on a throwaway PostgreSQL: one company can't read or change another's data; role rules; private storage; invitations; audit log. Needs PostgreSQL installed, or set `DATABASE_URL`. |
-| `npm run test:db -- --supabase` | The same 176 checks against your running local Supabase |
-| `node tests/e2e/walkthrough.mjs` | 60-step browser walkthrough (signup → incidents → invites → second company blocked). Needs the app running against local Supabase and Playwright installed. |
-| `node tests/staging/api-isolation.mjs` | 32 security checks against a deployed Supabase project through its public API, using the synthetic demo accounts (see `docs/STAGING.md`) |
+| `npm run test:unit` | Validation, permissions, file-type, CSV-safety, inventory-file and next-step rules (36 tests) |
+| `npm run test:db` | **181 database security checks** on a throwaway PostgreSQL: one company can't read or change another's data; role rules; private storage; invitations; audit log. Needs PostgreSQL installed, or set `DATABASE_URL`. |
+| `npm run test:db -- --supabase` | The same 181 checks against your running local Supabase |
+| `node tests/e2e/walkthrough.mjs` | 69-step browser walkthrough (signup → incidents → invites → second company blocked). Needs the app running against local Supabase and Playwright installed. |
+| `node tests/staging/api-isolation.mjs` | 34 security checks against a deployed Supabase project through its public API, using the synthetic demo accounts (see `docs/STAGING.md`) |
 | `node tests/staging/demo-smoke.mjs` | Browser check of the demo accounts against an app connected to staging |
 | `npm run typecheck` / `npm run build` | TypeScript and production build |
 

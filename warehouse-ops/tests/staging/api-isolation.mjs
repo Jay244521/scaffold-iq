@@ -58,6 +58,10 @@ const inv = await rosa.c.rpc("create_invitation", { p_org: orgA.id, p_email: "sp
 ok(Boolean(inv.error), "Company B cannot create invitations for company A");
 const sum = await rosa.c.rpc("incident_summary", { p_org: orgA.id });
 ok(sum.data?.total === 0, "Company B gets an empty dashboard summary for company A");
+const pat = await rosa.c.rpc("exception_patterns", { p_org: orgA.id });
+ok(pat.data?.supplier_trends.length === 0 && pat.data?.repeat_skus.length === 0 && pat.data?.stale_open === 0, "Company B sees no pattern alerts for company A");
+const patA = await dana.c.rpc("exception_patterns", { p_org: orgA.id });
+ok((patA.data?.supplier_trends.length ?? 0) + (patA.data?.repeat_skus.length ?? 0) > 0, "Company A sees its own pattern alerts");
 const rep = await rosa.c.rpc("incident_report", { p_org: orgA.id });
 ok(rep.data?.total === 0 && rep.data?.by_supplier.length === 0, "Company B gets an empty report for company A");
 const up = await rosa.c.storage.from("incident-evidence").upload(`${orgA.id}/${incA.id}/x.png`, png, { contentType: "image/png" });

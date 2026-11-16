@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Download } from "lucide-react";
 import { LocalTime } from "@/components/client";
+import { PatternsCard, type Patterns } from "@/components/PatternsCard";
 import { Card, EmptyState, PageHeader, StatusBadge, TypeBadge, buttonClass, cx } from "@/components/ui";
 import { getMembers, requireAppContext } from "@/lib/context";
 import { logError } from "@/lib/errors";
@@ -69,7 +70,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const facilityId = parsed.facility && ctx.facilities.some((f) => f.id === parsed.facility) ? parsed.facility : ctx.facility?.id;
   const { fromIso, toIso } = dayRange(from, to);
 
-  const [{ data, error }, openRes, members] = await Promise.all([
+  const [{ data, error }, openRes, members, { data: patternData }] = await Promise.all([
     ctx.supabase.rpc("incident_report", { p_org: ctx.org.orgId, p_facility: facilityId ?? null, p_from: fromIso, p_to: toIso }),
     (() => {
       let q = ctx.supabase
@@ -85,6 +86,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       return q;
     })(),
     getMembers(ctx.org.orgId),
+    ctx.supabase.rpc("exception_patterns", { p_org: ctx.org.orgId, p_facility: facilityId ?? null }),
   ]);
   if (error) logError("incident_report", error);
   const r = (data as Report | null) ?? null;
@@ -165,6 +167,8 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
             })}
           </div>
 
+          <PatternsCard p={patternData as Patterns | null} className="mt-6" />
+
           <Card title="Exceptions by supplier" className="mt-6">
             <div className="-mx-4 overflow-x-auto">
               <table className="w-full min-w-[720px] text-sm">
@@ -187,6 +191,11 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                     <tr key={s.id ?? "none"}>
                       <td className="px-4 py-2 font-medium text-slate-900">
                         {s.id ? <Link href={listHref({ supplier: s.id })} className="hover:underline">{s.name}</Link> : <span className="text-slate-500">{s.name}</span>}
+                        {s.id && (
+                          <Link href={`/reports/supplier/${s.id}?${params}`} className="ml-2 text-xs font-normal text-brand-600 hover:underline">
+                            Report
+                          </Link>
+                        )}
                       </td>
                       <td className="px-2 py-2 text-right">{s.total}</td>
                       <td className="px-2 py-2 text-right">{s.unresolved}</td>
