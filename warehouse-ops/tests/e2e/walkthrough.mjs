@@ -36,7 +36,7 @@ async function signUp(page, user, next) {
   await page.click("button[type=submit]");
 }
 
-async function reportIncident(page, { type, supplier, po, expected, received, description, files = [] }) {
+async function reportIncident(page, { type, supplier, po, expected, received, description, files = [], bol }) {
   await page.goto(`${BASE}/incidents/new`);
   await page.locator(`input[name=type][value=${type}]`).check({ force: true });
   if (supplier) await page.fill("#supplierName", supplier);
@@ -44,7 +44,8 @@ async function reportIncident(page, { type, supplier, po, expected, received, de
   if (expected !== undefined) await page.fill("#expectedQty", String(expected));
   if (received !== undefined) await page.fill("#receivedQty", String(received));
   await page.fill("#description", description);
-  if (files.length) await page.setInputFiles("input[type=file]", files);
+  if (bol) await page.setInputFiles("[data-testid=bol-input]", bol);
+  if (files.length) await page.setInputFiles("[data-testid=photo-input]", files);
   await page.click("button[type=submit]");
   await page.waitForURL(/\/incidents\/[0-9a-f-]{36}\?created=1/, { timeout: 30_000 });
   return page.url();
@@ -56,6 +57,8 @@ try {
   await scratch.setContent("<div style='width:400px;height:300px;background:#8b5a2b;color:#fff;font:40px sans-serif;padding:20px'>Crushed carton</div>");
   const png = path.join(SHOTS, "evidence-photo.png");
   await scratch.screenshot({ path: png });
+  const bolPdf = path.join(SHOTS, "signed-bol.pdf");
+  fs.writeFileSync(bolPdf, "%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n");
   const fake = path.join(SHOTS, "disguised.jpg");
   fs.writeFileSync(fake, "<html><script>alert(1)</script></html>".padEnd(2000, " "));
   await scratch.close();
@@ -94,10 +97,12 @@ try {
 
   const inc1 = await reportIncident(page, {
     type: "shortage", supplier: "Acme Packaging", po: "PO-1001", expected: 100, received: 92,
-    description: "8 cartons short on inbound load from Acme. BOL shows 100.", files: [png, fake],
+    description: "8 cartons short on inbound load from Acme. BOL shows 100.", files: [png, fake], bol: bolPdf,
   });
   expect(inc1.includes("failed=1"), "Disguised file is rejected by the server-side content check");
-  expect(await page.getByText("Evidence (1)").isVisible(), "Real photo stored as private evidence");
+  expect(await page.getByText("Evidence (2)").isVisible(), "Real photo and signed BOL stored as private evidence");
+  expect(await page.locator("section[aria-labelledby=bol-heading]").getByText("signed-bol.pdf").isVisible(), "Signed BOL appears in its own section");
+  expect(await page.getByText("added signed BOL: signed-bol.pdf").isVisible(), "History records the signed BOL upload");
   const imgSrc = await page.locator("img[alt='evidence-photo.png']").getAttribute("src");
   expect(imgSrc && imgSrc.includes("/object/sign/") && imgSrc.includes("token="), "Evidence is served only through a signed, expiring URL");
   const publicTry = await page.request.get(imgSrc.replace("/object/sign/", "/object/public/").split("?")[0]);
@@ -106,6 +111,16 @@ try {
   const inc2 = await reportIncident(page, { type: "damaged", supplier: "acme packaging", po: "PO-1002", description: "Two pallets crushed by forklift tines at trailer door." });
   const inc3 = await reportIncident(page, { type: "wrong_item", supplier: "Globex Foods", po: "PO-2001", expected: 40, received: 40, description: '=HYPERLINK("http://evil.example","click") Received SKU 1123 instead of 1132.' });
   ok("Three incidents reported; supplier name matched case-insensitively");
+
+  // Add a signed BOL afterwards from the incident page
+  await page.goto(inc2.split("?")[0]);
+  expect(await page.getByText("No signed BOL attached yet").isVisible(), "Missing signed BOL is flagged on the incident");
+  await page.setInputFiles("[data-testid=upload-signed_bol]", bolPdf);
+  await page.getByText("1 file added.").waitFor({ timeout: 30_000 });
+  await page.reload();
+  expect(await page.locator("section[aria-labelledby=bol-heading]").getByText("signed-bol.pdf").isVisible(), "Signed BOL can be added later from the incident page");
+  await page.goto(`${BASE}/incidents`);
+  expect((await page.locator("tbody span[title='Signed BOL attached']").count()) === 2, "Incident list marks incidents that have a signed BOL");
 
   // Workflow on incident 1
   await page.goto(inc1.split("?")[0]);
@@ -200,6 +215,7 @@ try {
   expect(csvRes.status() === 200 && (csvRes.headers()["content-type"] ?? "").includes("text/csv"), "CSV export downloads");
   expect(csv.trim().split("\r\n").length === 4 && csv.includes('"EX-1"') && csv.includes('"Acme Packaging"'), "CSV contains the 3 incidents with a header row");
   expect(csv.includes(`"'=HYPERLINK(`) && !csv.includes(`,"=HYPERLINK(`), "CSV neutralizes spreadsheet formulas in user text");
+  expect(csv.includes('"Signed BOL attached"') && (csv.match(/,"Yes",/g) ?? []).length === 2, "CSV shows which incidents have a signed BOL");
   const filtered = await (await page.request.get(`${BASE}/incidents/export?status=unresolved`)).text();
   expect(filtered.trim().split("\r\n").length === 3, "CSV export honors filters");
 

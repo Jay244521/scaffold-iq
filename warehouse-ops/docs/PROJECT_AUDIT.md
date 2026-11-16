@@ -39,7 +39,7 @@ and I'll reconcile anything worth keeping from it.
 | A Authentication | ✅ signup, login, logout, password reset, email confirmation, protected pages, membership |
 | B Organizations & facilities | ✅ secure onboarding, facilities CRUD/deactivate, invitations, 6 roles, role changes, facility selector |
 | C Dashboard | ✅ totals, open/in progress/resolved, avg resolution time, categories, supplier patterns, recent; 7/30/90/all ranges; facility scope |
-| D Incident creation | ✅ 5 types, supplier, facility, PO, shipment ref, SKU, qty expected/received (+variance), description, date/time, photos/PDFs |
+| D Incident creation | ✅ 5 types, supplier, facility, PO, shipment ref, SKU, qty expected/received (+variance), description, date/time, photos/PDFs, dedicated signed BOL / delivery receipt slot |
 | E Tracking | ✅ assignment, status, comments, resolution notes, history, search, filters, responsible employee, resolution timestamps, supervisor editing |
 | F Evidence | ✅ private storage, 10 MB, type allowlist + content check, authorization, signed URLs |
 | G Reporting | ✅ Reports page (by supplier with category breakdown, by category, unresolved aging, avg/median resolution time, oldest unresolved), date & facility filters, CSV export with formula-injection protection |

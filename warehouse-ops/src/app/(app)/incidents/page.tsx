@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Download, Plus, Search } from "lucide-react";
+import { Download, FileCheck, Plus, Search } from "lucide-react";
 import { LocalTime } from "@/components/client";
 import { EmptyState, LinkButton, PageHeader, StatusBadge, TypeBadge, buttonClass } from "@/components/ui";
 import { getMembers, requireAppContext } from "@/lib/context";
@@ -54,6 +54,10 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Pr
   const { data, count, error } = await query.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
   if (error) logError("list incidents", error);
   const rows = (data ?? []) as unknown as Row[];
+  const { data: bolRows } = rows.length
+    ? await ctx.supabase.from("incident_attachments").select("incident_id").eq("kind", "signed_bol").in("incident_id", rows.map((r) => r.id))
+    : { data: [] };
+  const hasBol = new Set((bolRows ?? []).map((b) => b.incident_id as string));
   const total = count ?? 0;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -166,6 +170,7 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Pr
                         <Link href={`/incidents/${r.id}`} className="font-mono font-medium text-brand-700 hover:underline">
                           {incidentRef(r.number)}
                         </Link>
+                        {hasBol.has(r.id) && <BolBadge />}
                       </td>
                       <td className="px-3 py-2.5">
                         <TypeBadge type={r.type} />
@@ -195,7 +200,10 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Pr
               <li key={r.id}>
                 <Link href={`/incidents/${r.id}`} className="card block p-3">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono text-sm font-medium text-brand-700">{incidentRef(r.number)}</span>
+                    <span className="font-mono text-sm font-medium text-brand-700">
+                      {incidentRef(r.number)}
+                      {hasBol.has(r.id) && <BolBadge />}
+                    </span>
                     <StatusBadge status={r.status} />
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -232,6 +240,14 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Pr
       )}
       <p className="mt-3 text-xs text-slate-500">Date filters use UTC days.</p>
     </>
+  );
+}
+
+function BolBadge() {
+  return (
+    <span className="ml-1.5 inline-flex items-center gap-0.5 rounded bg-emerald-50 px-1 py-0.5 align-middle font-sans text-[10px] font-semibold text-emerald-800 ring-1 ring-inset ring-emerald-200" title="Signed BOL attached">
+      <FileCheck className="h-3 w-3" aria-hidden /> BOL
+    </span>
   );
 }
 

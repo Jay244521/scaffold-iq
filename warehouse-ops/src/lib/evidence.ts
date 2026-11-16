@@ -4,6 +4,11 @@
  * browser-supplied file name or type can be faked.
  */
 export const MAX_EVIDENCE_BYTES = 10 * 1024 * 1024;
+
+/** "signed_bol" = the signed bill of lading / delivery receipt: proof of what was signed for at the dock. */
+export const EVIDENCE_KINDS = ["evidence", "signed_bol"] as const;
+export type EvidenceKind = (typeof EVIDENCE_KINDS)[number];
+export const isEvidenceKind = (v: unknown): v is EvidenceKind => typeof v === "string" && (EVIDENCE_KINDS as readonly string[]).includes(v);
 export const MAX_FILES_PER_BATCH = 10;
 
 export const ALLOWED_EVIDENCE_TYPES: Record<string, string[]> = {

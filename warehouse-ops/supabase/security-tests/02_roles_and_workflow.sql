@@ -155,6 +155,12 @@ select tests.throws(format($$insert into public.incident_attachments (org_id, in
   tests.id('org'), tests.id('inc'), tests.id('org') || '/' || tests.id('inc') || '/b.jpg'), 'Files over 10 MB are rejected');
 select tests.throws(format($$insert into public.incident_attachments (org_id, incident_id, storage_path, file_name, mime_type, size_bytes) values (%L, %L, %L, 'a.jpg', 'image/jpeg', 10)$$,
   tests.id('org'), tests.id('inc'), 'elsewhere/a.jpg'), 'Evidence records must point inside the incident''s folder');
+select tests.lives(format($$insert into public.incident_attachments (org_id, incident_id, storage_path, file_name, mime_type, size_bytes, kind) values (%L, %L, %L, 'bol.pdf', 'application/pdf', 10, 'signed_bol')$$,
+  tests.id('org'), tests.id('inc'), tests.id('org') || '/' || tests.id('inc') || '/bol.pdf'), 'Operators can attach a signed BOL');
+select tests.ok(exists (select 1 from public.incident_events where incident_id = tests.id('inc') and event_type = 'signed_bol_added' and to_value = 'bol.pdf'),
+  'Signed BOL uploads are recorded in history as such');
+select tests.throws(format($$insert into public.incident_attachments (org_id, incident_id, storage_path, file_name, mime_type, size_bytes, kind) values (%L, %L, %L, 'x.pdf', 'application/pdf', 10, 'invoice')$$,
+  tests.id('org'), tests.id('inc'), tests.id('org') || '/' || tests.id('inc') || '/x.pdf'), 'Unknown evidence kinds are rejected');
 select tests.logout();
 select tests.login('op2');
 select tests.eq(tests.affected($$delete from storage.objects$$), 0, 'Operators cannot delete other people''s evidence files');

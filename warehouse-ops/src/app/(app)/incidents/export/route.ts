@@ -9,6 +9,7 @@ import { incidentFilterSchema } from "@/lib/validation";
 const MAX_ROWS = 10_000;
 
 type Row = {
+  id: string;
   number: number;
   type: ExceptionType;
   status: IncidentStatus;
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
   const { query } = await incidentQuery(
     ctx,
     filters,
-    "number, type, status, occurred_at, created_at, resolved_at, po_number, shipment_ref, sku, item_description, expected_qty, received_qty, description, resolution_notes, reported_by, assigned_to, suppliers(name), facilities(name)",
+    "id, number, type, status, occurred_at, created_at, resolved_at, po_number, shipment_ref, sku, item_description, expected_qty, received_qty, description, resolution_notes, reported_by, assigned_to, suppliers(name), facilities(name)",
   );
   const { data, error } = await query.range(0, MAX_ROWS - 1);
   if (error) {
@@ -45,6 +46,13 @@ export async function GET(request: NextRequest) {
     return new NextResponse("Export failed. Please try again.", { status: 500 });
   }
   const members = await getMembers(ctx.org.orgId);
+  const { data: bolRows } = await ctx.supabase
+    .from("incident_attachments")
+    .select("incident_id")
+    .eq("org_id", ctx.org.orgId)
+    .eq("kind", "signed_bol")
+    .limit(MAX_ROWS * 5);
+  const hasBol = new Set((bolRows ?? []).map((b) => b.incident_id as string));
   const name = (id: string | null) => (id ? (members.find((m) => m.userId === id)?.name ?? "Former member") : "");
   const num = (v: number | null) => (v === null ? null : Number(v));
 
@@ -52,7 +60,7 @@ export async function GET(request: NextRequest) {
     [
       "Reference", "Occurred (UTC)", "Reported (UTC)", "Facility", "Category", "Status", "Supplier", "PO number",
       "Shipment reference", "SKU", "Item", "Expected qty", "Received qty", "Variance", "Reported by", "Responsible",
-      "Resolved (UTC)", "Hours to resolve", "Resolution notes", "Description",
+      "Resolved (UTC)", "Hours to resolve", "Signed BOL attached", "Resolution notes", "Description",
     ],
     ((data ?? []) as unknown as Row[]).map((r) => {
       const exp = num(r.expected_qty);
@@ -62,7 +70,7 @@ export async function GET(request: NextRequest) {
         incidentRef(r.number), r.occurred_at, r.created_at, r.facilities?.name, EXCEPTION_LABELS[r.type], STATUS_LABELS[r.status],
         r.suppliers?.name, r.po_number, r.shipment_ref, r.sku, r.item_description, exp, rec,
         exp !== null && rec !== null ? Math.round((rec - exp) * 1000) / 1000 : null,
-        name(r.reported_by), name(r.assigned_to), r.resolved_at, hours, r.resolution_notes, r.description,
+        name(r.reported_by), name(r.assigned_to), r.resolved_at, hours, hasBol.has(r.id) ? "Yes" : "No", r.resolution_notes, r.description,
       ];
     }),
   );

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Upload } from "lucide-react";
 import { SubmitButton, useFormAction } from "@/components/client";
 import { Alert, Field, buttonClass, fieldAria } from "@/components/ui";
-import { EVIDENCE_ACCEPT } from "@/lib/evidence";
+import { EVIDENCE_ACCEPT, type EvidenceKind } from "@/lib/evidence";
 import { STATUS_LABELS, STATUSES, type IncidentStatus } from "@/lib/labels";
 import type { ActionState } from "@/lib/validation";
 import { addComment, assignIncident, updateStatus } from "../actions";
@@ -97,7 +97,17 @@ export function CommentForm({ incidentId }: { incidentId: string }) {
   );
 }
 
-export function EvidenceUploader({ orgId, incidentId }: { orgId: string; incidentId: string }) {
+export function EvidenceUploader({
+  orgId,
+  incidentId,
+  kind = "evidence",
+  label = "Add photos or documents",
+}: {
+  orgId: string;
+  incidentId: string;
+  kind?: EvidenceKind;
+  label?: string;
+}) {
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
@@ -111,7 +121,7 @@ export function EvidenceUploader({ orgId, incidentId }: { orgId: string; inciden
     setErrors(problems);
     if (problems.length) return;
     setBusy(`Uploading 0/${files.length}…`);
-    const res = await uploadEvidence(orgId, incidentId, files, (n) => setBusy(`Uploading ${n}/${files.length}…`));
+    const res = await uploadEvidence(orgId, incidentId, files, (n) => setBusy(`Uploading ${n}/${files.length}…`), kind);
     setErrors(res.errors);
     setBusy(null);
     if (res.uploaded) setDone(`${res.uploaded} file${res.uploaded === 1 ? "" : "s"} added.`);
@@ -121,8 +131,8 @@ export function EvidenceUploader({ orgId, incidentId }: { orgId: string; inciden
   return (
     <div className="space-y-2">
       <label className={buttonClass("secondary", "sm", busy ? "pointer-events-none opacity-60" : "cursor-pointer")}>
-        <Upload className="h-4 w-4" aria-hidden /> {busy ?? "Add photos or documents"}
-        <input type="file" multiple accept={EVIDENCE_ACCEPT} className="sr-only" disabled={Boolean(busy)} onChange={(e) => (onFiles(e.target.files), (e.target.value = ""))} />
+        <Upload className="h-4 w-4" aria-hidden /> {busy ?? label}
+        <input type="file" multiple={kind !== "signed_bol"} data-testid={`upload-${kind}`} accept={EVIDENCE_ACCEPT} className="sr-only" disabled={Boolean(busy)} onChange={(e) => (onFiles(e.target.files), (e.target.value = ""))} />
       </label>
       {done && <Alert tone="success">{done}</Alert>}
       {errors.length > 0 && (

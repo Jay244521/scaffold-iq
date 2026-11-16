@@ -1,7 +1,7 @@
 "use client";
 
 import { EVIDENCE_BUCKET } from "@/lib/env";
-import { MAX_FILES_PER_BATCH, checkEvidenceFile, evidencePath } from "@/lib/evidence";
+import { MAX_FILES_PER_BATCH, checkEvidenceFile, evidencePath, type EvidenceKind } from "@/lib/evidence";
 import { getBrowserSupabase } from "@/lib/supabase/browser";
 import { registerEvidence } from "./actions";
 
@@ -16,7 +16,13 @@ export function precheckFiles(files: File[]): string[] {
  * Uploads files straight to private storage under the user's own session (storage
  * policies check membership), then asks the server to verify and record each one.
  */
-export async function uploadEvidence(orgId: string, incidentId: string, files: File[], onProgress?: (done: number) => void) {
+export async function uploadEvidence(
+  orgId: string,
+  incidentId: string,
+  files: File[],
+  onProgress?: (done: number) => void,
+  kind: EvidenceKind = "evidence",
+) {
   const supabase = getBrowserSupabase();
   const errors: string[] = [];
   let done = 0;
@@ -26,7 +32,7 @@ export async function uploadEvidence(orgId: string, incidentId: string, files: F
     if (error) {
       errors.push(`${file.name}: upload failed. ${/size|large/i.test(error.message) ? "File is too large." : "Please try again."}`);
     } else {
-      const res = await registerEvidence(incidentId, path, file.name);
+      const res = await registerEvidence(incidentId, path, file.name, kind);
       if (res.error) errors.push(res.error);
     }
     onProgress?.(++done);

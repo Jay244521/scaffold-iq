@@ -1,10 +1,10 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ArrowLeft, FileText, Trash2 } from "lucide-react";
+import { ArrowLeft, FileCheck, FileText, Trash2 } from "lucide-react";
 import { z } from "zod";
 import { LocalTime } from "@/components/client";
-import { Alert, Card, StatusBadge, TypeBadge } from "@/components/ui";
+import { Alert, Card, StatusBadge, TypeBadge, cx } from "@/components/ui";
 import { getMembers, requireAppContext } from "@/lib/context";
 import { EVIDENCE_BUCKET } from "@/lib/env";
 import { EXCEPTION_LABELS, STATUS_LABELS, formatBytes, formatQty, incidentRef, variance, type ExceptionType, type IncidentStatus } from "@/lib/labels";
@@ -39,7 +39,7 @@ type Incident = {
 };
 type Comment = { id: string; author_id: string; body: string; created_at: string };
 type Event = { id: number; actor_id: string | null; event_type: string; from_value: string | null; to_value: string | null; metadata: { fields?: string[] }; created_at: string };
-type Attachment = { id: string; storage_path: string; file_name: string; mime_type: string; size_bytes: number; uploaded_by: string; created_at: string };
+type Attachment = { id: string; storage_path: string; file_name: string; mime_type: string; size_bytes: number; uploaded_by: string; created_at: string; kind: string };
 
 export default async function IncidentPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ created?: string; failed?: string; updated?: string }> }) {
   const ctx = await requireAppContext();
@@ -59,10 +59,12 @@ export default async function IncidentPage({ params, searchParams }: { params: P
   const [{ data: comments }, { data: events }, { data: attachments }, members] = await Promise.all([
     ctx.supabase.from("incident_comments").select("id, author_id, body, created_at").eq("incident_id", id).order("created_at"),
     ctx.supabase.from("incident_events").select("id, actor_id, event_type, from_value, to_value, metadata, created_at").eq("incident_id", id).order("created_at"),
-    ctx.supabase.from("incident_attachments").select("id, storage_path, file_name, mime_type, size_bytes, uploaded_by, created_at").eq("incident_id", id).order("created_at"),
+    ctx.supabase.from("incident_attachments").select("id, storage_path, file_name, mime_type, size_bytes, uploaded_by, created_at, kind").eq("incident_id", id).order("created_at"),
     getMembers(ctx.org.orgId),
   ]);
   const files = (attachments ?? []) as Attachment[];
+  const bols = files.filter((f) => f.kind === "signed_bol");
+  const others = files.filter((f) => f.kind !== "signed_bol");
   const nameOf = (uid: string | null) => (uid ? (members.find((m) => m.userId === uid)?.name ?? "Former member") : "System");
 
   // Short-lived links to private files, issued only after the database confirmed access.
@@ -92,6 +94,10 @@ export default async function IncidentPage({ params, searchParams }: { params: P
         return "updated the resolution notes";
       case "details_updated":
         return `edited ${(e.metadata.fields ?? []).join(", ").replace(/_/g, " ")}`;
+      case "signed_bol_added":
+        return `added signed BOL: ${e.to_value}`;
+      case "signed_bol_removed":
+        return `removed signed BOL: ${e.from_value}`;
       case "evidence_added":
         return `added evidence: ${e.to_value}`;
       case "evidence_removed":
@@ -117,6 +123,43 @@ export default async function IncidentPage({ params, searchParams }: { params: P
     ["Responsible", inc.assigned_to ? nameOf(inc.assigned_to) : "Unassigned"],
     ["Resolved", inc.resolved_at ? <span key="res">{<LocalTime value={inc.resolved_at} />} by {nameOf(inc.resolved_by)}</span> : "—"],
   ];
+
+  const tile = (f: Attachment) => {
+    const url = urlFor.get(f.storage_path);
+    const isImage = f.mime_type.startsWith("image/") && !f.mime_type.includes("hei");
+    return (
+                    <li key={f.id} className="overflow-hidden rounded-md border border-slate-200">
+                      <a href={url ?? "#"} target="_blank" rel="noopener noreferrer" className="block bg-slate-50">
+                        {isImage && url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={url} alt={f.file_name} className="aspect-[4/3] w-full object-cover" loading="lazy" referrerPolicy="no-referrer" />
+                        ) : (
+                          <div className="flex aspect-[4/3] items-center justify-center">
+                            <FileText className="h-10 w-10 text-slate-400" aria-hidden />
+                          </div>
+                        )}
+                      </a>
+                      <div className="flex items-center gap-1 px-2 py-1.5">
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xs font-medium text-slate-900" title={f.file_name}>
+                            {f.file_name}
+                          </p>
+                          <p className="text-[11px] text-slate-500">
+                            {formatBytes(f.size_bytes)} · {nameOf(f.uploaded_by)}
+                          </p>
+                        </div>
+                        {can.deleteEvidence(role) && (
+                          <form action={deleteEvidence}>
+                            <input type="hidden" name="attachmentId" value={f.id} />
+                            <button className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-700" aria-label={`Delete ${f.file_name}`} title="Delete">
+                              <Trash2 className="h-4 w-4" aria-hidden />
+                            </button>
+                          </form>
+                        )}
+                      </div>
+                    </li>
+    );
+  };
 
   return (
     <>
@@ -165,47 +208,26 @@ export default async function IncidentPage({ params, searchParams }: { params: P
           </Card>
 
           <Card title={`Evidence (${files.length})`}>
-            {files.length === 0 ? (
+            <section aria-labelledby="bol-heading" className={cx("mb-5 rounded-md border p-3", bols.length ? "border-emerald-200 bg-emerald-50/50" : "border-amber-200 bg-amber-50/60")}>
+              <div className="mb-2 flex items-center gap-2">
+                <FileCheck className={cx("h-4 w-4", bols.length ? "text-emerald-700" : "text-amber-700")} aria-hidden />
+                <h3 id="bol-heading" className="text-sm font-semibold text-slate-900">Signed BOL / delivery receipt</h3>
+              </div>
+              {bols.length ? (
+                <ul className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-3">{bols.map(tile)}</ul>
+              ) : (
+                <p className="mb-3 text-sm text-amber-900">No signed BOL attached yet. It&apos;s the proof of what was signed for at the dock.</p>
+              )}
+              {can.uploadEvidence(role) && (
+                <EvidenceUploader orgId={inc.org_id} incidentId={inc.id} kind="signed_bol" label={bols.length ? "Add another BOL page" : "Add signed BOL"} />
+              )}
+            </section>
+
+            <h3 className="mb-2 text-sm font-semibold text-slate-900">Photos and documents</h3>
+            {others.length === 0 ? (
               <p className="mb-3 text-sm text-slate-500">No photos or documents yet.</p>
             ) : (
-              <ul className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {files.map((f) => {
-                  const url = urlFor.get(f.storage_path);
-                  const isImage = f.mime_type.startsWith("image/") && !f.mime_type.includes("hei");
-                  return (
-                    <li key={f.id} className="overflow-hidden rounded-md border border-slate-200">
-                      <a href={url ?? "#"} target="_blank" rel="noopener noreferrer" className="block bg-slate-50">
-                        {isImage && url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={url} alt={f.file_name} className="aspect-[4/3] w-full object-cover" loading="lazy" referrerPolicy="no-referrer" />
-                        ) : (
-                          <div className="flex aspect-[4/3] items-center justify-center">
-                            <FileText className="h-10 w-10 text-slate-400" aria-hidden />
-                          </div>
-                        )}
-                      </a>
-                      <div className="flex items-center gap-1 px-2 py-1.5">
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-xs font-medium text-slate-900" title={f.file_name}>
-                            {f.file_name}
-                          </p>
-                          <p className="text-[11px] text-slate-500">
-                            {formatBytes(f.size_bytes)} · {nameOf(f.uploaded_by)}
-                          </p>
-                        </div>
-                        {can.deleteEvidence(role) && (
-                          <form action={deleteEvidence}>
-                            <input type="hidden" name="attachmentId" value={f.id} />
-                            <button className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-700" aria-label={`Delete ${f.file_name}`} title="Delete">
-                              <Trash2 className="h-4 w-4" aria-hidden />
-                            </button>
-                          </form>
-                        )}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
+              <ul className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">{others.map(tile)}</ul>
             )}
             {can.uploadEvidence(role) && <EvidenceUploader orgId={inc.org_id} incidentId={inc.id} />}
           </Card>

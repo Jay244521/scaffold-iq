@@ -6,7 +6,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { getMembers, requireAppContext } from "@/lib/context";
 import { EVIDENCE_BUCKET } from "@/lib/env";
 import { friendlyError, logError } from "@/lib/errors";
-import { checkEvidenceFile, sameEvidenceFamily, sniffEvidenceType } from "@/lib/evidence";
+import { checkEvidenceFile, isEvidenceKind, sameEvidenceFamily, sniffEvidenceType } from "@/lib/evidence";
 import { can, canUpdateIncident, type Role } from "@/lib/permissions";
 import {
   assignSchema,
@@ -101,8 +101,14 @@ export async function createIncident(formData: FormData): Promise<CreateIncident
  * file sits in this incident's folder, checks its size and real type (first bytes),
  * then records it. Files that fail are deleted.
  */
-export async function registerEvidence(incidentId: string, path: string, originalName: string): Promise<ActionState> {
+export async function registerEvidence(
+  incidentId: string,
+  path: string,
+  originalName: string,
+  kind: string = "evidence",
+): Promise<ActionState> {
   const ctx = await requireAppContext();
+  if (!isEvidenceKind(kind)) return { error: "Invalid evidence type." };
   if (!can.uploadEvidence(ctx.org.role)) return { error: "Your role can't add evidence." };
   const incident = await loadIncident(ctx.supabase, ctx.org.orgId, incidentId);
   if (!incident) return { error: "Incident not found." };
@@ -150,6 +156,7 @@ export async function registerEvidence(incidentId: string, path: string, origina
     file_name: displayName,
     mime_type: actualType,
     size_bytes: size,
+    kind,
   });
   if (error) {
     logError("register evidence", error);

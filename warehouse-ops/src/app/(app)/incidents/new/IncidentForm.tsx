@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Camera, FileText, X } from "lucide-react";
+import { Camera, FileCheck, FileText, X } from "lucide-react";
 import { Alert, Field, buttonClass, cx, fieldAria } from "@/components/ui";
 import { EVIDENCE_ACCEPT } from "@/lib/evidence";
 import { EXCEPTION_HINTS, EXCEPTION_LABELS, EXCEPTION_TYPES, formatBytes, formatQty, variance, type ExceptionType } from "@/lib/labels";
@@ -47,6 +47,7 @@ export function IncidentForm({ facilities, defaultFacilityId, suppliers, initial
   const [occurredAt, setOccurredAt] = useState("");
   const [maxDate, setMaxDate] = useState<string | undefined>();
   const [files, setFiles] = useState<File[]>([]);
+  const [bolFile, setBolFile] = useState<File | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [error, setError] = useState<string | null>(null);
   const [fileErrors, setFileErrors] = useState<string[]>([]);
@@ -70,7 +71,7 @@ export function IncidentForm({ facilities, defaultFacilityId, suppliers, initial
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (busy) return;
-    const problems = precheckFiles(files);
+    const problems = [...precheckFiles(files), ...(bolFile ? precheckFiles([bolFile]) : [])];
     setFileErrors(problems);
     if (problems.length) return;
 
@@ -102,10 +103,14 @@ export function IncidentForm({ facilities, defaultFacilityId, suppliers, initial
         return;
       }
       let failed = 0;
+      if (bolFile) {
+        setBusy("Uploading signed BOL…");
+        failed += (await uploadEvidence(res.orgId, res.incidentId, [bolFile], undefined, "signed_bol")).errors.length;
+      }
       if (files.length) {
         setBusy(`Uploading evidence (0/${files.length})…`);
         const up = await uploadEvidence(res.orgId, res.incidentId, files, (n) => setBusy(`Uploading evidence (${n}/${files.length})…`));
-        failed = up.errors.length;
+        failed += up.errors.length;
       }
       router.push(`/incidents/${res.incidentId}?created=1${failed ? `&failed=${failed}` : ""}`);
     } catch {
@@ -226,11 +231,46 @@ export function IncidentForm({ facilities, defaultFacilityId, suppliers, initial
 
       {!initial && (
       <div className="card p-4 sm:p-5">
+        <p className="label">Signed BOL / delivery receipt</p>
+        <p className="mb-3 text-xs text-slate-500">
+          Photo or PDF of the bill of lading as signed at the dock, with any exceptions noted. This is the proof of what was received.
+        </p>
+        {bolFile ? (
+          <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm">
+            <FileCheck className="h-4 w-4 shrink-0 text-emerald-700" aria-hidden />
+            <span className="min-w-0 flex-1 truncate">{bolFile.name}</span>
+            <span className="text-xs text-slate-500">{formatBytes(bolFile.size)}</span>
+            <button type="button" onClick={() => setBolFile(null)} className="rounded p-1 text-slate-500 hover:bg-white" aria-label="Remove signed BOL">
+              <X className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
+        ) : (
+          <label className={buttonClass("secondary", "md", "cursor-pointer")}>
+            <FileCheck className="h-4 w-4" aria-hidden /> Add signed BOL
+            <input
+              type="file"
+              accept={EVIDENCE_ACCEPT}
+              className="sr-only"
+              data-testid="bol-input"
+              onChange={(e) => {
+                const f = e.target.files?.[0] ?? null;
+                setBolFile(f);
+                setFileErrors(f ? precheckFiles([f]) : []);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        )}
+      </div>
+      )}
+
+      {!initial && (
+      <div className="card p-4 sm:p-5">
         <p className="label">Photos and documents</p>
         <p className="mb-3 text-xs text-slate-500">JPEG, PNG, WebP, HEIC or PDF · up to 10 MB each · stored privately.</p>
         <label className={buttonClass("secondary", "md", "cursor-pointer")}>
           <Camera className="h-4 w-4" aria-hidden /> Add photos or files
-          <input type="file" multiple accept={EVIDENCE_ACCEPT} className="sr-only" onChange={(e) => (addFiles(e.target.files), (e.target.value = ""))} />
+          <input type="file" multiple accept={EVIDENCE_ACCEPT} className="sr-only" data-testid="photo-input" onChange={(e) => (addFiles(e.target.files), (e.target.value = ""))} />
         </label>
         {files.length > 0 && (
           <ul className="mt-3 divide-y divide-slate-100 rounded-md border border-slate-200">
