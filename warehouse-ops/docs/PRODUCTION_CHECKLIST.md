@@ -3,7 +3,7 @@
 ✅ done and tested · ⬜ to do before real customer data · 🔜 later phase
 
 ## Security
-- ✅ Live staging project security-tested through its public API: 34/34 cross-company, role, inventory and pattern checks pass (`tests/staging/api-isolation.mjs`)
+- ✅ Live staging project security-tested through its public API: 37/37 cross-company, role, inventory, pattern and supplier checks pass (`tests/staging/api-isolation.mjs`)
 - ✅ Supabase Security Advisor on staging: no errors; 6 warnings reviewed and accepted (intentional RPC entry points — see STAGING.md)
 - ✅ Row Level Security on every table; 125 automated checks (cross-tenant reads/writes, roles, storage, invitations, audit) pass on plain PostgreSQL **and** real Supabase
 - ✅ Tests are shown to catch regressions (a deliberately broken policy makes them fail)
@@ -11,7 +11,7 @@
 - ✅ Browser-supplied org / facility / user ids are verified; reporter, resolver and timestamps are set by the database
 - ✅ No service-role key anywhere in the app
 - ✅ Private evidence bucket; size/type limits at three layers; content signature check; 10-minute signed URLs
-- ✅ Append-only incident history and comments; admin audit log; neither editable by users
+- ✅ Append-only incident history and comments; admin audit log with a viewer page for owners/admins; neither editable by users
 - ✅ Safe error messages (no SQL/constraint details shown); generic error page
 - ✅ Open-redirect protection on login `next=`; search input sanitized for API filter syntax
 - ✅ Security headers (no framing, nosniff, HSTS, referrer policy); `npm audit`: 0 vulnerabilities

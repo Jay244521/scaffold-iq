@@ -82,6 +82,13 @@ ok(Boolean((await tom.c.rpc("apply_inventory_import", { p_import: pendingImp.id 
 const direct = await dana.c.from("inventory_items").update({ on_hand: 1 }).eq("org_id", orgA.id).select("id");
 ok(Boolean(direct.error) || direct.data.length === 0, "Even the owner cannot change inventory quantities directly");
 
+// ---- suppliers (checks that fail before any change is made, so demo data is untouched)
+const { data: twoSup } = await dana.c.from("suppliers").select("id").eq("org_id", orgA.id).limit(2);
+ok(Boolean((await rosa.c.rpc("merge_suppliers", { p_from: twoSup[0].id, p_into: twoSup[1].id })).error), "Company B cannot merge company A's suppliers");
+ok(Boolean((await tom.c.rpc("merge_suppliers", { p_from: twoSup[0].id, p_into: twoSup[1].id })).error), "Operators cannot merge suppliers");
+const ren = await rosa.c.from("suppliers").update({ name: "Hijacked" }).eq("id", twoSup[0].id).select("id");
+ok(!ren.error && ren.data.length === 0, "Company B cannot rename company A's suppliers");
+
 // ---- roles inside company A
 const gi = await grace.c.from("incidents").insert({ org_id: orgA.id, facility_id: facA.id, type: "other", description: "x", occurred_at: new Date().toISOString() });
 ok(Boolean(gi.error), "Viewer cannot create incidents");
