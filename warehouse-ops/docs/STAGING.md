@@ -1,18 +1,20 @@
 # Staging environment — settings, security, limitations and costs
 
-Last updated: 2026-11-16. **Synthetic data only. Recurring cost: $0.**
+Last updated: 2026-11-16. **Synthetic data only.** Recurring cost: Supabase $0; web hosting on Railway is
+a small usage charge on the founder's existing Railway Hobby plan (approved 2026-11-16; see section 9).
 
 ## 1. What exists
 
 | Piece | Where | Status |
 |---|---|---|
 | Database, login, private file storage | Supabase project **`warehouse-ops-staging`** (ref `xrjgqedeffkrcqhufifc`), org "Real estate", region `us-east-2` (Ohio), **Free plan** | ✅ Live, schema applied, synthetic data loaded, security-tested |
-| Web app | Netlify (Free plan) — **needs a one-time setup in your Netlify account** (section 4); I can't create accounts on your behalf | ⏳ Ready to connect |
+| Web app | **Railway**, project `warehouse-ops-demo`, service `web`: **https://web-production-059ef3bc.up.railway.app** | ✅ Live; sleeps when idle |
+| (Earlier attempt) | Netlify project `genuine-rugelach-633898`: builds succeed but every page returns "Page not found"; not used | ⛔ Can be deleted |
 | Code | GitHub `jay244521/scaffold-iq`, folder `warehouse-ops/` | ✅ |
 
 Supabase API URL: `https://xrjgqedeffkrcqhufifc.supabase.co`
 Publishable key (safe for browsers; Row Level Security limits it): `sb_publishable_5Iz6UqW1NeiwlHy020WKvw_ZfH7aeNr`
-The secret / service-role key is **not used anywhere** and must never be added to Netlify.
+The secret / service-role key is **not used anywhere** and must never be added to any hosting provider.
 
 ## 2. Synthetic demo data
 
@@ -73,38 +75,35 @@ the automated tests. The invitation preview only answers someone holding a 256-b
 The advisor also notes **Leaked password protection** (checking new passwords against known breaches) is off;
 it is a dashboard setting under Authentication → Passwords. Check whether it is available on the Free plan before relying on it.
 
-## 4. Web hosting: why Netlify, and how to connect it
+## 4. Web hosting
 
-**Vercel (Hobby/free) is not allowed for this use.** Vercel's fair-use guidelines restrict the free Hobby
-plan to *non-commercial personal use*, and treat any deployment used for the financial gain of anyone
-involved as commercial. Demoing our product to prospective paying customers is commercial. (Paid Vercel
-Pro is $20/month — not approved.)
+**Live demo: https://web-production-059ef3bc.up.railway.app** (log in with the demo accounts in section 2).
 
-| Option ($0) | Commercial use on free plan | Fit for this app | Verdict |
-|---|---|---|---|
-| **Netlify Free** | Allowed — Netlify's own announcement of the Free plan covers commercial projects | Full Next.js support (middleware, server actions) via Netlify's built-in runtime | **Chosen** |
-| Render Free | No restriction found, but free instances are intended for hobby/testing | Works, but sleeps after 15 min idle; first visit waits ~30–60 s | Backup option |
-| Cloudflare Workers Free | Allowed | 3 MB bundle cap and very small CPU budget per request; Next.js middleware support incomplete | Too risky for a live demo |
-| Vercel Hobby | **Not allowed** | — | Ruled out |
+### Railway settings (set up and verified by Claude through the Railway connection)
+| Setting | Value |
+|---|---|
+| Project / service | `warehouse-ops-demo` / `web`, region US West |
+| Source | GitHub `Jay244521/scaffold-iq`, branch `claude/warehouse-ops-mvp-ceda5s`, root directory `/warehouse-ops` |
+| Builds | Railpack, Node 22 (from `package.json` engines), `npm run build`; only rebuilds when files under `/warehouse-ops/**` change |
+| Start | `npm run start -- -p 8080 -H 0.0.0.0`; health check `/login` |
+| Cost controls | **App sleeping on** (stops when idle, wakes on the next visit in a few seconds); 1 replica; limits 1 vCPU / 1 GB |
+| Variables | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL` (the Railway URL), `NODE_ENV`, `NEXT_TELEMETRY_DISABLED`. No secrets. |
 
-> Verify before relying on it: I confirmed these terms from web search results of the providers' pages
-> and docs; this environment couldn't open netlify.com or vercel.com directly. Read Netlify's current
-> Terms and pricing page once when you create the account.
+If an automatic deploy doesn't start after a push, use **Deploy Latest Commit** in Railway (Cmd/Ctrl+K), or ask me.
 
-**One-time Netlify setup (about 10 minutes, $0, no credit card):**
-1. Sign up at netlify.com with your GitHub account. Choose the **Free** plan. Do not add a payment method.
-2. **Add new project → Import an existing project → GitHub →** `jay244521/scaffold-iq`.
-3. Branch to deploy: `claude/warehouse-ops-mvp-ceda5s` (or `main` after this work is merged).
-4. **Base directory: `warehouse-ops`**. Leave the build command and publish directory alone (read from `netlify.toml`).
-5. Environment variables:
-   - `NEXT_PUBLIC_SUPABASE_URL` = `https://xrjgqedeffkrcqhufifc.supabase.co`
-   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` = `sb_publishable_5Iz6UqW1NeiwlHy020WKvw_ZfH7aeNr`
-   - `NEXT_PUBLIC_SITE_URL` = the site's URL (e.g. `https://warehouse-ops-demo.netlify.app`; rename the site first under Site configuration → Change site name)
-6. Deploy. Then in **Site configuration → Build & deploy → Deploy Previews: "Don't deploy pull requests"**, to save credits.
-7. Put the site URL into Supabase (section 3, Site URL / Redirect URLs).
-8. Check: open the site, log in as `dana.owner@example.com`, then as `rosa.owner@example.com`.
+### Why not Vercel or Netlify
+- **Vercel Hobby (free)** is restricted to non-commercial personal use, and a demo for prospective customers is commercial. Ruled out.
+- **Netlify Free** allows commercial use and was tried first. Builds succeeded and Netlify reported "Published", but every
+  page (even static files) returned Netlify's "Page not found". The cause couldn't be diagnosed without the
+  build log, and the Netlify API rejected the access tokens provided. The Netlify project can be deleted; also delete
+  the "Claude build check" personal access tokens in Netlify (User settings → Applications).
+- **Railway** was chosen because Claude can deploy, read logs and verify it directly. The account is on the paid Hobby plan,
+  so this adds a small usage charge (approved by the founder).
 
-Once it's connected, tell me the URL and I'll run the staging test suites against the live site.
+### Issue found while deploying (fixed)
+Pages under the `(app)` / `(auth)` route-group folders produced JavaScript file paths containing parentheses. When a proxy or
+corporate web filter re-encodes them (`%28app%29`), Next.js returns 404 for that file and the page shows "Something went wrong".
+Warehouse networks often use such filters, so pages were moved out of route groups; no built file path contains parentheses now.
 
 ## 5. Security controls (tested on the live staging project)
 
@@ -125,11 +124,10 @@ headers; no service-role key anywhere.
 | **Supabase Free pauses the project after ~7 days with no activity** | Site shows errors until restored | Log in a day before each demo. If paused: Supabase dashboard → project → **Restore** (free, takes a few minutes) |
 | No automatic backups on Supabase Free | Synthetic data could be lost | Fine for synthetic data: re-run the seed script |
 | Supabase Free: 500 MB database, 1 GB file storage | Not a constraint for demos | — |
-| Netlify Free: 300 credits/month; deploys and traffic consume credits (third-party reports say ~15 credits per production deploy) | Roughly 15–20 deploys a month plus demo traffic | Netlify skips builds when nothing in `warehouse-ops/` changed (base directory); deploy previews off |
-| Netlify Free pauses the site when credits run out (no charge) | Site offline until next month | Keep a local fallback: `npm run dev` on a laptop pointed at staging (section 8) |
-| Netlify community reports (Jul–Aug 2026) of free sites wrongly paused by a credit bug | Possible surprise outage | Check the site the day before a demo; use the laptop fallback |
+| Railway app sleeping | The first visit after a quiet period takes a few seconds to wake | Open the site a minute before a demo |
+| Railway usage is billed on the Hobby plan | Small monthly charge | App sleeping and small limits; set a usage limit in Railway billing (recommended: $1–2) |
 | Built-in Supabase email: only to your own team's addresses, ~2/hour | Prospects can't self-sign-up or reset passwords on staging | Demo with the pre-made accounts. Invite links are copy-paste and need no email |
-| `NEXT_PUBLIC_SITE_URL` must match the real URL | Wrong links in auth emails | Set it in step 5 above |
+| `NEXT_PUBLIC_SITE_URL` must match the real URL | Wrong links in auth emails | Set to the Railway URL; also set Supabase Site URL to it (section 3) |
 
 ## 7. Email recommendation (no account created, nothing sent)
 
@@ -162,11 +160,11 @@ npm run build && npm start      # open http://localhost:3000
 | Item | Monthly | Notes |
 |---|---|---|
 | Supabase Free | $0 | |
-| Netlify Free | $0 | No payment method on file, so it can't bill |
+| Railway (web hosting) | ~$0.05–$1 estimated | Usage on the existing Hobby plan ($5/mo subscription already paid for other projects). App sleeps when idle. Estimate, not a guarantee; set a usage limit to cap it |
 | GitHub + Actions (tests) | $0 | |
 | Email provider | $0 | Not set up |
 | Domain | $0 | Not purchased; ~$10–15/yr when approved |
-| **Total** | **$0** | |
+| **Total** | **≈ $0–$1 incremental** | Plus the Railway Hobby subscription the account already pays |
 
 **Upgrade path, not approved and not needed for demos:** Supabase Pro $25/mo (no pausing, backups) and a
 domain, when the first pilot uses real data.

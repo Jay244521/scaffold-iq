@@ -1,6 +1,7 @@
 # Deploying Warehouse Ops
 
-Target: **Supabase** (database, login, file storage) + **Netlify** (web app), both on free plans.
+Target: **Supabase** (database, login, file storage) + a Node.js web host. The staging demo runs on **Railway**
+(see `STAGING.md` section 4 for the exact settings); Netlify was tried and could not serve the app.
 The live staging setup, its exact settings, limitations and costs are in **`STAGING.md`**.
 Do not put real customer data in until you've worked through `PRODUCTION_CHECKLIST.md`.
 
@@ -37,10 +38,11 @@ Current recurring cost: **$0**. Paid upgrades are not approved.
 6. **Project Settings → API Keys:** copy the Project URL and the **publishable** key. You will
    **not** need the secret / service-role key for this app — don't paste it anywhere.
 
-## 2. Deploy the app on Netlify
+## 2. Deploy the app
 
-Follow the step-by-step in `STAGING.md` → section 4 (base directory `warehouse-ops`; set the three
-`NEXT_PUBLIC_…` variables; turn off deploy previews). `netlify.toml` holds the build settings.
+Railway (current): root directory `/warehouse-ops`, start `npm run start -- -p 8080 -H 0.0.0.0`, the three
+`NEXT_PUBLIC_…` variables, app sleeping on. Full settings in `STAGING.md` section 4. Any Node.js 22 host that
+runs `npm run build` and `npm start` works the same way. `netlify.toml` is kept for reference.
 
 ## 3. Verify
 
@@ -50,6 +52,6 @@ Follow the step-by-step in `STAGING.md` → section 4 (base directory `warehouse
 
 ## Updating
 
-Push to the branch Netlify deploys from. For database changes, add a new file in
+Push to the branch the host deploys from (Railway rebuilds when `warehouse-ops/` changes). For database changes, add a new file in
 `supabase/migrations/`, run `npm run test:db`, then `npx supabase db push`.
 Never edit a migration that has already been applied to production.
