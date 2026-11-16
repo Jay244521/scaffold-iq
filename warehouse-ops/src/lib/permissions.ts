@@ -18,9 +18,9 @@ export const ROLE_LABELS: Record<Role, string> = {
 export const ROLE_DESCRIPTIONS: Record<Role, string> = {
   owner: "Full control, including ownership and billing decisions.",
   admin: "Manages team members, invitations and all settings.",
-  manager: "Manages facilities and suppliers, plus everything a supervisor can do.",
+  manager: "Manages facilities and suppliers, approves inventory corrections, plus everything a supervisor can do.",
   supervisor: "Assigns, edits, closes and reopens incidents.",
-  operator: "Reports incidents, adds evidence and comments, updates incidents they own.",
+  operator: "Reports incidents, adds evidence and comments, updates incidents they own, uploads inventory counts.",
   viewer: "Read-only access to incidents and dashboards.",
 };
 
@@ -40,6 +40,8 @@ export const can = {
   manageFacilities: (r: Role) => atLeast(r, "manager"),
   manageTeam: (r: Role) => atLeast(r, "admin"),
   deleteFacility: (r: Role) => atLeast(r, "admin"),
+  importInventory: (r: Role) => atLeast(r, "operator"),
+  approveInventory: (r: Role) => atLeast(r, "manager"),
 };
 
 /** Whether this user may change the status / resolution of an incident. */

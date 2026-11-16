@@ -3,7 +3,7 @@
 ✅ done and tested · ⬜ to do before real customer data · 🔜 later phase
 
 ## Security
-- ✅ Live staging project security-tested through its public API: 25/25 cross-company and role checks pass (`tests/staging/api-isolation.mjs`)
+- ✅ Live staging project security-tested through its public API: 32/32 cross-company, role and inventory checks pass (`tests/staging/api-isolation.mjs`)
 - ✅ Supabase Security Advisor on staging: no errors; 6 warnings reviewed and accepted (intentional RPC entry points — see STAGING.md)
 - ✅ Row Level Security on every table; 125 automated checks (cross-tenant reads/writes, roles, storage, invitations, audit) pass on plain PostgreSQL **and** real Supabase
 - ✅ Tests are shown to catch regressions (a deliberately broken policy makes them fail)
@@ -15,7 +15,7 @@
 - ✅ Safe error messages (no SQL/constraint details shown); generic error page
 - ✅ Open-redirect protection on login `next=`; search input sanitized for API filter syntax
 - ✅ Security headers (no framing, nosniff, HSTS, referrer policy); `npm audit`: 0 vulnerabilities
-- ⬜ Turn on leaked-password protection and review rate limits (Supabase → Auth)
+- ⬜ Turn on leaked-password protection if the plan includes it, and review rate limits (Supabase → Auth); flagged by the staging advisor
 - ⬜ Custom SMTP sender for auth emails (needs your approval of a provider)
 - ⬜ Run Supabase Security Advisor on the future production project; resolve findings
 - ⬜ Content-Security-Policy header (tighten after the AI phase settles external calls)
@@ -41,6 +41,6 @@
 - ✅ Responsive: verified with no horizontal scrolling at 320 px on every app page
 - ✅ Edit incident details after submission (supervisors), recorded in history
 - ✅ Phase 4: Reports page, CSV export (spreadsheet formula-injection protection)
-- 🔜 Phase 5: Inventory CSV import, preview, discrepancy review & approval
+- ✅ Phase 5: Inventory CSV import, preview, discrepancy review, manager approval, stale-record protection
 - 🔜 Phase 6: AI summaries, supplier reports, recommendations (human-approved only)
 - ⬜ Facility time zones (dates currently show in each viewer's own time zone; list filters use UTC days)

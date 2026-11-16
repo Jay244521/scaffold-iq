@@ -43,15 +43,13 @@ and I'll reconcile anything worth keeping from it.
 | E Tracking | ✅ assignment, status, comments, resolution notes, history, search, filters, responsible employee, resolution timestamps, supervisor editing |
 | F Evidence | ✅ private storage, 10 MB, type allowlist + content check, authorization, signed URLs |
 | G Reporting | ✅ Reports page (by supplier with category breakdown, by category, unresolved aging, avg/median resolution time, oldest unresolved), date & facility filters, CSV export with formula-injection protection |
-| H Inventory reconciliation | 🔜 Phase 5 |
+| H Inventory reconciliation | ✅ CSV import (preview first; required-column and per-row validation; duplicates), discrepancy detection against records, manager approve/reject per line, explicit confirmation to apply, stale-record protection, append-only adjustment log; direct edits blocked in the database |
 | I AI | 🔜 Phase 6 |
 
 ## 4. Prioritized plan from here
 
 1. ✅ **Phase 4 — Reporting:** done (Reports page, CSV export with formula-injection protection, supervisor editing).
-2. **Phase 5 — Inventory reconciliation:** CSV upload → parse in a size-limited, formula-safe way →
-   column mapping and validation preview → discrepancy list (system vs counted) → proposed
-   corrections that require a named human approval; nothing overwritten silently; everything audited.
+2. ✅ **Phase 5 — Inventory reconciliation:** done (see module H).
 3. **Phase 6 — AI (optional, needs your approval for an API provider and spend cap):** incident
    summaries, recurring-pattern detection, supplier discrepancy report drafts, suggested next
    steps. Read-only: AI output is a draft a person must accept; it cannot change inventory,

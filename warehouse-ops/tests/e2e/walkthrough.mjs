@@ -227,6 +227,75 @@ try {
   await op.goto(inc3.split("?")[0] + "/edit");
   expect(await op.getByText("Only supervisors, managers, admins and owners can edit").isVisible(), "Operators cannot edit incident details");
 
+  // ------------------------------------------------------------ inventory reconciliation
+  const sysCsv = path.join(SHOTS, "wms-export.csv");
+  fs.writeFileSync(sysCsv, "SKU,Location,Description,Qty\nSKU-A,A1,Corrugated boxes,100\nSKU-B,B1,Stretch film,50\nSKU-C,C1,Pallet labels,10\n");
+  const countCsv = path.join(SHOTS, "cycle-count.csv");
+  fs.writeFileSync(countCsv, "Item Number,Bin,Qty On Hand,Unit Cost\nSKU-A,A1,95,2.50\nSKU-B,B1,50,\nSKU-NEW,C1,4,\n,X,3,\nSKU-C,C1,abc,\n");
+  const badCsv = path.join(SHOTS, "bad.csv");
+  fs.writeFileSync(badCsv, "Description,Notes\nBoxes,four\n");
+
+  async function previewFile(pg, file, source = "count") {
+    await pg.goto(`${BASE}/inventory/import`);
+    await pg.locator(`input[name=source][value=${source}]`).check();
+    await pg.setInputFiles("#file", file);
+    await pg.click("text=Check file");
+  }
+  // Load records from a WMS export (owner = manager+), approving all new items.
+  await previewFile(page, sysCsv, "system");
+  await page.getByText("Preview: wms-export.csv").waitFor();
+  await page.click("text=Save for review");
+  await page.waitForURL(/\/inventory\/imports\/[0-9a-f-]{36}\?notice=created/);
+  await page.click("text=Approve all rows to review");
+  await page.waitForURL(/notice=decided/);
+  await page.check("input[name=confirm]");
+  await page.click("button:has-text('Apply 3 approved corrections')");
+  await page.waitForURL(/notice=applied/);
+  expect(await page.getByText("Applied 3 corrections").isVisible(), "Approved new items become inventory records");
+
+  await previewFile(page, badCsv);
+  await page.getByText("Required columns not found: SKU / item number and Quantity").waitFor();
+  ok("Files without required columns are refused with a clear message");
+
+  // Operator uploads a cycle count on a phone.
+  await previewFile(op, countCsv);
+  await op.getByText("Preview: cycle-count.csv").waitFor();
+  const tile = async (label) => (await op.locator(`div.rounded-md:has(p:text-is("${label}")) p`).nth(1).innerText()).trim();
+  expect((await tile("Discrepancies")) === "1" && (await tile("Not in records")) === "1" && (await tile("Match records")) === "1" && (await tile("Invalid")) === "2",
+    "Preview shows discrepancies, new items, matches and invalid rows before saving");
+  expect(await op.getByText("Missing SKU").isVisible() && await op.getByText('Invalid quantity "abc"').isVisible(), "Preview explains each invalid row");
+  await shot(op, "12-mobile-inventory-preview");
+  await op.click("text=Save for review");
+  await op.waitForURL(/\/inventory\/imports\/[0-9a-f-]{36}\?notice=created/);
+  const reviewUrl = op.url().split("?")[0];
+  expect(await op.getByText("A manager, admin or owner reviews and applies").isVisible() && !(await op.locator("text=Approve selected").count()),
+    "Operators cannot approve or apply corrections");
+
+  // Manager reviews: approve the discrepancy, reject the new item, apply.
+  await page.goto(reviewUrl);
+  await page.locator("tr:has-text('SKU-A') input[name=lineId]").check();
+  await page.click("text=Approve selected");
+  await page.waitForURL(/notice=decided/);
+  await page.locator("tr:has-text('SKU-NEW') input[name=lineId]").check();
+  await page.click("text=Reject selected");
+  await page.waitForURL(/notice=decided/);
+  await page.goto(`${BASE}/inventory?q=SKU-A`);
+  expect((await page.locator("td.text-right").first().innerText()).trim() === "100", "Approving alone changes nothing: record still shows 100");
+  await page.goto(reviewUrl);
+  await shot(page, "13-inventory-review");
+  await page.check("input[name=confirm]");
+  await page.click("button:has-text('Apply 1 approved correction')");
+  await page.waitForURL(/notice=applied/);
+  await page.goto(`${BASE}/inventory`);
+  expect(await page.locator("li:has-text('SKU-A')").getByText("100 →").isVisible(), "Applied change is logged with before/after quantities");
+  expect(await page.getByText("Approved by Olivia Owner").first().isVisible(), "Applied change is logged with the approver");
+  await page.goto(`${BASE}/inventory?q=SKU-NEW`);
+  expect(await page.getByText("No records match.").isVisible(), "Rejected new item was not created");
+  await page.goto(`${BASE}/inventory?q=SKU-A`);
+  expect((await page.locator("td.text-right").first().innerText()).trim() === "95", "Approved correction updated the record to 95");
+  await page.goto(`${BASE}/inventory`);
+  await shot(page, "14-inventory");
+
   // ------------------------------------------------------------ another company
   const rivalCtx = await browser.newContext();
   const rp = await rivalCtx.newPage();
@@ -240,6 +309,10 @@ try {
   expect(await rp.getByText("Page not found").isVisible(), "Another company cannot open Lone Star's incident by URL");
   await rp.goto(`${BASE}/incidents`);
   expect(await rp.getByText("No incidents yet").isVisible(), "Another company sees none of Lone Star's incidents");
+  await rp.goto(`${BASE}/inventory`);
+  expect(await rp.getByText("No inventory files yet").isVisible() && await rp.getByText("No inventory records yet").isVisible(), "Another company sees none of Lone Star's inventory");
+  await rp.goto(reviewUrl);
+  expect(await rp.getByText("Page not found").isVisible(), "Another company cannot open Lone Star's inventory import");
   const rivalCsv = await (await rp.request.get(`${BASE}/incidents/export`)).text();
   expect(rivalCsv.trim().split("\r\n").length === 1, "Another company's CSV export contains none of Lone Star's data");
   await rp.goto(link);

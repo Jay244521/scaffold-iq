@@ -65,6 +65,19 @@ ok(Boolean(up.error), "Company B cannot upload files into company A's evidence")
 const ls = await rosa.c.storage.from("incident-evidence").list(`${orgA.id}/${incA.id}`);
 ok((ls.data ?? []).length === 0, "Company B cannot list company A's evidence");
 
+// ---- inventory
+const { count: invA } = await dana.c.from("inventory_items").select("id", { count: "exact", head: true });
+ok(invA >= 24, `Company A sees its ${invA} inventory records`);
+ok((await rosa.c.from("inventory_items").select("id").eq("org_id", orgA.id)).data.length === 0, "Company B cannot read company A inventory");
+ok((await rosa.c.from("inventory_imports").select("id").eq("org_id", orgA.id)).data.length === 0, "Company B cannot read company A inventory imports");
+const rImp = await rosa.c.rpc("create_inventory_import", { p_org: orgA.id, p_facility: facA.id, p_source: "count", p_file_name: "x.csv", p_lines: [{ line_no: 2, sku: "CB-1824", location: "A-01-01", qty: 1 }] });
+ok(Boolean(rImp.error), "Company B cannot import inventory into company A");
+const { data: pendingImp } = await dana.c.from("inventory_imports").select("id").eq("org_id", orgA.id).eq("status", "pending_review").limit(1).single();
+ok(Boolean((await rosa.c.rpc("apply_inventory_import", { p_import: pendingImp.id })).error), "Company B cannot apply company A corrections");
+ok(Boolean((await tom.c.rpc("apply_inventory_import", { p_import: pendingImp.id })).error), "Operators cannot apply inventory corrections");
+const direct = await dana.c.from("inventory_items").update({ on_hand: 1 }).eq("org_id", orgA.id).select("id");
+ok(Boolean(direct.error) || direct.data.length === 0, "Even the owner cannot change inventory quantities directly");
+
 // ---- roles inside company A
 const gi = await grace.c.from("incidents").insert({ org_id: orgA.id, facility_id: facA.id, type: "other", description: "x", occurred_at: new Date().toISOString() });
 ok(Boolean(gi.error), "Viewer cannot create incidents");

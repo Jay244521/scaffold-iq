@@ -219,3 +219,74 @@ begin
   update public.incident_events e set actor_id = v_uid where e.org_id = v_org;
 end
 $second$;
+
+-- Demo inventory for Dallas DC: a baseline loaded from a (fictional) WMS export a month ago,
+-- approved and applied by the manager, and yesterday's cycle count awaiting review.
+-- Uses the same database functions the app uses, acting as the demo users.
+do $inventory$
+declare
+  v_org uuid; v_fac uuid; v_tom uuid; v_marcus uuid; v_imp uuid; v_lines jsonb;
+  v_items constant text[][] := array[
+    ['CB-1824', 'A-01-01', '18x24 corrugated boxes (bundle of 25)', '240', '18.50'],
+    ['CB-2436', 'A-01-02', '24x36 corrugated boxes (bundle of 20)', '180', '24.00'],
+    ['CB-1212', 'A-01-03', '12x12 shipping cartons (bundle of 50)', '400', '15.75'],
+    ['SF-18-80', 'A-02-01', 'Stretch film 18 in, 80 gauge', '96', '22.40'],
+    ['SF-20-90', 'A-02-02', 'Stretch film 20 in, 90 gauge', '64', '27.10'],
+    ['TP-2-CLR', 'A-02-03', 'Packing tape 2 in clear, case of 36', '55', '41.00'],
+    ['LB-4X6', 'A-03-01', 'Thermal labels 4x6, roll of 500', '320', '9.80'],
+    ['BP-0412', 'B-01-01', 'Canned black beans, 24 ct case', '150', '19.20'],
+    ['BP-0977', 'B-01-02', 'Pinto beans 25 lb sack', '88', '21.60'],
+    ['BP-1130', 'B-01-03', 'Long grain rice 50 lb sack', '72', '34.90'],
+    ['LB-12OZ-CS', 'B-02-01', 'Sparkling water 12 oz, 24 ct case', '210', '11.25'],
+    ['LB-20OZ-CS', 'B-02-02', 'Spring water 20 oz, 24 ct case', '260', '8.90'],
+    ['RF-M8x30', 'C-01-01', 'M8 x 30 hex bolts, box of 500', '34', '41.25'],
+    ['RF-M10x40', 'C-01-02', 'M10 x 40 hex bolts, box of 250', '28', '46.80'],
+    ['RF-W8', 'C-01-03', 'M8 flat washers, box of 1000', '40', '17.30'],
+    ['RF-N8', 'C-01-04', 'M8 hex nuts, box of 1000', '38', '19.90'],
+    ['PP-LTR20', 'C-02-01', 'Letter copy paper, 10 ream case', '120', '38.50'],
+    ['PP-LGL10', 'C-02-02', 'Legal copy paper, 10 ream case', '45', '44.00'],
+    ['CP-TOTE-L', 'C-03-01', 'Large stacking tote, gray', '140', '12.60'],
+    ['CP-TOTE-M', 'C-03-02', 'Medium stacking tote, gray', '175', '9.40'],
+    ['CP-LID-L', 'C-03-03', 'Lid for large tote', '130', '4.10'],
+    ['PL-48X40', 'D-01-01', 'Pallet 48x40, grade A', '60', '14.00'],
+    ['GL-NIT-L', 'D-02-01', 'Nitrile gloves L, box of 100', '90', '7.80'],
+    ['GL-NIT-M', 'D-02-02', 'Nitrile gloves M, box of 100', '110', '7.80']
+  ];
+begin
+  select id into v_org from public.organizations where name = 'Lone Star Distribution (Demo)';
+  if v_org is null or exists (select 1 from public.inventory_imports where org_id = v_org) then
+    return;
+  end if;
+  select id into v_fac from public.facilities where org_id = v_org and code = 'DAL1';
+  select id into v_tom from auth.users where email = 'tom.operator@example.com';
+  select id into v_marcus from auth.users where email = 'marcus.manager@example.com';
+
+  -- 1) Baseline from the WMS export, approved and applied by Marcus (manager).
+  perform set_config('request.jwt.claims', json_build_object('sub', v_marcus, 'role', 'authenticated')::text, true);
+  select jsonb_agg(jsonb_build_object('line_no', i + 1, 'sku', v_items[i][1], 'location', v_items[i][2], 'description', v_items[i][3],
+                                      'qty', v_items[i][4]::numeric, 'unit_cost', v_items[i][5]::numeric))
+    into v_lines from generate_series(1, array_length(v_items, 1)) i;
+  v_imp := public.create_inventory_import(v_org, v_fac, 'system', 'wms-on-hand-export.csv', v_lines);
+  perform public.decide_inventory_lines(v_imp, array(select id from public.inventory_import_lines where import_id = v_imp), 'approved');
+  perform public.apply_inventory_import(v_imp);
+  update public.inventory_imports set created_at = now() - interval '30 days', closed_at = now() - interval '30 days' + interval '2 hours' where id = v_imp;
+  update public.inventory_import_lines set decided_at = now() - interval '30 days' + interval '1 hour' where import_id = v_imp;
+  update public.inventory_adjustments set created_at = now() - interval '30 days' + interval '2 hours' where import_id = v_imp;
+  update public.inventory_items set created_at = now() - interval '30 days' + interval '2 hours', updated_at = now() - interval '30 days' + interval '2 hours' where org_id = v_org;
+
+  -- 2) Yesterday's cycle count of aisles A–C by Tom (operator), awaiting manager review:
+  --    four discrepancies, one SKU not in records, one row with a missing quantity.
+  perform set_config('request.jwt.claims', json_build_object('sub', v_tom, 'role', 'authenticated')::text, true);
+  select jsonb_agg(jsonb_build_object('line_no', i + 1, 'sku', v_items[i][1], 'location', v_items[i][2],
+           'qty', case v_items[i][1]
+                    when 'CB-1824' then 228 when 'TP-2-CLR' then 49 when 'BP-0412' then 162 when 'RF-M8x30' then 31
+                    when 'LB-4X6' then null else v_items[i][4]::numeric end,
+           'unit_cost', v_items[i][5]::numeric) order by i)
+    into v_lines from generate_series(1, 19) i;
+  v_lines := v_lines || jsonb_build_array(jsonb_build_object('line_no', 21, 'sku', 'SF-15-70', 'location', 'A-02-04', 'description', 'Stretch film 15 in, 70 gauge', 'qty', 12, 'unit_cost', 18.9));
+  v_imp := public.create_inventory_import(v_org, v_fac, 'count', 'dallas-cycle-count-aisles-A-C.csv', v_lines);
+  update public.inventory_imports set created_at = now() - interval '1 day' where id = v_imp;
+
+  perform set_config('request.jwt.claims', '', true);
+end
+$inventory$;

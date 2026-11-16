@@ -24,6 +24,9 @@ can never be delivered to a real person.
 Houston Hub), 6 suppliers, 48 receiving exceptions over 90 days, with comments, assignments,
 resolution notes and history. Patterns built in for the demo story: Trinity Corrugated → damage,
 Pecos Paper / Bluebonnet → shortages, Redline Fastener → wrong items.
+Inventory at Dallas DC: 24 records loaded from a "WMS export" a month ago (approved by Marcus), and
+**yesterday's cycle count by Tom awaiting review** (4 discrepancies, 1 SKU not in records, 1 invalid row).
+Log in as Marcus or Dana → Inventory to demo the approve-and-apply flow.
 
 | Demo login | Role | Shows |
 |---|---|---|
@@ -48,7 +51,7 @@ To wipe demo data: run `supabase/demo/remove-synthetic-demo-data.sql` in the Sup
 | Setting | Value | Who/how |
 |---|---|---|
 | Plan | Free ($0). No card on file needed | — |
-| Migrations | `20261116001120_core_schema`, `20261116001302_evidence_storage`, `20261116153203_reporting`, `20261116160943_fix_details_history`, `20261116161521_signed_bol` (same files as in `supabase/migrations/`) | Applied |
+| Migrations | `20261116001120_core_schema`, `20261116001302_evidence_storage`, `20261116153203_reporting`, `20261116160943_fix_details_history`, `20261116161521_signed_bol`, `20261116163155_inventory_reconciliation` (same files as in `supabase/migrations/`) | Applied |
 | Storage bucket | `incident-evidence`: **private**, 10 MB per file, JPEG/PNG/WebP/HEIC/HEIF/PDF only | Applied by migration |
 | Email confirmation | On (Supabase default) | Default |
 | **Site URL / Redirect URLs** | Set to the Netlify URL once it exists: Site URL `https://<site>.netlify.app`, Redirect URL `https://<site>.netlify.app/auth/callback` | ⏳ Founder, in dashboard → Authentication → URL Configuration |
@@ -56,12 +59,15 @@ To wipe demo data: run `supabase/demo/remove-synthetic-demo-data.sql` in the Sup
 | Minimum password length | Set to 8 to match the app | ⏳ Founder (Authentication → Providers → Email) |
 | Outgoing email | Supabase built-in sender (see section 7) | Default |
 
-Security Advisor result after setup: **no errors, no tables without RLS**. It shows 6 warnings that
+Security Advisor result after setup: **no errors, no tables without RLS**. It shows warnings that
 signed-in users (and, for the invitation preview, signed-out visitors) can call specific
 `SECURITY DEFINER` functions. These are **intentional and accepted**: they are the app's designed entry
 points (`create_organization`, `create_invitation`, `revoke_invitation`, `accept_invitation`,
-`get_invitation_preview`), each checks the caller's identity and role internally, and each is covered by
+`get_invitation_preview`, and the inventory functions `create_inventory_import`, `decide_inventory_lines`,
+`apply_inventory_import`, `discard_inventory_import`), each checks the caller's identity and role internally, and each is covered by
 the automated tests. The invitation preview only answers someone holding a 256-bit invitation token.
+The advisor also notes **Leaked password protection** (checking new passwords against known breaches) is off;
+it is a dashboard setting under Authentication → Passwords. Check whether it is available on the Free plan before relying on it.
 
 ## 4. Web hosting: why Netlify, and how to connect it
 
@@ -99,9 +105,9 @@ Once it's connected, tell me the URL and I'll run the staging test suites agains
 ## 5. Security controls (tested on the live staging project)
 
 Run on 2026-11-16 against `warehouse-ops-staging`:
-- `tests/staging/api-isolation.mjs` → **25/25 passed** (re-run after the Phase 4 reporting migration). It works through the public API with real logins: company B can't read, create, modify or delete company A's incidents, comments, history, people, memberships, invitations, dashboard numbers, reports or files; viewers can't write; operators can't assign; reporter/status can't be forged; storage rejects HTML; evidence has no public URL; signed-out visitors are refused.
+- `tests/staging/api-isolation.mjs` → **32/32 passed** (re-run after the Phase 5 inventory migration). It works through the public API with real logins: company B can't read, create, modify or delete company A's incidents, comments, history, people, memberships, invitations, dashboard numbers, reports, inventory or files; nobody, not even an owner, can change inventory quantities directly; viewers can't write; operators can't assign; reporter/status can't be forged; storage rejects HTML; evidence has no public URL; signed-out visitors are refused.
 - `tests/staging/demo-smoke.mjs` (app connected to staging, real browser) → **6/6 passed**: dashboard, list and detail render with synthetic data; viewer has no write controls; company B sees only its own data and gets "Page not found" for company A's incident URL.
-- Same schema also passes the 134-check database suite and the 48-step browser walkthrough on local Supabase.
+- Same schema also passes the 176-check database suite and the 60-step browser walkthrough on local Supabase.
 
 Controls in place: Row Level Security on every table; database-enforced roles; server-side
 authorization; private evidence bucket with type/size limits and file-signature checks; 10-minute
