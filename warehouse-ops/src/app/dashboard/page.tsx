@@ -39,7 +39,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const range: RangeKey = sp.range && sp.range in RANGES ? (sp.range as RangeKey) : "30";
   const from = range === "all" ? null : new Date(Date.now() - Number(range) * 86_400_000).toISOString();
 
-  const [{ data: summaryData, error: summaryError }, { data: recentData }, { data: patternData }] = await Promise.all([
+  const [{ data: summaryData, error: summaryError }, { data: recentData }, { data: patternData }, { data: mineData }] = await Promise.all([
     ctx.supabase.rpc("incident_summary", { p_org: ctx.org.orgId, p_facility: ctx.facility?.id ?? null, p_from: from, p_to: null }),
     (() => {
       let q = ctx.supabase
@@ -52,7 +52,16 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       return q;
     })(),
     ctx.supabase.rpc("exception_patterns", { p_org: ctx.org.orgId, p_facility: ctx.facility?.id ?? null }),
+    ctx.supabase
+      .from("incidents")
+      .select("id, number, type, status, occurred_at, po_number, suppliers(name), facilities(name)")
+      .eq("org_id", ctx.org.orgId)
+      .eq("assigned_to", ctx.user.id)
+      .in("status", ["open", "in_progress"])
+      .order("occurred_at", { ascending: true })
+      .limit(5),
   ]);
+  const mine = (mineData ?? []) as unknown as RecentRow[];
   if (summaryError) logError("incident_summary", summaryError);
 
   const s: Summary = (summaryData as Summary) ?? { total: 0, by_status: {}, by_type: {}, by_supplier: [], avg_resolution_hours: null };
@@ -192,6 +201,30 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           )}
         </Card>
       </div>
+
+      {mine.length > 0 && (
+        <Card
+          title={`Assigned to you (${mine.length}${mine.length === 5 ? "+" : ""})`}
+          className="mt-6 border-l-4 border-l-amber-500"
+          actions={<Link href="/incidents?assignee=me&status=unresolved" className="text-sm font-medium text-brand-600 hover:underline">View all</Link>}
+        >
+          <ul className="-mx-4 -my-2 divide-y divide-slate-100">
+            {mine.map((r) => (
+              <li key={r.id}>
+                <Link href={`/incidents/${r.id}`} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 hover:bg-slate-50">
+                  <span className="w-16 font-mono text-sm font-medium text-slate-900">{incidentRef(r.number)}</span>
+                  <TypeBadge type={r.type} />
+                  <span className="order-last w-full min-w-0 truncate text-sm text-slate-700 sm:order-none sm:w-auto sm:flex-1">
+                    {r.suppliers?.name ?? "No supplier"}{r.po_number ? ` · ${r.po_number}` : ""}
+                  </span>
+                  <span className="ml-auto text-xs text-slate-500 sm:ml-0"><LocalTime value={r.occurred_at} mode="relative" /></span>
+                  <StatusBadge status={r.status} />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       <PatternsCard p={patternData as Patterns | null} className="mt-6" />
 

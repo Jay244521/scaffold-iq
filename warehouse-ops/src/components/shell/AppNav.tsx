@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BarChart3, Building2, ClipboardList, History, LayoutDashboard, Menu, PackageSearch, Plus, Truck, Users, X } from "lucide-react";
+import { BarChart3, Briefcase, Building2, ClipboardList, History, LayoutDashboard, Menu, PackageSearch, Plus, Truck, Users, X } from "lucide-react";
 import { cx } from "@/components/ui";
 
 const items = [
@@ -13,6 +13,7 @@ const items = [
   { href: "/inventory", label: "Inventory", icon: PackageSearch },
 ];
 const settings = [
+  { href: "/settings/company", label: "Company", icon: Briefcase },
   { href: "/settings/facilities", label: "Facilities", icon: Building2 },
   { href: "/settings/suppliers", label: "Suppliers", icon: Truck },
   { href: "/settings/team", label: "Team", icon: Users },

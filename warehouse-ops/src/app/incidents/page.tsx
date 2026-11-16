@@ -238,7 +238,7 @@ export default async function IncidentsPage({ searchParams }: { searchParams: Pr
           )}
         </>
       )}
-      <p className="mt-3 text-xs text-slate-500">Date filters use UTC days.</p>
+      <p className="mt-3 text-xs text-slate-500">Date filters use days in your company&apos;s time zone ({ctx.org.timezone.replace(/_/g, " ")}).</p>
     </>
   );
 }

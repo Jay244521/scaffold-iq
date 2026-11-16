@@ -7,6 +7,7 @@ import { Card, EmptyState, PageHeader, StatusBadge, TypeBadge, buttonClass, cx }
 import { getMembers, requireAppContext } from "@/lib/context";
 import { logError } from "@/lib/errors";
 import { dayRange } from "@/lib/incident-query";
+import { zonedToday } from "@/lib/timezone";
 import { EXCEPTION_LABELS, incidentRef, type ExceptionType, type IncidentStatus } from "@/lib/labels";
 import { incidentFilterSchema } from "@/lib/validation";
 
@@ -46,7 +47,6 @@ type OpenRow = {
   suppliers: { name: string } | null;
 };
 
-const iso = (d: Date) => d.toISOString().slice(0, 10);
 const PRESETS = [
   { label: "Last 30 days", days: 30 },
   { label: "Last 90 days", days: 90 },
@@ -64,11 +64,11 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const ctx = await requireAppContext();
   const sp = await searchParams;
   const parsed = incidentFilterSchema.parse({ from: sp.from, to: sp.to, facility: sp.facility });
-  const today = new Date();
-  const from = parsed.from ?? iso(new Date(today.getTime() - 89 * 86_400_000));
-  const to = parsed.to ?? iso(today);
+  const tz = ctx.org.timezone;
+  const from = parsed.from ?? zonedToday(tz, -89);
+  const to = parsed.to ?? zonedToday(tz);
   const facilityId = parsed.facility && ctx.facilities.some((f) => f.id === parsed.facility) ? parsed.facility : ctx.facility?.id;
-  const { fromIso, toIso } = dayRange(from, to);
+  const { fromIso, toIso } = dayRange(from, to, tz);
 
   const [{ data, error }, openRes, members, { data: patternData }] = await Promise.all([
     ctx.supabase.rpc("incident_report", { p_org: ctx.org.orgId, p_facility: facilityId ?? null, p_from: fromIso, p_to: toIso }),
@@ -131,14 +131,14 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           {PRESETS.map((p) => (
             <Link
               key={p.days}
-              href={`/reports?${new URLSearchParams({ from: iso(new Date(today.getTime() - (p.days - 1) * 86_400_000)), to: iso(today), ...(facilityId ? { facility: facilityId } : {}) })}`}
+              href={`/reports?${new URLSearchParams({ from: zonedToday(tz, -(p.days - 1)), to: zonedToday(tz), ...(facilityId ? { facility: facilityId } : {}) })}`}
               className="rounded-md px-2 py-1 text-brand-700 hover:bg-brand-50"
             >
               {p.label}
             </Link>
           ))}
         </div>
-        <p className="w-full text-xs text-slate-500">Dates are UTC days. The CSV export uses the same filters.</p>
+        <p className="w-full text-xs text-slate-500">Dates are days in your company&apos;s time zone ({tz.replace(/_/g, " ")}). The CSV export uses the same filters.</p>
       </form>
 
       {!r || r.total === 0 ? (

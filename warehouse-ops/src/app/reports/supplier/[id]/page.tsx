@@ -6,6 +6,7 @@ import { z } from "zod";
 import { Alert, buttonClass } from "@/components/ui";
 import { requireAppContext } from "@/lib/context";
 import { dayRange } from "@/lib/incident-query";
+import { formatZonedDate, zonedToday } from "@/lib/timezone";
 import { EXCEPTION_LABELS, STATUS_LABELS, formatQty, incidentRef, type ExceptionType, type IncidentStatus } from "@/lib/labels";
 import { incidentFilterSchema } from "@/lib/validation";
 import { DraftMessage, PrintButton } from "./ReportTools";
@@ -28,8 +29,6 @@ type Row = {
   facilities: { name: string } | null;
 };
 
-const iso = (d: Date) => d.toISOString().slice(0, 10);
-const fmtDate = (s: string) => new Date(s).toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric", year: "numeric" });
 
 export default async function SupplierReportPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string | undefined>> }) {
   const ctx = await requireAppContext();
@@ -40,11 +39,13 @@ export default async function SupplierReportPage({ params, searchParams }: { par
   if (!supplier) notFound();
 
   const f = incidentFilterSchema.parse({ from: sp.from, to: sp.to, facility: sp.facility });
+  const tz = ctx.org.timezone;
+  const fmtDate = (s: string) => formatZonedDate(s, tz);
   const today = new Date();
-  const from = f.from ?? iso(new Date(today.getTime() - 89 * 86_400_000));
-  const to = f.to ?? iso(today);
+  const from = f.from ?? zonedToday(tz, -89);
+  const to = f.to ?? zonedToday(tz);
   const facilityId = f.facility && ctx.facilities.some((x) => x.id === f.facility) ? f.facility : undefined;
-  const { fromIso, toIso } = dayRange(from, to);
+  const { fromIso, toIso } = dayRange(from, to, tz);
 
   let q = ctx.supabase
     .from("incidents")

@@ -49,10 +49,10 @@ To stop: press `Ctrl+C` in the app window, then `npx supabase stop`.
 
 | Command | What it proves |
 |---|---|
-| `npm run test:unit` | Validation, permissions, file-type, CSV-safety, inventory-file, next-step and audit-wording rules (38 tests) |
-| `npm run test:db` | **194 database security checks** on a throwaway PostgreSQL: one company can't read or change another's data; role rules; private storage; invitations; audit log. Needs PostgreSQL installed, or set `DATABASE_URL`. |
-| `npm run test:db -- --supabase` | The same 194 checks against your running local Supabase |
-| `node tests/e2e/walkthrough.mjs` | 75-step browser walkthrough (signup → incidents → invites → second company blocked). Needs the app running against local Supabase and Playwright installed. |
+| `npm run test:unit` | Validation, permissions, file-type, CSV-safety, inventory-file, next-step, audit-wording and time-zone rules (42 tests) |
+| `npm run test:db` | **199 database security checks** on a throwaway PostgreSQL: one company can't read or change another's data; role rules; private storage; invitations; audit log. Needs PostgreSQL installed, or set `DATABASE_URL`. |
+| `npm run test:db -- --supabase` | The same 199 checks against your running local Supabase |
+| `node tests/e2e/walkthrough.mjs` | 80-step browser walkthrough (signup → incidents → invites → second company blocked). Needs the app running against local Supabase and Playwright installed. |
 | `node tests/staging/api-isolation.mjs` | 37 security checks against a deployed Supabase project through its public API, using the synthetic demo accounts (see `docs/STAGING.md`) |
 | `node tests/staging/demo-smoke.mjs` | Browser check of the demo accounts against an app connected to staging |
 | `npm run typecheck` / `npm run build` | TypeScript and production build |
@@ -65,6 +65,10 @@ GitHub Actions runs typecheck, unit tests, database security tests and the build
 A free staging environment with **synthetic data only** runs on Supabase (Free) and is set up for
 Netlify (Free). Demo logins, settings, limitations and costs ($0/month): **`docs/STAGING.md`**.
 Load demo data into a local database with `DEMO_PASSWORD='…' bash scripts/seed-demo.sh`.
+
+## Demo script
+
+A 15-minute guide for prospect meetings: `docs/DEMO_SCRIPT.md`.
 
 ## How it's organized
 

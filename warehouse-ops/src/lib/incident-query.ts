@@ -1,12 +1,17 @@
 import "server-only";
 import type { AppContext } from "@/lib/context";
+import { zonedDayStart } from "@/lib/timezone";
 import { sanitizeSearch, type IncidentFilters } from "@/lib/validation";
 
-/** Turns a YYYY-MM-DD date into the UTC timestamp range used by list, reports and export. */
-export function dayRange(from?: string, to?: string) {
+/**
+ * Turns YYYY-MM-DD dates into the timestamp range used by the list, reports and export.
+ * Days are calendar days in the company's time zone ("to" is inclusive).
+ */
+export function dayRange(from: string | undefined, to: string | undefined, tz: string) {
+  const nextDay = (d: string) => new Date(Date.parse(`${d}T12:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
   return {
-    fromIso: from ? `${from}T00:00:00Z` : null,
-    toIso: to ? new Date(Date.parse(`${to}T00:00:00Z`) + 86_400_000).toISOString() : null,
+    fromIso: from ? zonedDayStart(from, tz) : null,
+    toIso: to ? zonedDayStart(nextDay(to), tz) : null,
   };
 }
 
@@ -34,7 +39,7 @@ export async function incidentQuery(ctx: AppContext, f: IncidentFilters, select:
   if (f.assignee === "me") q = q.eq("assigned_to", ctx.user.id);
   else if (f.assignee === "unassigned") q = q.is("assigned_to", null);
   else if (f.assignee) q = q.eq("assigned_to", f.assignee);
-  const { fromIso, toIso } = dayRange(f.from, f.to);
+  const { fromIso, toIso } = dayRange(f.from, f.to, ctx.org.timezone);
   if (fromIso) q = q.gte("occurred_at", fromIso);
   if (toIso) q = q.lt("occurred_at", toIso);
 

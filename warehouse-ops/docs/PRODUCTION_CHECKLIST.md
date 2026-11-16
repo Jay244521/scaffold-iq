@@ -44,4 +44,4 @@
 - ✅ Phase 5: Inventory CSV import, preview, discrepancy review, manager approval, stale-record protection
 - ✅ Phase 6 ($0): supplier discrepancy reports, pattern alerts, suggested next steps (rules-based; nothing sent or changed automatically)
 - 🔜 Optional paid AI summaries (needs approval of provider and spending cap)
-- ⬜ Facility time zones (dates currently show in each viewer's own time zone; list filters use UTC days)
+- ✅ Company time zone (Settings → Company): date filters, reports, supplier reports and CSV exports use it

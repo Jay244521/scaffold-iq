@@ -6,12 +6,13 @@ import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { isRole, type Role } from "@/lib/permissions";
+import { DEFAULT_TIMEZONE } from "@/lib/timezone";
 
 export const ORG_COOKIE = "wo_org";
 export const FACILITY_COOKIE = "wo_facility";
 
 export type Facility = { id: string; name: string; code: string | null; address: string | null; is_active: boolean };
-export type OrgMembership = { orgId: string; orgName: string; role: Role };
+export type OrgMembership = { orgId: string; orgName: string; role: Role; timezone: string };
 export type Member = { userId: string; role: Role; name: string; email: string };
 
 export type AppContext = {
@@ -52,14 +53,14 @@ export const getAppContext = cache(async (): Promise<AppContext | null> => {
   const { supabase, user } = auth;
 
   const [{ data: rows }, { data: profile }] = await Promise.all([
-    supabase.from("memberships").select("org_id, role, organizations(name)").eq("user_id", user.id),
+    supabase.from("memberships").select("org_id, role, organizations(name, timezone)").eq("user_id", user.id),
     supabase.from("profiles").select("full_name, email").eq("id", user.id).maybeSingle(),
   ]);
 
   const memberships: OrgMembership[] = (rows ?? [])
-    .map((r: { org_id: string; role: string; organizations: { name: string } | { name: string }[] | null }) => {
+    .map((r: { org_id: string; role: string; organizations: { name: string; timezone: string } | { name: string; timezone: string }[] | null }) => {
       const org = Array.isArray(r.organizations) ? r.organizations[0] : r.organizations;
-      return { orgId: r.org_id, orgName: org?.name ?? "Organization", role: r.role as Role };
+      return { orgId: r.org_id, orgName: org?.name ?? "Organization", role: r.role as Role, timezone: org?.timezone ?? DEFAULT_TIMEZONE };
     })
     .filter((m) => isRole(m.role))
     .sort((a, b) => a.orgName.localeCompare(b.orgName));

@@ -247,6 +247,17 @@ select tests.login('op');
 select tests.eq((select count(*) from public.audit_log), 0, 'Operators cannot read the audit log');
 select tests.logout();
 
+-- ---------------------------------------------------------------- company time zone
+select tests.ok((select timezone = 'America/Chicago' from public.organizations where id = tests.id('org')), 'New companies default to US Central time');
+select tests.login('manager');
+select tests.eq(tests.affected(format($$update public.organizations set timezone = 'America/New_York' where id = %L$$, tests.id('org'))), 0, 'Managers cannot change the company time zone');
+select tests.logout();
+select tests.login('owner');
+select tests.eq(tests.affected(format($$update public.organizations set timezone = 'America/Denver' where id = %L$$, tests.id('org'))), 1, 'Owners and admins can change the company time zone');
+select tests.throws(format($$update public.organizations set timezone = 'Mars/Olympus' where id = %L$$, tests.id('org')), 'Unknown time zones are rejected');
+select tests.throws(format($$update public.organizations set created_by = null where id = %L$$, tests.id('org')), 'Other organization fields cannot be changed');
+select tests.logout();
+
 -- ---------------------------------------------------------------- dashboard summary
 select tests.login('viewer');
 select tests.ok((select (s ->> 'total')::int = 2 and (s -> 'by_type' ->> 'damaged')::int = 1 and (s -> 'by_status' ->> 'in_progress')::int = 1

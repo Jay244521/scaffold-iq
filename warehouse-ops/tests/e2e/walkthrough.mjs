@@ -282,6 +282,22 @@ try {
   expect(mf.status() === 200 && mj.name === "Warehouse Ops" && mj.display === "standalone" && (await page.request.get(`${BASE}/icons/icon-512.png`)).status() === 200,
     "App can be added to a phone's home screen (manifest and icons served)");
 
+  // ------------------------------------------------------------ company time zone, assigned work
+  expect(csv.includes('"Occurred (America/Chicago)"'), "CSV dates are in the company time zone");
+  await page.goto(`${BASE}/settings/company`);
+  await page.selectOption("#timezone", "America/New_York");
+  await page.click("text=Save");
+  await page.getByText("now use this time zone").waitFor();
+  const csvNY = await (await page.request.get(`${BASE}/incidents/export`)).text();
+  expect(csvNY.includes('"Occurred (America/New_York)"'), "Owners change the company time zone; exports follow it");
+  await page.goto(`${BASE}/incidents`);
+  expect(await page.getByText("America/New York").isVisible(), "Date filters state which time zone they use");
+  await op.goto(`${BASE}/settings/company`);
+  expect(await op.locator("#timezone").isDisabled(), "Operators cannot change company settings");
+  await op.goto(`${BASE}/dashboard`);
+  expect(await op.getByText(/Assigned to you/).isVisible() && await op.locator("section", { hasText: "Assigned to you" }).getByText("EX-2").isVisible(),
+    "Dashboard shows each person the open work assigned to them");
+
   // ------------------------------------------------------------ inventory reconciliation
   const sysCsv = path.join(SHOTS, "wms-export.csv");
   fs.writeFileSync(sysCsv, "SKU,Location,Description,Qty\nSKU-A,A1,Corrugated boxes,100\nSKU-B,B1,Stretch film,50\nSKU-C,C1,Pallet labels,10\n");

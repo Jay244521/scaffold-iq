@@ -3,6 +3,7 @@ import { toCsv } from "@/lib/csv";
 import { getMembers, requireAppContext } from "@/lib/context";
 import { logError } from "@/lib/errors";
 import { incidentQuery } from "@/lib/incident-query";
+import { formatZonedDateTime } from "@/lib/timezone";
 import { EXCEPTION_LABELS, STATUS_LABELS, incidentRef, type ExceptionType, type IncidentStatus } from "@/lib/labels";
 import { incidentFilterSchema } from "@/lib/validation";
 
@@ -33,6 +34,7 @@ type Row = {
 /** CSV export of incidents matching the same filters as the incident list / reports. */
 export async function GET(request: NextRequest) {
   const ctx = await requireAppContext();
+  const tz = ctx.org.timezone;
   const raw = Object.fromEntries(request.nextUrl.searchParams.entries());
   const filters = incidentFilterSchema.parse(raw);
   const { query } = await incidentQuery(
@@ -58,19 +60,19 @@ export async function GET(request: NextRequest) {
 
   const csv = toCsv(
     [
-      "Reference", "Occurred (UTC)", "Reported (UTC)", "Facility", "Category", "Status", "Supplier", "PO number",
+      "Reference", `Occurred (${tz})`, `Reported (${tz})`, "Facility", "Category", "Status", "Supplier", "PO number",
       "Shipment reference", "SKU", "Item", "Expected qty", "Received qty", "Variance", "Reported by", "Responsible",
-      "Resolved (UTC)", "Hours to resolve", "Signed BOL attached", "Resolution notes", "Description",
+      `Resolved (${tz})`, "Hours to resolve", "Signed BOL attached", "Resolution notes", "Description",
     ],
     ((data ?? []) as unknown as Row[]).map((r) => {
       const exp = num(r.expected_qty);
       const rec = num(r.received_qty);
       const hours = r.resolved_at ? Math.round(((Date.parse(r.resolved_at) - Date.parse(r.created_at)) / 3_600_000) * 10) / 10 : null;
       return [
-        incidentRef(r.number), r.occurred_at, r.created_at, r.facilities?.name, EXCEPTION_LABELS[r.type], STATUS_LABELS[r.status],
+        incidentRef(r.number), formatZonedDateTime(r.occurred_at, tz), formatZonedDateTime(r.created_at, tz), r.facilities?.name, EXCEPTION_LABELS[r.type], STATUS_LABELS[r.status],
         r.suppliers?.name, r.po_number, r.shipment_ref, r.sku, r.item_description, exp, rec,
         exp !== null && rec !== null ? Math.round((rec - exp) * 1000) / 1000 : null,
-        name(r.reported_by), name(r.assigned_to), r.resolved_at, hours, hasBol.has(r.id) ? "Yes" : "No", r.resolution_notes, r.description,
+        name(r.reported_by), name(r.assigned_to), formatZonedDateTime(r.resolved_at, tz), hours, hasBol.has(r.id) ? "Yes" : "No", r.resolution_notes, r.description,
       ];
     }),
   );
