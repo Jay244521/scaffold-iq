@@ -4,9 +4,9 @@
 [build]
   command = "npm run build"
   publish = ".next"
-  # Skip builds when nothing in this app changed (each build uses free-plan credits,
-  # and this repository also contains unrelated projects).
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ."
+  # No custom "ignore" command: on a site's first build Netlify compares a commit with
+  # itself, so a diff-based ignore rule cancels the very first deploy. With a base
+  # directory set, Netlify already skips builds when nothing in this folder changed.
 
 [build.environment]
   NODE_VERSION = "22"

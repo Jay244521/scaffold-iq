@@ -115,7 +115,7 @@ headers; no service-role key anywhere.
 | **Supabase Free pauses the project after ~7 days with no activity** | Site shows errors until restored | Log in a day before each demo. If paused: Supabase dashboard → project → **Restore** (free, takes a few minutes) |
 | No automatic backups on Supabase Free | Synthetic data could be lost | Fine for synthetic data: re-run the seed script |
 | Supabase Free: 500 MB database, 1 GB file storage | Not a constraint for demos | — |
-| Netlify Free: 300 credits/month; deploys and traffic consume credits (third-party reports say ~15 credits per production deploy) | Roughly 15–20 deploys a month plus demo traffic | `netlify.toml` skips builds when the app didn't change; deploy previews off |
+| Netlify Free: 300 credits/month; deploys and traffic consume credits (third-party reports say ~15 credits per production deploy) | Roughly 15–20 deploys a month plus demo traffic | Netlify skips builds when nothing in `warehouse-ops/` changed (base directory); deploy previews off |
 | Netlify Free pauses the site when credits run out (no charge) | Site offline until next month | Keep a local fallback: `npm run dev` on a laptop pointed at staging (section 8) |
 | Netlify community reports (Jul–Aug 2026) of free sites wrongly paused by a credit bug | Possible surprise outage | Check the site the day before a demo; use the laptop fallback |
 | Built-in Supabase email: only to your own team's addresses, ~2/hour | Prospects can't self-sign-up or reset passwords on staging | Demo with the pre-made accounts. Invite links are copy-paste and need no email |
