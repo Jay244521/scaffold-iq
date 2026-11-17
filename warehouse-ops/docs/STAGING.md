@@ -57,7 +57,7 @@ To wipe demo data: run `supabase/demo/remove-synthetic-demo-data.sql` in the Sup
 | Setting | Value | Who/how |
 |---|---|---|
 | Plan | Free ($0). No card on file needed | — |
-| Migrations | `20261116001120_core_schema`, `20261116001302_evidence_storage`, `20261116153203_reporting`, `20261116160943_fix_details_history`, `20261116161521_signed_bol`, `20261116163155_inventory_reconciliation`, `20261116170007_exception_patterns`, `20261117090000_merge_suppliers` (last one applied by the founder in the SQL editor and recorded in the migration history) (same files as in `supabase/migrations/`) | Applied |
+| Migrations | `20261116001120_core_schema`, `20261116001302_evidence_storage`, `20261116153203_reporting`, `20261116160943_fix_details_history`, `20261116161521_signed_bol`, `20261116163155_inventory_reconciliation`, `20261116170007_exception_patterns`, `20261117090000_merge_suppliers`, `20261117120000_organization_timezone` (the last two applied by the founder in the SQL editor and recorded in the migration history) (same files as in `supabase/migrations/`) | Applied |
 | Storage bucket | `incident-evidence`: **private**, 10 MB per file, JPEG/PNG/WebP/HEIC/HEIF/PDF only | Applied by migration |
 | Email confirmation | On (Supabase default) | Default |
 | **Site URL / Redirect URLs** | Set to the Netlify URL once it exists: Site URL `https://<site>.netlify.app`, Redirect URL `https://<site>.netlify.app/auth/callback` | ⏳ Founder, in dashboard → Authentication → URL Configuration |
