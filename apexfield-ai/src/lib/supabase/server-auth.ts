@@ -48,10 +48,12 @@ export async function getAuthContext(): Promise<AuthContext | null> {
     if (!user) return null;
     const { data } = await supabase
       .from("technicians")
-      .select("id, org_id, full_name, role, truck_label, experience_years")
+      .select("id, org_id, full_name, role, truck_label, experience_years, deactivated_at")
       .eq("id", user.id)
       .maybeSingle();
-    const tech = data && (data as TechProfile).org_id ? (data as TechProfile) : null;
+    // Deactivated technicians keep a valid JWT for up to an hour after the ban; treat them as unlinked.
+    const row = data as (TechProfile & { deactivated_at: string | null }) | null;
+    const tech = row?.org_id && !row.deactivated_at ? row : null;
     return { supabase, user, tech };
   } catch (e) {
     console.error("[auth] getAuthContext failed:", e instanceof Error ? e.message : e);

@@ -24,10 +24,15 @@ export const metadata: Metadata = {
       "Real-time multimodal AI field coaching that turns day-one HVAC hires into autonomous, high-margin technicians.",
     type: "website",
   },
+  applicationName: "ApexField AI",
+  appleWebApp: { capable: true, title: "ApexField", statusBarStyle: "black-translucent" },
+  icons: { apple: "/icons/apple-touch-icon.png" },
 };
 
 export const viewport: Viewport = {
   themeColor: "#0B0F19",
+  // Respect notches / home indicators when launched full screen from the home screen.
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

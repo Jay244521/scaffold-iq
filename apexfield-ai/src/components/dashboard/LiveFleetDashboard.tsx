@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
-import { Activity, AlertTriangle, CheckCircle2, Loader2, Radio, ShieldAlert, Truck, Users } from "lucide-react";
+import Link from "next/link";
+import { Activity, AlertTriangle, CheckCircle2, History, Loader2, Radio, ShieldAlert, Truck, Users } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { filterCounts, selectTechs, type FleetFilter } from "@/lib/fleet-sim";
 import { useLiveFleet } from "@/hooks/useLiveFleet";
@@ -102,13 +103,21 @@ export function LiveFleetDashboard({
             </p>
             <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Today&apos;s field sessions</h1>
           </div>
-          <button
-            type="button"
-            onClick={() => setTeamOpen(true)}
-            className="inline-flex min-h-11 items-center gap-2 self-start rounded-xl border border-line-strong px-4 text-sm font-semibold hover:border-amber hover:text-amber sm:self-auto"
-          >
-            <Users className="h-4 w-4" aria-hidden="true" /> Team ({fleet.techs.length})
-          </button>
+          <div className="flex gap-2 self-start sm:self-auto">
+            <Link
+              href="/dashboard/history"
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line-strong px-4 text-sm font-semibold hover:border-amber hover:text-amber"
+            >
+              <History className="h-4 w-4" aria-hidden="true" /> History
+            </Link>
+            <button
+              type="button"
+              onClick={() => setTeamOpen(true)}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line-strong px-4 text-sm font-semibold hover:border-amber hover:text-amber"
+            >
+              <Users className="h-4 w-4" aria-hidden="true" /> Team ({fleet.techs.filter((t) => !t.deactivated_at).length})
+            </button>
+          </div>
         </div>
 
         <section aria-label="Fleet metrics" className="grid grid-cols-2 gap-3 xl:grid-cols-4">
@@ -169,6 +178,12 @@ export function LiveFleetDashboard({
       {teamOpen && (
         <TeamPanel
           techs={fleet.techs}
+          meId={userId}
+          meRole={profile.role}
+          onChanged={(message) => {
+            pushToast({ tone: "success", title: "Team updated", body: message });
+            void fleet.refetch();
+          }}
           onClose={() => setTeamOpen(false)}
           onAdded={(name) => {
             pushToast({ tone: "success", title: "Technician added", body: `${name} can sign in now.` });

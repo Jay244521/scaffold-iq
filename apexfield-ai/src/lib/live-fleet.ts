@@ -15,6 +15,7 @@ export type DbTechnician = {
   experience_years: number | null;
   truck_label: string | null;
   email?: string | null;
+  deactivated_at?: string | null;
 };
 
 export type DbSession = {
@@ -237,7 +238,7 @@ export function mapLiveFleet(techs: DbTechnician[], sessions: DbSession[], now: 
   for (const t of techs) {
     const s = byTech.get(t.id);
     if (s) cards.push(mapSessionToTechnician(t, s, now));
-    else if (t.role !== "admin") idle.push(t); // office admins aren't field techs unless they run a session
+    else if (t.role !== "admin" && !t.deactivated_at) idle.push(t); // office admins and deactivated techs aren't on shift
   }
   return { cards, idle };
 }

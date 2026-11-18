@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import { Logo } from "@/components/landing/Logo";
 
 export function AuthShell({ title, subtitle, children, footer }: { title: string; subtitle: string; children: ReactNode; footer: ReactNode }) {
@@ -32,15 +32,23 @@ export function Field({
   hint,
   ...input
 }: { label: string; hint?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+  const hintId = useId();
   return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-sm font-medium text-slate-200">{label}</span>
-      <input
-        {...input}
-        className="h-12 rounded-xl border border-line-strong bg-slate-deep px-3 text-base text-ink placeholder:text-muted focus:border-amber focus:outline-none"
-      />
-      {hint && <span className="text-xs text-muted">{hint}</span>}
-    </label>
+    <div className="flex flex-col gap-1.5">
+      <label className="flex flex-col gap-1.5">
+        <span className="text-sm font-medium text-slate-200">{label}</span>
+        <input
+          {...input}
+          aria-describedby={hint ? hintId : undefined}
+          className="h-12 rounded-xl border border-line-strong bg-slate-deep px-3 text-base text-ink placeholder:text-muted focus:border-amber focus:outline-none"
+        />
+      </label>
+      {hint && (
+        <span id={hintId} className="text-xs text-muted">
+          {hint}
+        </span>
+      )}
+    </div>
   );
 }
 

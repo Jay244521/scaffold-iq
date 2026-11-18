@@ -612,6 +612,33 @@ export function useGeminiLiveSession({ onToolCall }: { onToolCall: LiveToolHandl
     return sent;
   }, [captureFrame, send]);
 
+  // Keep the screen awake during a live call: a dimmed, locked phone drops the camera and mic.
+  useEffect(() => {
+    if (status !== "active") return;
+    type WakeLock = { release: () => Promise<void>; released: boolean };
+    const nav = navigator as Navigator & { wakeLock?: { request: (type: "screen") => Promise<WakeLock> } };
+    if (!nav.wakeLock) return;
+    let lock: WakeLock | null = null;
+    let cancelled = false;
+    const acquire = async () => {
+      try {
+        const l = await nav.wakeLock!.request("screen");
+        if (cancelled) void l.release();
+        else lock = l;
+      } catch {
+        /* low battery mode or unsupported: the session still works */
+      }
+    };
+    const onVisible = () => document.visibilityState === "visible" && (!lock || lock.released) && void acquire();
+    void acquire();
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      cancelled = true;
+      document.removeEventListener("visibilitychange", onVisible);
+      void lock?.release().catch(() => {});
+    };
+  }, [status]);
+
   useEffect(
     () => () => {
       stoppingRef.current = true;

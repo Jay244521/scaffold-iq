@@ -132,6 +132,16 @@ Migration: `supabase/migrations/20261113100000_team_accounts_and_whispers.sql`. 
 
 Migration: `supabase/migrations/20261118103132_session_lifecycle_and_leads.sql` (applied).
 
+**Team and account management**
+- Managers open **Team → Manage** on any technician to edit role, truck and years, set a new temporary password, or **Deactivate** them (`PATCH /api/team/:id`). Deactivation bans sign-in in Supabase Auth, closes open sessions and keeps their history; **Reactivate** reverses it. Nobody can demote or deactivate themselves, and lead techs can't change admins. Migration `20261118103229_technician_deactivation.sql` adds `technicians.deactivated_at` (applied).
+- Everyone can change their own password at **/account**, linked from the name in the top bar.
+
+**Session history** (`/dashboard/history`, managers only): the last 7, 30 or 90 days, filtered by technician, status or text, with the same inspector. **Export CSV** gives one row per session (tech, equipment, symptom, root cause, parts, duration, reading counts, safety verification, escalation, consent time, AI report). Cells that look like spreadsheet formulas are defused.
+
+**Field use**
+- Installable web app (`/manifest.webmanifest`): "Add to Home Screen" launches full screen straight into Live AI.
+- The screen stays awake during live sessions (Wake Lock API), so the phone doesn't dim and drop the camera mid-diagnostic.
+
 **Tests:** `npm test` runs the unit suite (`tests/`: safety gate, tool schemas, lookup client, live-fleet mapping, persistence, PDF pipeline, demo fleet). CI (`.github/workflows/apexfield-ai.yml`) runs typecheck, tests and build on every PR that touches `apexfield-ai/`.
 
 **Vercel env for accounts:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, plus the server-only `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
