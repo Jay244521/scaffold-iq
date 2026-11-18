@@ -37,12 +37,13 @@ export function useAuth() {
     }
     const { data } = await sb
       .from("technicians")
-      .select("id, org_id, full_name, role, truck_label, experience_years, organizations(name)")
+      .select("id, org_id, full_name, role, truck_label, experience_years, deactivated_at, organizations(name)")
       .eq("id", user.id)
       .maybeSingle();
     const row = data as (Omit<Profile, "org_name"> & { organizations: { name: string } | { name: string }[] | null }) | null;
     const org = Array.isArray(row?.organizations) ? row?.organizations[0] : row?.organizations;
-    const profile: Profile | null = row?.org_id ? { ...row, org_name: org?.name ?? null } : null;
+    const active = row?.org_id && !(row as { deactivated_at?: string | null }).deactivated_at;
+    const profile: Profile | null = active && row ? { ...row, org_name: org?.name ?? null } : null;
     setState({ status: "signed_in", user, profile, isManager: isManagerRole(profile?.role) });
   }, [sb]);
 

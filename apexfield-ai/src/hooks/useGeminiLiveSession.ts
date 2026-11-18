@@ -106,6 +106,7 @@ export function useGeminiLiveSession({ onToolCall }: { onToolCall: LiveToolHandl
   const reconnectsRef = useRef(0);
   const sessionIdRef = useRef<string | null>(null);
   const mutedRef = useRef(false);
+  const consentRef = useRef(false);
 
   const micStreamRef = useRef<MediaStream | null>(null);
   const camStreamRef = useRef<MediaStream | null>(null);
@@ -358,7 +359,7 @@ export function useGeminiLiveSession({ onToolCall }: { onToolCall: LiveToolHandl
       const res = await fetch("/api/live/token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: sessionIdRef.current }),
+        body: JSON.stringify({ sessionId: sessionIdRef.current, consentAcknowledged: consentRef.current }),
       });
       const data = (await res.json().catch(() => ({}))) as Partial<TokenResponse> & { error?: string };
       if (!res.ok || !data.token || !data.model) {
@@ -474,8 +475,9 @@ export function useGeminiLiveSession({ onToolCall }: { onToolCall: LiveToolHandl
 
   /* ------------------------------ public API ------------------------------ */
 
-  const start = useCallback(async () => {
+  const start = useCallback(async (opts: { consentAcknowledged?: boolean } = {}) => {
     if (sessionRef.current || (status === "connecting" && !error)) return;
+    consentRef.current = Boolean(opts.consentAcknowledged);
     stoppingRef.current = false;
     kickedOffRef.current = false;
     sessionIdRef.current = null;
@@ -609,6 +611,33 @@ export function useGeminiLiveSession({ onToolCall }: { onToolCall: LiveToolHandl
     }
     return sent;
   }, [captureFrame, send]);
+
+  // Keep the screen awake during a live call: a dimmed, locked phone drops the camera and mic.
+  useEffect(() => {
+    if (status !== "active") return;
+    type WakeLock = { release: () => Promise<void>; released: boolean };
+    const nav = navigator as Navigator & { wakeLock?: { request: (type: "screen") => Promise<WakeLock> } };
+    if (!nav.wakeLock) return;
+    let lock: WakeLock | null = null;
+    let cancelled = false;
+    const acquire = async () => {
+      try {
+        const l = await nav.wakeLock!.request("screen");
+        if (cancelled) void l.release();
+        else lock = l;
+      } catch {
+        /* low battery mode or unsupported: the session still works */
+      }
+    };
+    const onVisible = () => document.visibilityState === "visible" && (!lock || lock.released) && void acquire();
+    void acquire();
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      cancelled = true;
+      document.removeEventListener("visibilitychange", onVisible);
+      void lock?.release().catch(() => {});
+    };
+  }, [status]);
 
   useEffect(
     () => () => {

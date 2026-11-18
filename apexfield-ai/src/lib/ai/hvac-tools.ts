@@ -33,6 +33,7 @@ Tools:
 - Call advance_diagnostic_step whenever a check passes or fails and the diagnostic tree moves. step_number follows the 5-step sequence above.
 - Call complete_service_session only once the root cause is confirmed by readings, not suspected.
 - Call lookup_oem_spec whenever you need an exact OEM figure or procedure for the registered unit: charging targets, RLA/LRA/MCA/MOCP, capacitor ratings, fault or flash codes, wiring terminals, clearances. Ask a short, specific query ("target subcooling at 95°F outdoor", "E4 fault code"). Quote values exactly as returned and say where they came from ("per the install manual, page 14"). If the lookup finds nothing, say the manual isn't on file and label anything else you say as general field practice, not the OEM spec. A manual never overrides the safety rules below.
+- Call escalate_to_manager when you cannot confirm the root cause from what you can see and measure (ambiguous or contradictory readings, an amp draw or pressure far outside spec with no clear cause), before any repair that would condemn a compressor, control board or coil, or whenever something looks unsafe. Use urgency "stop_work" for safety concerns (tell the technician to stop and step back) and "review" otherwise (keep doing safe, non-invasive checks while the manager reviews). Escalate once per issue, then wait for the manager's reply.
 - If a tool returns an error, follow it. Tool errors are hard safety and sequencing rules enforced by the system; never argue with them or work around them.
 
 Messages from the service manager:
@@ -152,6 +153,19 @@ export const HVAC_FUNCTION_DECLARATIONS: FunctionDeclaration[] = [
     },
   },
   {
+    name: "escalate_to_manager",
+    description:
+      "Flag this call for the service manager: ambiguous or contradictory readings, a costly repair decision, or a safety concern. Turns the tech's card red on the manager's dashboard.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        reason: { type: Type.STRING, description: "One or two sentences with the readings involved, e.g. 'Compressor 31.8A vs 21.2 RLA; capacitor 15% low. Possible hard start vs failing compressor.'" },
+        urgency: { type: Type.STRING, enum: ["review", "stop_work"], format: "enum" },
+      },
+      required: ["reason", "urgency"],
+    },
+  },
+  {
     name: "complete_service_session",
     description: "Close the call once the root cause is confirmed and verified by readings.",
     parameters: {
@@ -212,6 +226,7 @@ export type AdvanceStepArgs = {
   expected_target: string;
   status: (typeof STEP_STATUSES)[number];
 };
+export type EscalateArgs = { reason: string; urgency: "review" | "stop_work" };
 export type CompleteSessionArgs = {
   confirmed_root_cause: string;
   parts_replaced: string[];
@@ -223,6 +238,7 @@ export type HvacToolCall =
   | { name: "verify_safety_disconnect"; args: VerifySafetyArgs }
   | { name: "log_diagnostic_reading"; args: LogReadingArgs }
   | { name: "advance_diagnostic_step"; args: AdvanceStepArgs }
+  | { name: "escalate_to_manager"; args: EscalateArgs }
   | { name: "complete_service_session"; args: CompleteSessionArgs };
 
 export type HvacToolName = HvacToolCall["name"];
@@ -341,6 +357,11 @@ export function parseToolCall(name: unknown, rawArgs: unknown): ParseResult {
             },
           },
         };
+      }
+      case "escalate_to_manager": {
+        const reason = str(args, "reason", true);
+        if (reason.length < 8) throw new Error("reason must describe what you saw and measured");
+        return { ok: true, call: { name, args: { reason: reason.slice(0, 600), urgency: oneOf(args, "urgency", ["review", "stop_work"] as const) } } };
       }
       case "complete_service_session": {
         const parts = args.parts_replaced ?? [];

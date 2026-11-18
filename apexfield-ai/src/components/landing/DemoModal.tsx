@@ -54,6 +54,8 @@ function DemoModal({ onClose }: { onClose: () => void }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const [form, setForm] = useState<FormState>(EMPTY);
   const [status, setStatus] = useState<"idle" | "submitting" | "done">("idle");
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const honeypotRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const previouslyFocused = document.activeElement as HTMLElement | null;
@@ -93,9 +95,20 @@ function DemoModal({ onClose }: { onClose: () => void }) {
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus("submitting");
-    // Wire this to your CRM / API route (e.g. POST /api/demo) when ready.
-    await new Promise((r) => setTimeout(r, 700));
-    setStatus("done");
+    setSubmitError(null);
+    try {
+      const res = await fetch("/api/demo-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, website: honeypotRef.current?.value ?? "" }),
+      });
+      const body = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) throw new Error(body.error ?? "We couldn't send your request. Please try again.");
+      setStatus("done");
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "We couldn't send your request. Please try again.");
+      setStatus("idle");
+    }
   };
 
   const inputClass =
@@ -156,6 +169,8 @@ function DemoModal({ onClose }: { onClose: () => void }) {
             </p>
 
             <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-4">
+              {/* Honeypot: hidden from people and assistive tech; bots tend to fill it. */}
+              <input ref={honeypotRef} name="website" type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[9999px] h-px w-px opacity-0" />
               <Field label="Full Name" htmlFor="demo-name">
                 <input
                   ref={firstFieldRef}
@@ -219,6 +234,11 @@ function DemoModal({ onClose }: { onClose: () => void }) {
                   />
                 </Field>
               </div>
+              {submitError && (
+                <p role="alert" className="rounded-lg border border-danger/50 bg-danger/10 px-3 py-2.5 text-sm text-red-200">
+                  {submitError}
+                </p>
+              )}
               <button
                 type="submit"
                 disabled={status === "submitting"}

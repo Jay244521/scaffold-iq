@@ -144,6 +144,23 @@ export function StepTracker({ state }: { state: LiveSessionState }) {
   );
 }
 
+/** Shown to the technician while an AI escalation waits for the service manager. */
+export function EscalationBanner({ escalation }: { escalation: LiveSessionState["escalation"] }) {
+  if (!escalation) return null;
+  const stop = escalation.urgency === "stop_work";
+  return (
+    <div role="alert" className={`animate-fade-up rounded-2xl border-2 p-4 ${stop ? "animate-escalate border-danger bg-danger/15" : "border-gauge/70 bg-gauge/10"}`}>
+      <p className={`flex items-center gap-2 font-mono text-[11px] font-bold tracking-[0.1em] ${stop ? "text-danger" : "text-amber-hi"}`}>
+        <OctagonAlert className="h-4 w-4" aria-hidden="true" /> {stop ? "STOP WORK · ESCALATED TO YOUR MANAGER" : "ESCALATED · MANAGER REVIEWING"}
+      </p>
+      <p className="mt-1.5 text-sm text-slate-100">{escalation.reason}</p>
+      <p className="mt-1 text-xs text-muted">
+        {stop ? "Step back from the equipment until your manager responds." : "Keep to safe, non-invasive checks until your manager responds."}
+      </p>
+    </div>
+  );
+}
+
 const BLOCKED_VISIBLE_MS = 12_000;
 
 /** Latest rejected AI action. Auto-dismisses so a resolved block doesn't linger. */

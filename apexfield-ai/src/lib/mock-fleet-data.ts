@@ -4,7 +4,8 @@
  * board renders identically on the server and the client.
  */
 
-export type TechStatus = "coaching" | "safety_hold" | "escalated" | "completed";
+/** "ended" = live session stopped before a root cause was confirmed (live fleet only). */
+export type TechStatus = "coaching" | "safety_hold" | "escalated" | "completed" | "ended";
 export type StepStatus = "passed" | "failed" | "active" | "hold" | "upcoming";
 /** "out" = out of spec with no direction recorded (live sessions store only within/out). */
 export type ReadingStatus = "ok" | "low" | "high" | "out";

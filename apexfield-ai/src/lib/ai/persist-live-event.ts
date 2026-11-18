@@ -116,6 +116,18 @@ export async function persistLiveEvent(
       return {};
     }
 
+    case "escalate_to_manager": {
+      const a = call.args;
+      await must(
+        db
+          .from("service_sessions")
+          .update({ status: "escalated", escalation_reason: `${a.urgency === "stop_work" ? "STOP WORK: " : ""}${a.reason}`, escalated_at: now })
+          .eq("id", sessionId),
+        "escalate session",
+      );
+      return {};
+    }
+
     case "complete_service_session": {
       const a = call.args;
       await must(

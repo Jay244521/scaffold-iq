@@ -5,10 +5,11 @@ import { EquipmentPill, ExperienceBadge, ReadingChip, STATUS_META, StatusBadge, 
 export function TechCard({ tech, onInspect }: { tech: Technician; onInspect: (id: string) => void }) {
   const meta = STATUS_META[tech.status];
   const done = tech.status === "completed";
+  const stopped = tech.status === "ended";
   const passed = tech.steps.filter((s) => s.status === "passed" || s.status === "failed").length;
   const pct = done ? 100 : Math.round((passed / 5) * 100);
   const bar =
-    tech.status === "escalated" ? "bg-danger" : tech.status === "safety_hold" ? "bg-amber" : done ? "bg-sky-400" : "bg-emerald";
+    tech.status === "escalated" ? "bg-danger" : tech.status === "safety_hold" ? "bg-amber" : done ? "bg-sky-400" : stopped ? "bg-line-strong" : "bg-emerald";
   const latest = tech.readings.slice(-3);
 
   return (
@@ -60,7 +61,7 @@ export function TechCard({ tech, onInspect }: { tech: Technician; onInspect: (id
 
       <div className="mt-3">
         <div className="flex items-center justify-between font-mono text-[11px] text-muted">
-          <span>{done ? "ALL 5 STEPS COMPLETE" : `STEP ${tech.currentStep} OF 5`}</span>
+          <span>{done ? "ALL 5 STEPS COMPLETE" : stopped ? `STOPPED AT STEP ${tech.currentStep}` : `STEP ${tech.currentStep} OF 5`}</span>
           <span>{pct}%</span>
         </div>
         <div

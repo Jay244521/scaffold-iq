@@ -1,0 +1,37 @@
+name: apexfield-ai
+
+on:
+  pull_request:
+    paths: ["apexfield-ai/**", ".github/workflows/apexfield-ai.yml"]
+  push:
+    branches: [main]
+    paths: ["apexfield-ai/**", ".github/workflows/apexfield-ai.yml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apexfield-ai-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apexfield-ai
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apexfield-ai/package-lock.json
+      - run: npm ci
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Unit tests
+        run: npm test
+      - name: Build
+        run: npm run build

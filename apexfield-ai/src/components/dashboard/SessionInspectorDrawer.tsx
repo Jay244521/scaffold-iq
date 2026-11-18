@@ -182,6 +182,18 @@ function AttentionBanner({ tech, onClear }: { tech: Technician; onClear: (id: st
           <p className="mt-1 text-sm text-slate-100">{tech.statusReason}</p>
         </div>
       </div>
+      {esc && tech.live && (
+        <button
+          type="button"
+          onClick={() => onClear(tech.id)}
+          className="inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-xl bg-emerald px-4 text-sm font-bold text-slate-deep hover:brightness-110"
+        >
+          <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> Mark reviewed · tech continues
+        </button>
+      )}
+      {esc && tech.live && (
+        <p className="text-xs text-muted">Send guidance below first if they need it. Marking reviewed tells their AI coach to let them continue.</p>
+      )}
       {esc && !tech.live && (
         <button
           type="button"
@@ -315,7 +327,7 @@ function TelemetryTable({ tech }: { tech: Technician }) {
 function Interventions({ tech, onWhisper, onClear, onDispatch }: Omit<Props, "onClose">) {
   const [text, setText] = useState("");
   const [confirmHold, setConfirmHold] = useState(false);
-  const ended = tech.status === "completed";
+  const ended = tech.status === "completed" || tech.status === "ended";
   const canClear = tech.status === "escalated" || tech.status === "safety_hold";
 
   // Reset the hold confirmation if the tech or status changes underneath us.

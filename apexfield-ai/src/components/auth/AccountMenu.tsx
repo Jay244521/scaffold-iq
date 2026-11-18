@@ -22,13 +22,16 @@ export function AccountMenu({ auth, next }: { auth: Auth; next: string }) {
   const p = auth.profile;
   return (
     <div className="flex items-center gap-2">
-      <span className="hidden max-w-[14rem] items-center gap-1.5 truncate text-sm text-slate-300 lg:inline-flex" title={auth.user.email ?? ""}>
+      <Link href="/account" className="hidden max-w-[14rem] items-center gap-1.5 truncate text-sm text-slate-300 hover:text-amber lg:inline-flex" title={`${auth.user.email ?? ""} · Account settings`}>
         <UserRound className="h-4 w-4 shrink-0 text-amber" aria-hidden="true" />
         <span className="truncate">
           {p?.full_name ?? auth.user.email}
           {p?.org_name ? <span className="text-muted"> · {p.org_name}</span> : null}
         </span>
-      </span>
+      </Link>
+      <Link href="/account" aria-label="Account settings" className="inline-flex min-h-11 items-center px-2 text-slate-400 hover:text-amber lg:hidden">
+        <UserRound className="h-4 w-4" aria-hidden="true" />
+      </Link>
       <button
         type="button"
         onClick={() => void auth.signOut().then(() => window.location.assign("/"))}
