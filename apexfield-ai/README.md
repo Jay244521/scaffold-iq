@@ -130,7 +130,7 @@ Migration: `supabase/migrations/20261113100000_team_accounts_and_whispers.sql`. 
 - **Consent.** Once a day, before the first live session, the technician confirms that the customer knows about the AI camera and audio, that AI doesn't replace lockout/tagout or their training, and that they verify 0V themselves. The token route requires it, and the session stores `consent_acknowledged_at`. Have counsel review the wording for your states.
 - **Demo requests.** "Book a Live Field Demo" posts to `/api/demo-request` and lands in `demo_requests` (service role only, with a honeypot and rate limit). Read leads in Supabase → Table Editor.
 
-Migration: `supabase/migrations/20261114090000_session_lifecycle_and_leads.sql`.
+Migration: `supabase/migrations/20261118103132_session_lifecycle_and_leads.sql` (applied).
 
 **Tests:** `npm test` runs the unit suite (`tests/`: safety gate, tool schemas, lookup client, live-fleet mapping, persistence, PDF pipeline, demo fleet). CI (`.github/workflows/apexfield-ai.yml`) runs typecheck, tests and build on every PR that touches `apexfield-ai/`.
 
